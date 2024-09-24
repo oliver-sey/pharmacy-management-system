@@ -5,8 +5,7 @@ Hello y'all, I hope this readme helps. The backend will use FastAPI to define ro
 - FastAPI docs: https://fastapi.tiangolo.com/
 - Uvicorn docs: https://www.uvicorn.org/
 
-To srart, you should create a Python virtual environment, it basically is just a container that will hold all of our Python stuff. Sort of similar to Maven, all the libraries our Python code uses can be found in backend/requirements.
-txt
+To srart, you should create a Python virtual environment, it basically is just a container that will hold all of our Python stuff. Sort of similar to Maven, all the libraries our Python code uses can be found in backend/requirements.txt
 To do this run these commands
 
 make sure you are in the `pharmacy-management-system` directory

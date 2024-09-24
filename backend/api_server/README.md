@@ -36,3 +36,5 @@ uvicorn backend.backend:app --reload
 ```
 
 The reload argument makes it so you don't need to stop and start the server every time you make a change.
+
+If all is well, http://localhost:8000/test, should show some data served by our API.

@@ -47,4 +47,6 @@ coverage/
 /env
 
 # Python backend
-backend/__pycache__/
+__pycache__/
+*.pyc
+*.pyo

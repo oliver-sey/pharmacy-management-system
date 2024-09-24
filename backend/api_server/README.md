@@ -32,7 +32,7 @@ pip install -r backend/requirements.txt
 Great! Now you should have your environment setup and you can run the server. Use this command to do so.
 
 ```shell
-uvicorn backend.backend:app --reload
+uvicorn backend.api_server.backend:app --reload
 ```
 
 The reload argument makes it so you don't need to stop and start the server every time you make a change.

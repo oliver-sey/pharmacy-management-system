@@ -42,3 +42,9 @@ coverage/
 # Miscellaneous
 .pnp
 .pnp.js
+
+# Python virtual environment
+/env
+
+# Python backend
+backend/__pycache__/

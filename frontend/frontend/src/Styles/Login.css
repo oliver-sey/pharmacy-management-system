@@ -1,0 +1,30 @@
+/* Centered container for the login form */
+.centered-div {
+	display: flex;
+	flex-direction: column; /* Aligns items vertically */
+	justify-content: center; /* Centers vertically */
+	align-items: center; /* Centers horizontally */
+	height: 70vh; /* Takes up almost full viewport height */
+}
+
+/* Style for each form group (label + input) */
+.form-group {
+	display: flex;
+	justify-content: space-between; /* Pushes label to the left and input to the right */
+	align-items: center; /* Centers items vertically within the form group */
+	width: 300px; /* Set fixed width for form groups */
+	margin-bottom: 10px; /* Space between form groups */
+	padding-top: 10px;
+	padding-bottom: 5px;
+}
+
+/* Style for labels */
+.input-label {
+	text-align: left; /* Left-aligns the label */
+	width: 150px; /* Fixed width for label */
+}
+
+/* Style for inputs */
+.input-field {
+	width: 150px; /* Adjust input width */
+}

@@ -1,23 +1,27 @@
 import logo from './logo.svg';
-import './App.css';
+import './Styles/App.css';
+import Header from './Components/Header';
+import Login from './Pages/Login';
+import ManagerHome from './Pages/ManagerHome';
+import PharmacistHome from './Pages/PharmacistHome';
+import ViewOfPatients from './Pages/ViewOfPatients';
+import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
+
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Router>
+        
+        <p> Hello world </p>
+        <Routes>
+          <Route path="/" element={<Login/>}/>
+          <Route path="/pharmacisthome" element={<PharmacistHome/>}/>
+          <Route path='/managerhome' element={<ManagerHome/>}/>
+          <Route path='/viewofpatients' element={<ViewOfPatients/>}/>
+
+        </Routes>
+      </Router>
     </div>
   );
 }

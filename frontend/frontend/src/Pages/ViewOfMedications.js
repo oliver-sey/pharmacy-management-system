@@ -170,6 +170,11 @@ function ViewOfMedications() {
 		},
 	];
 
+	const medicationConfirmMessage = (row) =>
+		`${row?.name || "Unknown Medication Name"} - ${
+			row?.dosage || "Unknown Dosage"
+		}`;
+
 	return (
 		<div>
 			<h2>Medication Inventory Table</h2>
@@ -178,6 +183,7 @@ function ViewOfMedications() {
 				rows={rows}
 				editModal={EditModal}
 				deleteModal={DeleteModal}
+				customConfirmMessage={medicationConfirmMessage}
 			></EditDeleteTable>
 		</div>
 	);

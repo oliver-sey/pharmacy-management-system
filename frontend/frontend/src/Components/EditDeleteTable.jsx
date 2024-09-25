@@ -40,6 +40,7 @@ const EditDeleteTable = ({
 	columns,
 	editModal: EditModal,
 	deleteModal: DeleteModal,
+	customConfirmMessage
 }) => {
 	const {
 		isEditOpen,
@@ -50,6 +51,13 @@ const EditDeleteTable = ({
 		openDeleteModal,
 		closeDeleteModal,
 	} = useModals();
+
+
+	// Ensure customConfirmMessage is a function before calling it
+    const getConfirmMessage = (row) => {
+        return typeof customConfirmMessage === 'function' ? customConfirmMessage(row) : 'this item';
+    };
+
 
 	// Define the action buttons for each row
 	const actionButtons = (row) => (
@@ -81,7 +89,7 @@ const EditDeleteTable = ({
 				onClose={closeEditModal}
 				row={selectedRow}
 				onSave={(updatedRow) => {
-					console.log("Save new data:", updatedRow);
+					console.log("Saved new data:", updatedRow);
 					closeEditModal();
 				}}
 			/>
@@ -90,9 +98,10 @@ const EditDeleteTable = ({
 			<DeleteModal
 				open={isDeleteOpen}
 				onClose={closeDeleteModal}
-				itemName={`${selectedRow?.firstName} ${selectedRow?.lastName}`} // Example item name
+				customMessage={getConfirmMessage(selectedRow)} 
 				onConfirmDelete={() => {
-					console.log("Delete confirmed for:", selectedRow);
+					// TODO: Handle delete logic here
+					console.log(`Deleting ${getConfirmMessage(selectedRow)}`);
 					closeDeleteModal();
 				}}
 			/>

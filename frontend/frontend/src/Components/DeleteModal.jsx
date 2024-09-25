@@ -9,12 +9,12 @@ import {
 	Button,
 } from "@mui/material";
 
-const DeleteModal = ({ open, onClose, itemName, onConfirmDelete }) => {
+const DeleteModal = ({ open, onClose, customMessage: customConfirmMessage, onConfirmDelete }) => {
 	return (
 		<Dialog open={open} onClose={onClose}>
-			<DialogTitle>Delete {itemName}?</DialogTitle>
+			<DialogTitle>Delete {customConfirmMessage}?</DialogTitle>
 			<DialogContent>
-				Are you sure you want to delete {itemName}?
+				Are you sure you want to delete {customConfirmMessage}? This action cannot be undone.
 			</DialogContent>
 			<DialogActions>
 				<Button onClick={onClose}>Cancel</Button>

@@ -2,7 +2,7 @@ import React from "react";
 import EditDeleteTable from "../Components/EditDeleteTable";
 import EditPatientModal from "../Components/EditPatientModal";
 import DeleteModal from "../Components/DeleteModal";
-import Button from '@mui/material/Button';
+import Button from "@mui/material/Button";
 
 function ViewOfPatients() {
 	const columns = [
@@ -300,16 +300,24 @@ function ViewOfPatients() {
 		},
 	];
 
+	const patientConfirmMessage = (row) =>
+		`${row?.firstName || "Unknown First Name"} ${
+			row?.lastName || "Unknown Last Name"
+		}, with DOB ${row?.dateOfBirth || "Unknown DOB"}`;
+
 	return (
 		<div>
 			<h2>Patients Table</h2>
 			{/* TODO: add onclick */}
-			<div><Button variant="contained">Add Patient</Button></div>
+			<div>
+				<Button variant="contained">Add Patient</Button>
+			</div>
 			<EditDeleteTable
 				rows={rows}
 				columns={columns}
 				editModal={EditPatientModal}
 				deleteModal={DeleteModal}
+				customConfirmMessage={patientConfirmMessage}
 			/>
 		</div>
 	);

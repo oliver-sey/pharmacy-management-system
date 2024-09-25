@@ -18,6 +18,7 @@ body {
 	--accent-color: #28a745; /* Accent green */
 	--secondary-color: #6c757d; /* Muted gray for secondary text */
 	--background-color: #f5f5f5; /* Light gray background */
+	--secondary-background-color: #6eacee; /* Primary blue */
 	--error-color: #dc3545; /* Red for error messages or alerts */
 	--text-color: #333; /* Main text color */
 }

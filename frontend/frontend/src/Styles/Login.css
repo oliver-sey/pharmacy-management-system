@@ -1,10 +1,58 @@
+import styles.css
+
 /* Centered container for the login form */
-.centered-div {
+/*centered-div {
+/*	display: flex;
+/*	/*flex-direction: column; /* Aligns items vertically */
+/*	justify-content: center; /* Centers horizontally*/
+/*	align-items: center; /* Centers vertically */
+/*	height: 90vh; /* Takes up almost full viewport height */
+/*
+/*
+/*login-box {
+/*	display: flex;
+/*	flex-direction: column; /* Aligns items vertically */
+/*	justify-content: space-around; /* Centers vertically */
+/*	align-items: center; /* Centers horizontally */
+/*	height: 50%;
+/*	width: 40vw;
+/*	background-color: var(--secondary-color);
+/*	border-radius: 4%;
+/*
+*/
+
+/* load bearing css class?????? without this the cnetered-div-container isn't centered */
+.asdasdcentered-div {
+	height: 100vh; /* Full height of the viewport */
+}
+
+body {
 	display: flex;
-	flex-direction: column; /* Aligns items vertically */
-	justify-content: center; /* Centers vertically */
-	align-items: center; /* Centers horizontally */
-	height: 70vh; /* Takes up almost full viewport height */
+	justify-content: center;
+}
+
+.centered-div-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	margin-top: 10vh;
+	height: 60vh;
+}
+
+.login-box {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
+	background-color: var(--secondary-background-color);
+	width: 70%; /* Takes up 70% of parent width */
+	height: 65%; /* Takes up 65% of parent height */
+	padding: 20px;
+	margin-bottom: 10vh;
+	border-radius: 8px;
+	/* Enhanced box shadow for a more prominent effect */
+	box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2), 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
 /* Style for each form group (label + input) */
@@ -12,7 +60,7 @@
 	display: flex;
 	justify-content: space-between; /* Pushes label to the left and input to the right */
 	align-items: center; /* Centers items vertically within the form group */
-	width: 300px; /* Set fixed width for form groups */
+	width: 90%; /* Set fixed width for form groups */
 	margin-bottom: 10px; /* Space between form groups */
 	padding-top: 10px;
 	padding-bottom: 5px;
@@ -21,10 +69,13 @@
 /* Style for labels */
 .input-label {
 	text-align: left; /* Left-aligns the label */
-	width: 150px; /* Fixed width for label */
 }
 
 /* Style for inputs */
 .input-field {
-	width: 150px; /* Adjust input width */
+	width: 60% !important; /* Adjust input width */
+}
+
+#submit-button {
+	background-color: var(--accent-color);
 }

@@ -69,6 +69,7 @@ body {
 /* Style for labels */
 .input-label {
 	text-align: left; /* Left-aligns the label */
+	font-size: large;
 }
 
 /* Style for inputs */

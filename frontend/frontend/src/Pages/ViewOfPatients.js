@@ -1,18 +1,7 @@
-import React, { useState } from "react";
-import TableComponent from "../Components/TableComponent";
-import { DataGrid } from "@mui/x-data-grid";
-// import Paper from "@mui/material/Paper";
-import {
-	Paper,
-	IconButton,
-	Dialog,
-	DialogActions,
-	DialogTitle,
-	Button,
-} from "@mui/material";
-
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
+import React from "react";
+import EditDeleteTable from "../Components/EditDeleteTable";
+import EditModal from "../Components/EditModal";
+import DeleteModal from "../Components/DeleteModal";
 
 function ViewOfPatients() {
 	const columns = [
@@ -63,25 +52,6 @@ function ViewOfPatients() {
 			field: "insuranceMemberID",
 			headerName: "Insurance Member ID",
 			width: 180,
-		},
-		{
-			field: "actions",
-			headerName: "Actions",
-			width: 100,
-			sortable: false,
-			renderCell: (params) => (
-				<span>
-					{/* pencil icon to edit the patient */}
-					<IconButton onClick={() => handleOpenEdit(params.row)}>
-						<EditIcon color="black" />
-					</IconButton>
-
-					{/* trash can icon to delete the patient */}
-					<IconButton onClick={() => handleOpenDelete(params.row)}>
-						<DeleteIcon color="error" />
-					</IconButton>
-				</span>
-			),
 		},
 	];
 
@@ -329,83 +299,15 @@ function ViewOfPatients() {
 		},
 	];
 
-	const paginationModel = { page: 0, pageSize: 25 };
-
-	// *** Modals ***
-	const [selectedRow, setSelectedRow] = useState(null);
-
-	// Code for edit modal
-	const [openEdit, setOpenEdit] = useState(false);
-
-	// Handle modal open and close
-	const handleOpenEdit = (row) => {
-		setSelectedRow(row);
-		setOpenEdit(true);
-	};
-
-	const handleCloseEdit = () => {
-		setOpenEdit(false);
-	};
-
-	// Code for delete modal
-	const [openDelete, setOpenDelete] = useState(false);
-
-	// Handle modal open and close
-	const handleOpenDelete = (row) => {
-		setSelectedRow(row);
-		setOpenDelete(true);
-	};
-
-	const handleCloseDelete = () => {
-		setOpenDelete(false);
-	};
-
 	return (
 		<div>
-			{/*  Modal for Delete Confirmation */}
-			<Dialog open={openDelete} onClose={handleCloseDelete}>
-				<DialogTitle>{`Delete ${selectedRow?.firstName} ${selectedRow?.lastName}?`}</DialogTitle>
-				<DialogActions>
-					<Button onClick={handleCloseDelete} color="primary">
-						Cancel
-					</Button>
-					<Button
-						onClick={() => {
-							// Handle delete action here
-							console.log(
-								`Deleting patient ID: ${selectedRow?.id}`
-							);
-							handleCloseDelete();
-						}}
-						color="error"
-					>
-						Delete
-					</Button>
-				</DialogActions>
-			</Dialog>
-			<div>
-				<div>
-					<h2>Patients</h2>
-				</div>
-
-				<Paper sx={{ height: "0.8vwh", width: "100%" }}>
-					<DataGrid
-						rows={rows}
-						columns={columns}
-						initialState={{ pagination: { paginationModel } }}
-						pageSizeOptions={[5, 10]}
-						// checkboxSelection
-						sx={{
-							border: 0,
-							"& .MuiDataGrid-columnHeaders": {
-								fontWeight: "bold", // Make headers bold
-								backgroundColor: "#000000", // Optional background color for headers
-							},
-						}}
-					/>
-				</Paper>
-				{/* <TableComponent rows={rows}></TableComponent> */}
-			</div>
+			<h2>Patients Table</h2>
+			<EditDeleteTable
+				rows={rows}
+				columns={columns}
+				editModal={EditModal}
+				deleteModal={DeleteModal}
+			/>
 		</div>
 	);
 }

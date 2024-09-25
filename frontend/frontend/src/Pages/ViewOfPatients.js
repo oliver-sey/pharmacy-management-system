@@ -10,7 +10,9 @@ import {
 	DialogTitle,
 	Button,
 } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete"; // Material UI Delete Icon
+
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 function ViewOfPatients() {
 	const columns = [
@@ -68,9 +70,17 @@ function ViewOfPatients() {
 			width: 100,
 			sortable: false,
 			renderCell: (params) => (
-				<IconButton onClick={() => handleOpen(params.row)}>
-					<DeleteIcon color="error" />
-				</IconButton>
+				<span>
+					{/* pencil icon to edit the patient */}
+					<IconButton onClick={() => handleOpenEdit(params.row)}>
+						<EditIcon color="black" />
+					</IconButton>
+
+					{/* trash can icon to delete the patient */}
+					<IconButton onClick={() => handleOpenDelete(params.row)}>
+						<DeleteIcon color="error" />
+					</IconButton>
+				</span>
 			),
 		},
 	];
@@ -321,25 +331,42 @@ function ViewOfPatients() {
 
 	const paginationModel = { page: 0, pageSize: 25 };
 
-	const [open, setOpen] = useState(false);
+	// *** Modals ***
 	const [selectedRow, setSelectedRow] = useState(null);
 
+	// Code for edit modal
+	const [openEdit, setOpenEdit] = useState(false);
+
 	// Handle modal open and close
-	const handleOpen = (row) => {
+	const handleOpenEdit = (row) => {
 		setSelectedRow(row);
-		setOpen(true);
+		setOpenEdit(true);
 	};
 
-	const handleClose = () => {
-		setOpen(false);
+	const handleCloseEdit = () => {
+		setOpenEdit(false);
 	};
+
+	// Code for delete modal
+	const [openDelete, setOpenDelete] = useState(false);
+
+	// Handle modal open and close
+	const handleOpenDelete = (row) => {
+		setSelectedRow(row);
+		setOpenDelete(true);
+	};
+
+	const handleCloseDelete = () => {
+		setOpenDelete(false);
+	};
+
 	return (
 		<div>
 			{/*  Modal for Delete Confirmation */}
-			<Dialog open={open} onClose={handleClose}>
+			<Dialog open={openDelete} onClose={handleCloseDelete}>
 				<DialogTitle>{`Delete ${selectedRow?.firstName} ${selectedRow?.lastName}?`}</DialogTitle>
 				<DialogActions>
-					<Button onClick={handleClose} color="primary">
+					<Button onClick={handleCloseDelete} color="primary">
 						Cancel
 					</Button>
 					<Button
@@ -348,7 +375,7 @@ function ViewOfPatients() {
 							console.log(
 								`Deleting patient ID: ${selectedRow?.id}`
 							);
-							handleClose();
+							handleCloseDelete();
 						}}
 						color="error"
 					>

@@ -1,6 +1,6 @@
 // EditDeleteTable.jsx
 import { React, useState } from "react";
-import { IconButton } from "@mui/material";
+import { IconButton, Tooltip } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import BaseTable from "./BaseTable";
@@ -54,12 +54,16 @@ const EditDeleteTable = ({
 	// Define the action buttons for each row
 	const actionButtons = (row) => (
 		<>
-			<IconButton onClick={() => openEditModal(row)}>
-				<EditIcon color="primary" />
-			</IconButton>
-			<IconButton onClick={() => openDeleteModal(row)}>
-				<DeleteIcon color="error" />
-			</IconButton>
+			<Tooltip id="edit" title="Edit">
+				<IconButton onClick={() => openEditModal(row)}>
+					<EditIcon color="primary" />
+				</IconButton>
+			</Tooltip>
+			<Tooltip id="delete" title="Delete">
+				<IconButton onClick={() => openDeleteModal(row)}>
+					<DeleteIcon color="error" />
+				</IconButton>
+			</Tooltip>
 		</>
 	);
 

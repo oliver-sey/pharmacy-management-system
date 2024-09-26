@@ -5,8 +5,14 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import BaseTable from "./BaseTable";
 
-// Slightly separated modal handling logic
-const useModals = () => {
+const EditDeleteTable = ({
+	rows,
+	columns,
+	editModal: EditModal,
+	deleteModal: DeleteModal,
+	onAdd,
+	customConfirmMessage,
+}) => {
 	const [isEditOpen, setEditOpen] = useState(false);
 	const [isDeleteOpen, setDeleteOpen] = useState(false);
 	const [selectedRow, setSelectedRow] = useState(null);
@@ -24,40 +30,17 @@ const useModals = () => {
 	};
 	const closeDeleteModal = () => setDeleteOpen(false);
 
-	return {
-		isEditOpen,
-		isDeleteOpen,
-		selectedRow,
-		openEditModal,
-		closeEditModal,
-		openDeleteModal,
-		closeDeleteModal,
-	};
-};
-
-const EditDeleteTable = ({
-	rows,
-	columns,
-	editModal: EditModal,
-	deleteModal: DeleteModal,
-	customConfirmMessage
-}) => {
-	const {
-		isEditOpen,
-		isDeleteOpen,
-		selectedRow,
-		openEditModal,
-		closeEditModal,
-		openDeleteModal,
-		closeDeleteModal,
-	} = useModals();
-
-
 	// Ensure customConfirmMessage is a function before calling it
-    const getConfirmMessage = (row) => {
-        return typeof customConfirmMessage === 'function' ? customConfirmMessage(row) : 'this item';
-    };
+	const getConfirmMessage = (row) => {
+		return typeof customConfirmMessage === "function"
+			? customConfirmMessage(row)
+			: "this item";
+	};
 
+	// Call onAdd when Add  button is clicked
+	if (onAdd) {
+		onAdd(() => openEditModal(null));
+	}
 
 	// Define the action buttons for each row
 	const actionButtons = (row) => (
@@ -98,7 +81,7 @@ const EditDeleteTable = ({
 			<DeleteModal
 				open={isDeleteOpen}
 				onClose={closeDeleteModal}
-				customMessage={getConfirmMessage(selectedRow)} 
+				customMessage={getConfirmMessage(selectedRow)}
 				onConfirmDelete={() => {
 					// TODO: Handle delete logic here
 					console.log(`Deleting ${getConfirmMessage(selectedRow)}`);

@@ -1,6 +1,6 @@
-import React from "react";
+import { React, useRef } from "react";
 import EditDeleteTable from "../Components/EditDeleteTable";
-import EditPatientModal from "../Components/EditPatientModal";
+import AddEditPatientModal from "../Components/AddEditPatientModal";
 import DeleteModal from "../Components/DeleteModal";
 import Button from "@mui/material/Button";
 
@@ -305,19 +305,31 @@ function ViewOfPatients() {
 			row?.lastName || "Unknown Last Name"
 		}, with DOB ${row?.dateOfBirth || "Unknown DOB"}`;
 
+	const openAddPatientModal = useRef(null);
+
 	return (
 		<div>
 			<h2>Patients Table</h2>
-			{/* TODO: add onclick */}
-			<div>
-				<Button variant="contained">Add Patient</Button>
-			</div>
+			<Button
+				variant="contained"
+				onClick={() => {
+					if (openAddPatientModal.current) {
+						openAddPatientModal.current(); // Trigger modal to open for adding a patient
+					}
+				}}
+			>
+				Add Patient
+			</Button>
+
 			<EditDeleteTable
 				rows={rows}
 				columns={columns}
-				editModal={EditPatientModal}
+				editModal={AddEditPatientModal}
 				deleteModal={DeleteModal}
 				customConfirmMessage={patientConfirmMessage}
+				onAdd={(handler) => {
+					openAddPatientModal.current = handler; // Store the open modal handler
+				}}
 			/>
 		</div>
 	);

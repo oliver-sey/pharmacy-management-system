@@ -1,9 +1,13 @@
+import { React, useRef } from "react";
+
 import Header from "../Components/Header";
 import EditDeleteTable from "../Components/EditDeleteTable";
-import EditModal from "../Components/EditModal";
+import AddEditMedicationModal from "../Components/EditModal";
 import DeleteModal from "../Components/DeleteModal";
 
 import { IconButton, Tooltip } from "@mui/material";
+import Button from "@mui/material/Button";
+
 import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import WarningIcon from "@mui/icons-material/Warning";
@@ -175,15 +179,31 @@ function ViewOfMedications() {
 			row?.dosage || "Unknown Dosage"
 		}`;
 
+	const openAddMedicationModal = useRef(null);
+
 	return (
 		<div>
 			<h2>Medication Inventory Table</h2>
+			<Button
+				variant="contained"
+				onClick={() => {
+					if (openAddMedicationModal.current) {
+						openAddMedicationModal.current(); // Trigger modal to open for adding a patient
+					}
+				}}
+			>
+				Add Medication
+			</Button>
+
 			<EditDeleteTable
 				columns={columns}
 				rows={rows}
-				editModal={EditModal}
+				editModal={AddEditMedicationModal}
 				deleteModal={DeleteModal}
 				customConfirmMessage={medicationConfirmMessage}
+				onAdd={(handler) => {
+					openAddMedicationModal.current = handler; // Store the open modal handler
+				}}
 			></EditDeleteTable>
 		</div>
 	);

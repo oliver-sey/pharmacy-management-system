@@ -9,11 +9,18 @@ import {
 	TextField,
 } from "@mui/material";
 
-const EditModal = ({ open, onClose, row, onSave }) => {
-	// Initialize form data with the values from the selected row
+const EditPatientModal = ({ open, onClose, row, onSave }) => {
+	// Initialize form data with the values from the selected row or default to empty
 	const [formData, setFormData] = useState({
 		firstName: row?.firstName || "",
 		lastName: row?.lastName || "",
+		dateOfBirth: row?.dateOfBirth || "",
+		address: row?.address || "",
+		phoneNumber: row?.phoneNumber || "",
+		email: row?.email || "",
+		insuranceName: row?.insuranceName || "",
+		insuranceGroupNum: row?.insuranceGroupNum || "",
+		insuranceMemberID: row?.insuranceMemberID || "",
 	});
 
 	// Update form data on input change
@@ -29,8 +36,10 @@ const EditModal = ({ open, onClose, row, onSave }) => {
 
 	return (
 		<Dialog open={open} onClose={onClose}>
-			<DialogTitle>Edit Details</DialogTitle>
+		{/* depending on if row is not null or null, change the title from editing to adding a new patient */}
+			<DialogTitle>{row ? "Edit Patient" : "Add Patient"}</DialogTitle>
 			<DialogContent>
+				{/* Fields for editing/adding patient */}
 				<TextField
 					label="First Name"
 					name="firstName"
@@ -103,16 +112,17 @@ const EditModal = ({ open, onClose, row, onSave }) => {
 					fullWidth
 					margin="dense"
 				/>
-				
+
 			</DialogContent>
 			<DialogActions>
 				<Button onClick={onClose}>Cancel</Button>
 				<Button onClick={handleSave} color="primary">
-					Save
+					{/* depending on if row is not null or null, change the text from saving edits to adding a new patient */}
+					{row ? "Save Changes" : "Add Patient"}
 				</Button>
 			</DialogActions>
 		</Dialog>
 	);
 };
 
-export default EditModal;
+export default EditPatientModal;

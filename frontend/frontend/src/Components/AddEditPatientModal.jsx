@@ -9,7 +9,7 @@ import {
 	TextField,
 } from "@mui/material";
 
-const EditPatientModal = ({ open, onClose, row, onSave }) => {
+const AddEditPatientModal = ({ open, onClose, row, onSave }) => {
 	// Initialize form data with the values from the selected row or default to empty
 	const [formData, setFormData] = useState({
 		firstName: row?.firstName || "",
@@ -125,4 +125,4 @@ const EditPatientModal = ({ open, onClose, row, onSave }) => {
 	);
 };
 
-export default EditPatientModal;
+export default AddEditPatientModal;

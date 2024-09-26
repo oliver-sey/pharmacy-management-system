@@ -1,5 +1,5 @@
 // EditModal.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
 	Dialog,
 	DialogActions,
@@ -10,18 +10,48 @@ import {
 } from "@mui/material";
 
 const AddEditPatientModal = ({ open, onClose, row, onSave }) => {
-	// Initialize form data with the values from the selected row or default to empty
+	// Initialize form data
 	const [formData, setFormData] = useState({
-		firstName: row?.firstName || "",
-		lastName: row?.lastName || "",
-		dateOfBirth: row?.dateOfBirth || "",
-		address: row?.address || "",
-		phoneNumber: row?.phoneNumber || "",
-		email: row?.email || "",
-		insuranceName: row?.insuranceName || "",
-		insuranceGroupNum: row?.insuranceGroupNum || "",
-		insuranceMemberID: row?.insuranceMemberID || "",
+		firstName: "",
+		lastName: "",
+		dateOfBirth: "",
+		address: "",
+		phoneNumberStr: "",
+		email: "",
+		insuranceName: "",
+		insuranceGroupNum: "",
+		insuranceMemberID: "",
 	});
+
+	// Update form data when the row prop changes
+	useEffect(() => {
+		if (row) {
+			setFormData({
+				firstName: row.firstName || "",
+				lastName: row.lastName || "",
+				dateOfBirth: row.dateOfBirth || "",
+				address: row.address || "",
+				phoneNumber: row.phoneNumberStr || "",
+				email: row.email || "",
+				insuranceName: row.insuranceName || "",
+				insuranceGroupNum: row.insuranceGroupNum || "",
+				insuranceMemberID: row.insuranceMemberID || "",
+			});
+		} else {
+			// Reset to empty fields when adding a new patient
+			setFormData({
+				firstName: "",
+				lastName: "",
+				dateOfBirth: "",
+				address: "",
+				phoneNumberStr: "",
+				email: "",
+				insuranceName: "",
+				insuranceGroupNum: "",
+				insuranceMemberID: "",
+			});
+		}
+	}, [row]);
 
 	// Update form data on input change
 	const handleChange = (e) => {
@@ -36,7 +66,7 @@ const AddEditPatientModal = ({ open, onClose, row, onSave }) => {
 
 	return (
 		<Dialog open={open} onClose={onClose}>
-		{/* depending on if row is not null or null, change the title from editing to adding a new patient */}
+			{/* depending on if row is not null or null, change the title from editing to adding a new patient */}
 			<DialogTitle>{row ? "Edit Patient" : "Add Patient"}</DialogTitle>
 			<DialogContent>
 				{/* Fields for editing/adding patient */}
@@ -112,7 +142,6 @@ const AddEditPatientModal = ({ open, onClose, row, onSave }) => {
 					fullWidth
 					margin="dense"
 				/>
-
 			</DialogContent>
 			<DialogActions>
 				<Button onClick={onClose}>Cancel</Button>

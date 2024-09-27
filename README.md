@@ -9,7 +9,7 @@
 2. Check Docker status, making sure it's properly installed
 
     ```shell
-    docker-compose --version
+    docker --version
     docker-compose --version
     ```
 

@@ -1,4 +1,7 @@
-// EditModal.jsx
+// a component for a modal for editing
+// I think this only gets used as a default, and always gets replaced with a different modal
+// TODO: figure this out
+
 import React, { useState } from "react";
 import {
 	Dialog,

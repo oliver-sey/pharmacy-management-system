@@ -1,4 +1,7 @@
-// EditModal.jsx
+// This is a component for editing a medication, and adding a new medication
+// the same modal (popup) gets used for both, but when you are editing, the fields in the popup
+// have the values from the existing medication
+
 import React, { useState, useEffect } from "react";
 import {
 	Dialog,
@@ -57,10 +60,13 @@ const AddEditMedicationModal = ({ open, onClose, row, onSave }) => {
 
 	return (
 		<Dialog open={open} onClose={onClose}>
+		{/* change the title based on if we are adding or editing,
+		which we can tell from if row is null or not */}
 			<DialogTitle>
 				{row ? "Edit Medication" : "Add Medication"}
 			</DialogTitle>
-
+			
+			{/* To be honest, I'm not sure what fullWidth and margin do, open to changing them */}
 			<DialogContent>
 				<TextField
 					label="Medication Name"
@@ -113,6 +119,8 @@ const AddEditMedicationModal = ({ open, onClose, row, onSave }) => {
 			</DialogContent>
 			<DialogActions>
 				<Button onClick={onClose}>Cancel</Button>
+				{/* change the button text based on if we are adding or editing,
+				which we can tell from if row is null or not */}
 				<Button onClick={handleSave} color="primary">
 					{row ? "Save Changes" : "Add Medication"}
 				</Button>

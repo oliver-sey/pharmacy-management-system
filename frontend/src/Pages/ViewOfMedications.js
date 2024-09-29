@@ -13,6 +13,9 @@ import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import WarningIcon from "@mui/icons-material/Warning";
 
 function ViewOfMedications() {
+	// the columns for the table
+	// headerName is what shows up on the website
+	// width is the default width of the column, user can adjust it
 	const columns = [
 		{ field: "id", headerName: "ID", width: 70 },
 		{ field: "name", headerName: "Medication Name", width: 200 },
@@ -29,6 +32,7 @@ function ViewOfMedications() {
 			field: "alerts",
 			headerName: "Alerts",
 			width: 100,
+			// calculate time between now and the expiration date, to see what alert icons we should show
 			renderCell: (params) => {
 				// TODO: fix some weird stuff with time zones??? dates still print weird
 				const today = new Date();
@@ -51,6 +55,8 @@ function ViewOfMedications() {
 				);
 
 				// TODO: is a medicine expired on the expiration date, or the next day??
+				// get the difference in time in milliseconds, then convert to days
+				// to avoid weird time zone differences
 				let differenceMS =
 					expirationDateUTC.getTime() - todayUTC.getTime();
 				let differenceDays = differenceMS / (1000 * 60 * 60 * 24);
@@ -68,6 +74,7 @@ function ViewOfMedications() {
 						"**is expired"
 					);
 					icons.push(
+						// empty hourglass icon, says "Expired" when you hover
 						<IconButton>
 							<Tooltip id="expired" title="Expired">
 								<HourglassEmptyIcon color="error" />
@@ -87,6 +94,7 @@ function ViewOfMedications() {
 					icons.push(
 						// TODO: fix style?
 						// <div style={[{"display": "flex"}, { "align-items": "center" }]}>
+						// half-empty hourglass icon, says the warning when you hover
 						<IconButton>
 							<Tooltip
 								id="warning"
@@ -135,6 +143,8 @@ function ViewOfMedications() {
 		},
 	];
 
+	// hardcoded values for development, this will come from the backend/database later
+	// TODO: get rid of hardcoded values
 	const rows = [
 		{
 			id: 1,
@@ -174,6 +184,8 @@ function ViewOfMedications() {
 		},
 	];
 
+	// the message format that should get used in the delete confirmation modal (popup) for this table
+	// need this since we want a different format on other tables that use this same base component
 	const medicationConfirmMessage = (row) =>
 		`${row?.name || "Unknown Medication Name"} - ${
 			row?.dosage || "Unknown Dosage"

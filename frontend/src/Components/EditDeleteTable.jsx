@@ -1,4 +1,6 @@
-// EditDeleteTable.jsx
+// a component for a table, built off of BaseTable, with the action column having a button to edit and a button to delete
+// handles stuff with open and closing the modals (popups) for these actions
+
 import { React, useState } from "react";
 import { IconButton, Tooltip } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";

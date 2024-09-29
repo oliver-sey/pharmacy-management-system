@@ -1,4 +1,7 @@
-// EditModal.jsx
+// This is a component for editing a patient, and adding a new patient
+// the same modal (popup) gets used for both, but when you are editing, the fields in the popup
+// have the values from the existing patient
+
 import React, { useState, useEffect } from "react";
 import {
 	Dialog,

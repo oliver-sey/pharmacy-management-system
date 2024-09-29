@@ -5,6 +5,9 @@ import DeleteModal from "../Components/DeleteModal";
 import Button from "@mui/material/Button";
 
 function ViewOfPatients() {
+	// the columns for the table
+	// headerName is what shows up on the website
+	// width is the default width of the column, user can adjust it
 	const columns = [
 		{ field: "id", headerName: "ID", width: 70 },
 		{ field: "firstName", headerName: "First name", width: 130 },
@@ -57,6 +60,8 @@ function ViewOfPatients() {
 	];
 
 	// {ID: , firstName: "", lastName: "", dateOfBirth: "", address: "", phoneNumberStr: "", email: "", insuranceName: "", insuranceGroupNum: "", insuranceMemberID: ""}
+	// hardcoded values for development, this will come from the backend/database later
+	// TODO: get rid of hardcoded values
 	const rows = [
 		{
 			id: 1,
@@ -300,6 +305,8 @@ function ViewOfPatients() {
 		},
 	];
 
+	// the message format that should get used in the delete confirmation modal (popup) for this table
+	// need this since we want a different format on other tables that use this same base component
 	const patientConfirmMessage = (row) =>
 		`${row?.firstName || "Unknown First Name"} ${
 			row?.lastName || "Unknown Last Name"

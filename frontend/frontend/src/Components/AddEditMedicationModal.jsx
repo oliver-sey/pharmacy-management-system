@@ -1,5 +1,5 @@
 // EditModal.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
 	Dialog,
 	DialogActions,
@@ -10,16 +10,39 @@ import {
 } from "@mui/material";
 
 const AddEditMedicationModal = ({ open, onClose, row, onSave }) => {
-	// Initialize form data with the values from the selected row
+	// Initialize form data
 	const [formData, setFormData] = useState({
-		id: row?.id || "",
-		name: row?.name || "",
-		dosageStr: row?.dosageStr || "",
-		quantity: row?.quantity || "",
-		prescriptionRequired: row?.prescriptionRequired || "",
-		expirationDate: row?.expirationDate || "",
-		dollarsPerUnit: row?.dollarsPerUnit || "",
+		name: "",
+		dosageStr: "",
+		quantity: "",
+		prescriptionRequired: "",
+		expirationDate: "",
+		dollarsPerUnit: "",
 	});
+
+	// Update form data when the row prop changes
+	useEffect(() => {
+		if (row) {
+			setFormData({
+				name: row?.name || "",
+				dosageStr: row?.dosageStr || "",
+				quantity: row?.quantity || "",
+				prescriptionRequired: row?.prescriptionRequired || "",
+				expirationDate: row?.expirationDate || "",
+				dollarsPerUnit: row?.dollarsPerUnit || "",
+			});
+		} else {
+			// Reset to empty fields when adding a new patient
+			setFormData({
+				name: "",
+				dosageStr: "",
+				quantity: "",
+				prescriptionRequired: "",
+				expirationDate: "",
+				dollarsPerUnit: "",
+			});
+		}
+	}, [row]);
 
 	// Update form data on input change
 	const handleChange = (e) => {
@@ -39,14 +62,6 @@ const AddEditMedicationModal = ({ open, onClose, row, onSave }) => {
 			</DialogTitle>
 
 			<DialogContent>
-				<TextField
-					label="ID"
-					name="id"
-					value={formData.id}
-					onChange={handleChange}
-					fullWidth
-					margin="dense"
-				/>
 				<TextField
 					label="Medication Name"
 					name="name"

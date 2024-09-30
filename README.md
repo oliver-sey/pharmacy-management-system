@@ -21,11 +21,12 @@
 
 4. Future development with Docker container
 
-    Stop the container:
-    ```shell
-    ctrl + c
-    ```
     Start the container: 
     ```shell
     docker-compose up
+    ```
+
+    Stop the container:
+    ```shell
+    ctrl + c
     ```

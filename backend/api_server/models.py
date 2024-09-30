@@ -5,9 +5,11 @@ from sqlalchemy.sql import func
 
 Base  = declarative_base()
 
-class Item(Base):
-    __tablename__ = 'items'
+class User(Base):
+    __tablename__ = 'employees'
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
-    description = Column(String, index=True)
+    email = Column(String, unique=True, index=True)
+    password = Column(String, unique=True, index=True)
+

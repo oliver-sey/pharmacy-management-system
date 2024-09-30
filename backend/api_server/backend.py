@@ -243,5 +243,17 @@ print(get_password_hash("password123"))
 log_config = uvicorn.config.LOGGING_CONFIG
 log_config["formatters"]["access"]["fmt"] = "%(asctime)s - %(levelname)s - %(message)s"
 
+
+
+#--------- Reset Password ---------
+@app.post("/resetpassword")
+def reset_password(password_data: dict = Body(...)):
+    new_password = password_data.get("password")
+    
+    if not new_password:
+        return {"message": "Password is required"}, 400
+    
+    return {"message": "Password has been successfully reset"}
+    
 #Run server
 uvicorn.run(app, log_config=log_config)

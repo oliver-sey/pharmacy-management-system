@@ -8,6 +8,7 @@ import ViewOfPatients from './Pages/ViewOfPatients';
 import ViewOfUsers from './Pages/ViewOfUsers';
 import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
 import ViewOfMedications from './Pages/ViewOfMedications';
+import ResetPassword from './Pages/ResetPassword'
 
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
           <Route path='/viewofpatients' element={<ViewOfPatients/>}/>
           <Route path='/viewofmedications' element={<ViewOfMedications/>}/>
           <Route path='/viewofusers' element={<ViewOfUsers/>}/>
+          <Route path='/resetpassword' element ={<ResetPassword/>}/>
 
         </Routes>
       </Router>

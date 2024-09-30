@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta, timezone
-import logging
+from jose import JWTError
 from typing import Annotated, Union # for definding the types that our functions take in and return, could be useful... or not idk
 import uvicorn
 import jwt
@@ -40,12 +40,14 @@ fake_users_db = {
         "full_name": "John Doe",
         "username": "manager@example.com",
         "hashed_password": "$2b$12$RZ40hSEXI8BuUqOCe1Gj/exWkH3pPFlPNtsahkWLIV2XiTzw8d4ym",
+        "role": "manager",
         "disabled": False,
     },
     "pharmacist@example.com": {
         "full_name": "Oliver",
         "username": "pharmacist@example.com",
         "hashed_password": "$2b$12$9N86kINZys6.SpJ9C/IRWudLqbWks80Z2BBcn/3Fsk7ZHsRCfa4HK",
+        "role": "pharmacist",
         "disabled": False,
     }
 }
@@ -104,6 +106,17 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
+def verify_token(token: Annotated[str, Depends(oauth2_scheme)]):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise HTTPException(status_code=403, detail="Token is invalid or expired")
+        return payload
+        
+    except JWTError:
+        raise HTTPException(status_code=403, detail="Token is invalid or expired")
+
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     credentials_exception = HTTPException(
@@ -151,6 +164,10 @@ async def login_for_access_token(
     )
     return Token(access_token=access_token, token_type="bearer")
 
+@app.get("/verify-token/{token}")
+async def verify_user_token(token: str):
+    verify_token(token=token)
+    return {'message': 'Token is valid.'}
 
 @app.get("/users/me/", response_model=User)
 async def read_users_me(

@@ -13,18 +13,11 @@ function App() {
   return (
     <div className="App">
       <Router>
-      
-        
         <p> Hello world </p>
-
-        
         <Routes>
           <Route exact path="/protected" element={<GeneralProtected/>}/>
           <Route exact path="/" element={<Login/>}/>
         </Routes>
-        
-        
-        
       </Router>
     </div>
   );

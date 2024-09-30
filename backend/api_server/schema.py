@@ -1,17 +1,16 @@
 # build a schema using pydantic
-from pydantic import BaseModel
 
-class Book(BaseModel):
-    title: str
-    rating: int
-    author_id: int
+from pydantic import BaseModel, EmailStr
 
-    class Config:
-        orm_mode = True
+class EmployeeCreate(BaseModel):
+    name: str
+    email: EmailStr
+    password: str
 
-class Author(BaseModel):
-    name:str
-    age:int
+class EmployeeResponse(BaseModel):
+    id: int
+    name: str
+    email: EmailStr
 
     class Config:
         orm_mode = True

@@ -2,9 +2,15 @@ from typing import Union # for definding the types that our functions take in an
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
+from database import SessionLocal, engine
+from models import Base, Employee
+from schemas import EmployeeCreate, EmployeeResponse
 
-app = FastAPI()
+# Create the database tables
+Base.metadata.create_all(bind=engine)
+
+app = FastAPI(dependencies=[Depends(get_db)])
 
 # this is to allow our react app to make requests to our fastapi app
 origins = [
@@ -15,10 +21,14 @@ app.add_middleware(
     allow_origins=origins,
 )
 
-# Create a database session dependency
-DATABASE_URL = "postgresql://user:password@postgres/mydatabase"
+# Dependency to get the database session
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
-engine = create_engine(DATABASE_URL)
 # test endpoint
 @app.get("/test") # this is a decorator that tells fastapi to run the function below when a GET request is made to http://localhost:8000/test
 def read_root():
@@ -31,10 +41,14 @@ def get_user(user_id: int):
     # make a call to our future database to get the user with the given user_id
     return {"user_id": user_id}
 
-@app.post("/post/user")
-def post_user(user: dict):
-    # make a call to our future database to add the user to the database
-    return user
+@app.post("/employee", response_model=EmployeeResponse)
+def post_employee(employee: EmployeeCreate):
+    db = next(get_db()) 
+    db_employee = Employee(name=employee.name, email=employee.email, password=employee.password)
+    db.add(db_employee)
+    db.commit()
+    db.refresh(db_employee)
+    return db_employee
 
 @app.put("/put/user/{user_id}")
 def put_user(user_id: int, user: dict):

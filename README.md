@@ -1,10 +1,12 @@
 # pharmacy-management-system
 
+Developed in Fall 2024 by Skyler DeVaugh, Katelyn McLean, Oliver Seymour, Hsinwei Lin, CJ Reda, and Dalia Castro
+
 ## Setup
 
 1. Install Docker (execute once)
 
-    Follow the [link](https://www.docker.com/products/docker-desktop/) and download docker desktop
+    Download Docker Desktop [here](https://www.docker.com/products/docker-desktop/)
 
 2. Check Docker status, making sure it's properly installed
 

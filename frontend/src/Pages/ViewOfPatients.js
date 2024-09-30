@@ -1,31 +1,26 @@
-import React, { useState } from "react";
-
-import { DataGrid } from "@mui/x-data-grid";
-// import Paper from "@mui/material/Paper";
-import {
-	Paper,
-	IconButton,
-	Dialog,
-	DialogActions,
-	DialogTitle,
-	Button,
-} from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete"; // Material UI Delete Icon
+import { React, useRef } from "react";
+import EditDeleteTable from "../Components/EditDeleteTable";
+import AddEditPatientModal from "../Components/AddEditPatientModal";
+import DeleteModal from "../Components/DeleteModal";
+import Button from "@mui/material/Button";
 
 function ViewOfPatients() {
+	// the columns for the table
+	// headerName is what shows up on the website
+	// width is the default width of the column, user can adjust it
 	const columns = [
 		{ field: "id", headerName: "ID", width: 70 },
 		{ field: "firstName", headerName: "First name", width: 130 },
 		{ field: "lastName", headerName: "Last name", width: 130 },
-		{
-			field: "fullName",
-			headerName: "Full name",
-			description: "This column has a value getter and is not sortable.",
-			sortable: false,
-			width: 160,
-			valueGetter: (value, row) =>
-				`${row.firstName || ""} ${row.lastName || ""}`,
-		},
+		// {
+		// 	field: "fullName",
+		// 	headerName: "Full name",
+		// 	description: "This column has a value getter and is not sortable.",
+		// 	sortable: false,
+		// 	width: 160,
+		// 	valueGetter: (value, row) =>
+		// 		`${row.firstName || ""} ${row.lastName || ""}`,
+		// },
 		{ field: "dateOfBirth", headerName: "Date of Birth", width: 160 },
 
 		{
@@ -62,20 +57,11 @@ function ViewOfPatients() {
 			headerName: "Insurance Member ID",
 			width: 180,
 		},
-		{
-			field: "actions",
-			headerName: "Actions",
-			width: 100,
-			sortable: false,
-			renderCell: (params) => (
-				<IconButton onClick={() => handleOpen(params.row)}>
-					<DeleteIcon color="error" />
-				</IconButton>
-			),
-		},
 	];
 
 	// {ID: , firstName: "", lastName: "", dateOfBirth: "", address: "", phoneNumberStr: "", email: "", insuranceName: "", insuranceGroupNum: "", insuranceMemberID: ""}
+	// hardcoded values for development, this will come from the backend/database later
+	// TODO: get rid of hardcoded values
 	const rows = [
 		{
 			id: 1,
@@ -319,65 +305,39 @@ function ViewOfPatients() {
 		},
 	];
 
-	const paginationModel = { page: 0, pageSize: 25 };
+	// the message format that should get used in the delete confirmation modal (popup) for this table
+	// need this since we want a different format on other tables that use this same base component
+	const patientConfirmMessage = (row) =>
+		`${row?.firstName || "Unknown First Name"} ${
+			row?.lastName || "Unknown Last Name"
+		}, with DOB ${row?.dateOfBirth || "Unknown DOB"}`;
 
-	const [open, setOpen] = useState(false);
-	const [selectedRow, setSelectedRow] = useState(null);
+	const openAddPatientModal = useRef(null);
 
-	// Handle modal open and close
-	const handleOpen = (row) => {
-		setSelectedRow(row);
-		setOpen(true);
-	};
-
-	const handleClose = () => {
-		setOpen(false);
-	};
 	return (
 		<div>
-			{/*  Modal for Delete Confirmation */}
-			<Dialog open={open} onClose={handleClose}>
-				<DialogTitle>{`Delete ${selectedRow?.firstName} ${selectedRow?.lastName}?`}</DialogTitle>
-				<DialogActions>
-					<Button onClick={handleClose} color="primary">
-						Cancel
-					</Button>
-					<Button
-						onClick={() => {
-							// Handle delete action here
-							console.log(
-								`Deleting patient ID: ${selectedRow?.id}`
-							);
-							handleClose();
-						}}
-						color="error"
-					>
-						Delete
-					</Button>
-				</DialogActions>
-			</Dialog>
-			<div>
-				<div>
-					<h2>Patients</h2>
-				</div>
+			<h2>Patients Table</h2>
+			<Button
+				variant="contained"
+				onClick={() => {
+					if (openAddPatientModal.current) {
+						openAddPatientModal.current(); // Trigger modal to open for adding a patient
+					}
+				}}
+			>
+				Add Patient
+			</Button>
 
-				<Paper sx={{ height: "0.8vwh", width: "100%" }}>
-					<DataGrid
-						rows={rows}
-						columns={columns}
-						initialState={{ pagination: { paginationModel } }}
-						pageSizeOptions={[5, 10]}
-						// checkboxSelection
-						sx={{
-							border: 0,
-							"& .MuiDataGrid-columnHeaders": {
-								fontWeight: "bold", // Make headers bold
-								backgroundColor: "#000000", // Optional background color for headers
-							},
-						}}
-					/>
-				</Paper>
-			</div>
+			<EditDeleteTable
+				rows={rows}
+				columns={columns}
+				editModal={AddEditPatientModal}
+				deleteModal={DeleteModal}
+				customConfirmMessage={patientConfirmMessage}
+				onAdd={(handler) => {
+					openAddPatientModal.current = handler; // Store the open modal handler
+				}}
+			/>
 		</div>
 	);
 }

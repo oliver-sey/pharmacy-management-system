@@ -2,6 +2,7 @@ from typing import Union # for definding the types that our functions take in an
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import create_engine
 
 app = FastAPI()
 
@@ -14,6 +15,10 @@ app.add_middleware(
     allow_origins=origins,
 )
 
+# Create a database session dependency
+DATABASE_URL = "postgresql://user:password@postgres/mydatabase"
+
+engine = create_engine(DATABASE_URL)
 # test endpoint
 @app.get("/test") # this is a decorator that tells fastapi to run the function below when a GET request is made to http://localhost:8000/test
 def read_root():

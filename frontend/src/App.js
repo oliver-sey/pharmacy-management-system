@@ -4,6 +4,7 @@ import Header from './Components/Header';
 import Login from './Pages/Login';
 import ManagerHome from './Pages/ManagerHome';
 import PharmacistHome from './Pages/PharmacistHome';
+import ViewOfPatients from './Pages/ViewOfPatients';
 import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
 
 
@@ -17,6 +18,8 @@ function App() {
           <Route path="/" element={<Login/>}/>
           <Route path="/pharmacisthome" element={<PharmacistHome/>}/>
           <Route path='/managerhome' element={<ManagerHome/>}/>
+          <Route path='/viewofpatients' element={<ViewOfPatients/>}/>
+
         </Routes>
       </Router>
     </div>

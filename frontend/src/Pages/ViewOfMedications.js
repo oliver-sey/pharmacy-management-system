@@ -1,6 +1,5 @@
 import { React, useRef } from "react";
 
-import Header from "../Components/Header";
 import EditDeleteTable from "../Components/EditDeleteTable";
 import AddEditMedicationModal from "../Components/AddEditMedicationModal";
 import DeleteModal from "../Components/DeleteModal";

@@ -2,11 +2,12 @@
 
 from pydantic import BaseModel, EmailStr
 
-class EmployeeCreate(BaseModel):
-    name: str
+class UserCreate(BaseModel):
+    user_type: str
     email: EmailStr
     password: str
-
+    is_locked_out: bool = True
+    
 class EmployeeResponse(BaseModel):
     id: int
     name: str

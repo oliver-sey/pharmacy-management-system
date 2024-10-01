@@ -2,3 +2,8 @@ fastapi
 uvicorn
 psycopg2 
 sqlalchemy
+python-jose
+pyjwt
+passlib
+python-multipart
+typing

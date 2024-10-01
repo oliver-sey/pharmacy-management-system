@@ -1,51 +1,93 @@
-import React from "react";
-import "../Styles/Login.css"; // import the specific stylesheet for this page
+import React, {useState} from "react";
+import "../Styles/Login.css"; // import the specific stylesheet for this page;
+import { useNavigate } from 'react-router-dom';
+
+import '../Styles/Login.css';
 
 function Login() {
-	return (
-		<div>
-			<h1>Employee Login</h1>
-			<h3>Welcome to the Pharmacy Management System</h3>
-			<div className="centered-div-container">
-				<div className="login-box">
-					<div className="form-group">
-						<label htmlFor="email" className="input-label">
-							Email:
-						</label>
-						<input
-							type="text"
-							className="input-field"
-							id="email"
-							placeholder="Email"
-						/>
-					</div>
+  const[username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState('');
 
-					<div className="form-group">
-						<label htmlFor="password" className="input-label">
-							Password:
-						</label>
-						<input
-							type="password"
-							className="input-field"
-							id="password"
-							placeholder="Password"
-						/>
-					</div>
+  const navigate = useNavigate();
 
-					<div>
-						<p>
-							Don't have an account yet? Ask your pharmacy manager
-							to create one for you.
-						</p>
-					</div>
+  const validateForm = () => {
+    if (!username || !password) {
+      setError('Username and password are required');
+      return false;
+    }
+    setError('');
+    return true;
+  }
 
-					<div>
-						<input type="button" id="submit-button" value="Submit" />
-					</div>
-				</div>
-			</div>
-		</div>
-	);
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (!validateForm()) return;
+    setLoading(true);
+
+    const formDetails = new URLSearchParams();
+    formDetails.append('username', username);
+    formDetails.append('password', password);
+
+    try {
+      const response = await fetch('http://localhost:8000/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+
+        },
+        body: formDetails,
+      });
+
+      setLoading(false);
+      
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('token', data.access_token);
+        console.log("navigating now")
+        navigate('../protected', {replace: true});
+      } else {
+        const errorData = await response.json();
+        setError(errorData.detail || 'Authentication failed!');
+      }
+
+      } catch (error) {
+        setLoading(false);
+        setError('An error occured. Please try again later.');
+      }
+    }
+  
+
+  return(
+    <div className="login-wrapper">
+      <h1>Please Log In</h1>
+      <form onSubmit={handleSubmit}>
+        <label>
+          <p>Username</p>
+          <input 
+            type="text" 
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+        </label>
+        <label>
+          <p>Password</p>
+          <input 
+            type="password" 
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </label>
+        <div>
+          <button type="submit" disabled={loading}>
+            {loading ? 'Logging in...' : 'Login'}
+          </button>
+          {error && <p>{error}</p>}
+        </div>
+      </form>
+    </div>
+  )
 }
 
 export default Login;

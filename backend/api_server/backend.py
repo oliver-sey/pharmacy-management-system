@@ -22,6 +22,9 @@ origins = [
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 #-----authentication values-------
@@ -66,6 +69,7 @@ class TokenData(BaseModel):
 
 class User(BaseModel):
     username: Optional[str] = None
+    role: Optional[str] = None
     full_name: Optional[str] = None
     disabled: Optional[bool] = None
 
@@ -85,6 +89,7 @@ def get_password_hash(password):
 def get_user_auth(db, username: str):
     if username in db:
         user_dict = db[username]
+        print(UserInDB(**user_dict))
         return UserInDB(**user_dict)
 
 
@@ -131,13 +136,17 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
+            print("point 1")
             raise credentials_exception
         token_data = TokenData(username=username)
     except InvalidTokenError:
+        print("point 2")
         raise credentials_exception
     user = get_user_auth(fake_users_db, username=token_data.username)
     if user is None:
+        print("point 3")
         raise credentials_exception
+    print(user)
     return user
 
 
@@ -187,9 +196,9 @@ async def read_own_items(
 
 
 # Create a database session dependency
-DATABASE_URL = "postgresql://user:password@postgres/mydatabase"
+# DATABASE_URL = "postgresql://user:password@postgres/mydatabase"
 
-engine = create_engine(DATABASE_URL)
+# engine = create_engine(DATABASE_URL)
 # test endpoint
 @app.get("/test") # this is a decorator that tells fastapi to run the function below when a GET request is made to http://localhost:8000/test
 def read_root():
@@ -243,7 +252,7 @@ def delete_patient(patient_id: int):
 log_config = uvicorn.config.LOGGING_CONFIG
 log_config["formatters"]["access"]["fmt"] = "%(asctime)s - %(levelname)s - %(message)s"
 
-
+#uvicorn.run(app, log_config=log_config)
 
 # #--------- Reset Password ---------
 # @app.post("/resetpassword")

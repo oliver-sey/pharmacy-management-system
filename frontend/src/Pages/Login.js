@@ -8,6 +8,7 @@ function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState('');
+  const [role, setRole] = useState('');
 
   const navigate = useNavigate();
 
@@ -30,7 +31,7 @@ function Login() {
     formDetails.append('password', password);
 
     try {
-      const response = await fetch('http://localhost:8000/token', {
+      const response = await fetch('/token', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -44,8 +45,26 @@ function Login() {
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem('token', data.access_token);
-        console.log("navigating now")
-        navigate('../protected', {replace: true});
+
+        const userResponse = await fetch('http://localhost:8000/users/me', {
+          method: 'GET',
+          headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
+
+        })
+
+        if (userResponse.ok) {
+          const userData = await userResponse.json();
+          setRole(userData.role)
+
+          if (userData.role == 'manager') {
+            navigate('../managerhome', {replace: true})
+          } else if (userData.role == 'pharmacist') {
+            navigate('../pharmacisthome', {replace: true})
+          } else {
+            navigate('../protected', {replace: true})
+          }
+      }
+       
       } else {
         const errorData = await response.json();
         setError(errorData.detail || 'Authentication failed!');

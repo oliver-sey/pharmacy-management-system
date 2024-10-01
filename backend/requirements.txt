@@ -5,3 +5,5 @@ sqlalchemy
 python-jose
 pyjwt
 passlib
+python-multipart
+typing

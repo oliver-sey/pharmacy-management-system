@@ -10,6 +10,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from passlib.context import CryptContext
 from sqlalchemy import create_engine
+from typing import Optional
+
 
 app = FastAPI()
 
@@ -59,13 +61,13 @@ class Token(BaseModel):
 
 
 class TokenData(BaseModel):
-    username: str | None = None
+    username: Optional[str] = None
 
 
 class User(BaseModel):
-    username: str | None = None
-    full_name: str | None = None
-    disabled: bool | None = None
+    username: Optional[str] = None
+    full_name: Optional[str] = None
+    disabled: Optional[bool] = None
 
 
 class UserInDB(User):
@@ -97,7 +99,7 @@ def authenticate_user(fake_db, username: str, password: str):
     return user
 
 
-def create_access_token(data: dict, expires_delta: timedelta | None = None):
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
@@ -237,23 +239,18 @@ def delete_patient(patient_id: int):
     # make a call to our future database to delete the patient with the given patient_id
     return {"patient_id": patient_id}
 
-print(get_password_hash("password123"))
-
 #--------Logging configurations---------
 log_config = uvicorn.config.LOGGING_CONFIG
 log_config["formatters"]["access"]["fmt"] = "%(asctime)s - %(levelname)s - %(message)s"
 
 
 
-#--------- Reset Password ---------
-@app.post("/resetpassword")
-def reset_password(password_data: dict = Body(...)):
-    new_password = password_data.get("password")
+# #--------- Reset Password ---------
+# @app.post("/resetpassword")
+# def reset_password(password_data: dict = Body(...)):
+#     new_password = password_data.get("password")
     
-    if not new_password:
-        return {"message": "Password is required"}, 400
+#     if not new_password:
+#         return {"message": "Password is required"}, 400
     
-    return {"message": "Password has been successfully reset"}
-    
-#Run server
-uvicorn.run(app, log_config=log_config)
+#     return {"message": "Password has been successfully reset"}

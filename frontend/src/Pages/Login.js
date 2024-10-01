@@ -4,7 +4,10 @@ import { useNavigate } from 'react-router-dom';
 
 import '../Styles/Login.css';
 
+// ***IMPORTANT:*** OAuth requires that the variable be called username, even though here it is an email
+
 function Login() {
+	// username is actually an email
   const[username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -14,7 +17,7 @@ function Login() {
 
   const validateForm = () => {
     if (!username || !password) {
-      setError('Username and password are required');
+      setError('Email and password are required');
       return false;
     }
     setError('');
@@ -64,7 +67,7 @@ function Login() {
       <h1>Please Log In</h1>
       <form onSubmit={handleSubmit}>
         <label>
-          <p>Username</p>
+          <p>Email</p>
           <input 
             type="text" 
             value={username}

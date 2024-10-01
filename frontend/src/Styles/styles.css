@@ -84,7 +84,7 @@ input[type="password"] {
 
 /* Error text */
 .error-text {
-	color: var(--error-color);
+	color: var(--error-color)!important;
 }
 
 /* Centered container */

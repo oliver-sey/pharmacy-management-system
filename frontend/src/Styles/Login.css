@@ -1,87 +1,120 @@
-import styles.css
+/* import styles.css  */
 
-/* Centered container for the login form */
-/*centered-div {
-/*	display: flex;
-/*	/*flex-direction: column; /* Aligns items vertically */
-/*	justify-content: center; /* Centers horizontally*/
-/*	align-items: center; /* Centers vertically */
-/*	height: 90vh; /* Takes up almost full viewport height */
-/*
-/*
-/*login-box {
-/*	display: flex;
-/*	flex-direction: column; /* Aligns items vertically */
-/*	justify-content: space-around; /* Centers vertically */
-/*	align-items: center; /* Centers horizontally */
-/*	height: 50%;
-/*	width: 40vw;
-/*	background-color: var(--secondary-color);
-/*	border-radius: 4%;
-/*
-*/
-
-/* load bearing css class?????? without this the cnetered-div-container isn't centered */
-.asdasdcentered-div {
-	height: 100vh; /* Full height of the viewport */
-}
-
-body {
+/* Centering the login box on the screen */
+.login-container {
 	display: flex;
-	justify-content: center;
-}
-
-.centered-div-container {
-	display: flex;
-	justify-content: center;
+	flex-direction: column;
 	align-items: center;
-	width: 100%;
-	margin-top: 10vh;
-	height: 60vh;
+	justify-content: center;
+	height: 100vh;
+	padding: 0 20px;
+	background-color: #f4f4f9;
+}
+
+h1 {
+	text-align: center;
+	font-size: 24px;
+	margin-bottom: 20px;
+	color: #333;
 }
 
 .login-box {
+	background-color: #fff;
+	padding: 30px;
+	border-radius: 10px;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+	width: 100%;
+	max-width: 400px;
 	display: flex;
 	flex-direction: column;
-	justify-content: space-between;
 	align-items: center;
-	background-color: var(--secondary-background-color);
-	width: 70%; /* Takes up 70% of parent width */
-	height: 65%; /* Takes up 65% of parent height */
-	padding: 20px;
-	margin-bottom: 10vh;
-	border-radius: 8px;
-	/* Enhanced box shadow for a more prominent effect */
-	box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2), 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
-/* Style for each form group (label + input) */
+/* Make the input fields centered inside the form */
 .form-group {
-	display: flex;
-	justify-content: space-between; /* Pushes label to the left and input to the right */
-	align-items: center; /* Centers items vertically within the form group */
-	width: 90%; /* Set fixed width for form groups */
-	margin-bottom: 10px; /* Space between form groups */
-	padding-top: 10px;
-	padding-bottom: 5px;
+	width: 100%;
+	margin-bottom: 15px;
+	text-align: left;
+
+	padding: 0 10px; /* Add padding to the left and right */
+	box-sizing: border-box; /* Ensure padding doesn't affect total width */
 }
 
-/* Style for labels */
-.input-label {
-	text-align: left; /* Left-aligns the label */
-	font-size: large;
+.form-group label {
+	display: block;
+	font-size: 16px;
+	margin-bottom: 5px;
+	color: #333;
 }
 
-/* Style for inputs */
-.input-field {
-	width: 60% !important; /* Adjust input width */
+.form-group input {
+	width: 100%;
+	padding: 10px;
+	box-sizing: border-box; /* Ensure padding doesn't affect total width */
+
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	font-size: 16px;
 }
 
-#submit-button {
-	background-color: var(--accent-color);
+/* Styling for error states */
+.error-input {
+	border-color: #e74c3c;
 }
-.login-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+
+.error-message {
+	color: #e74c3c;
+	font-size: 14px;
+	margin-top: 5px;
+	text-align: center;
+}
+
+button {
+	width: 100%;
+	padding: 10px;
+	background-color: #3498db;
+	color: #fff;
+	border: none;
+	border-radius: 5px;
+	font-size: 16px;
+	cursor: pointer;
+}
+
+button:hover {
+	background-color: #2980b9;
+}
+
+/* Disabled state */
+button:disabled {
+	background-color: gray; /* Grayed out color */
+	color: #ccc; /* Make text lighter */
+	cursor: not-allowed; /* Change cursor to indicate it's disabled */
+	pointer-events: none; /* Disable hover effects */
+}
+
+/* button.disabled:hover {
+	background-color: gray; /* No hover effect */
+/*} */
+
+.password-help,
+#attempts-message {
+	margin-top: 15px;
+	font-size: 14px;
+	color: #666;
+	text-align: center;
+}
+
+/* Responsive design */
+@media (max-width: 600px) {
+	.login-box {
+		padding: 20px;
+	}
+
+	h1 {
+		font-size: 20px;
+	}
+
+	button {
+		font-size: 14px;
+	}
 }

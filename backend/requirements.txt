@@ -2,7 +2,8 @@ fastapi
 uvicorn
 psycopg2 
 sqlalchemy
-pydantic[email]
-PyJWT
 python-jose
+pyjwt
 passlib
+python-multipart
+typing

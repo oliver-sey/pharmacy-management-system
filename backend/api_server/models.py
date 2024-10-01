@@ -4,8 +4,6 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from .database import Base
 
-Base  = declarative_base()
-
 class User(Base):
     __tablename__ = 'users'
 
@@ -102,6 +100,6 @@ class Transaction(Base):
     timestamp = Column(DateTime, default=func.now())
     payment_method = Column(String)
 
-    patients = relationship("Patient", back_populates="transactions", nullable=False)
-    user = relationship("User", back_populates="transactions", nullable=False)
-    inventory_update = relationship("InventoryUpdate", back_populates="transactions", nullable=False)
+    patients = relationship("Patient", back_populates="transactions")
+    user = relationship("User", back_populates="transactions")
+    inventory_update = relationship("InventoryUpdate", back_populates="transactions")

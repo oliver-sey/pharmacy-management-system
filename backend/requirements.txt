@@ -7,3 +7,4 @@ pyjwt
 passlib
 python-multipart
 typing
+pydantic[email]

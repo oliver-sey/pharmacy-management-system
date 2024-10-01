@@ -5,14 +5,6 @@ from sqlalchemy.sql import func
 
 Base  = declarative_base()
 
-class Item(Base):
-    __tablename__ = 'items'
-
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True)
-    description = Column(String, index=True)
-
-
 class User(Base):
     __tablename__ = 'users'
 
@@ -77,3 +69,38 @@ class Medication(Base):
     dollars_per_unit = Column(Float)
 
     prescriptions = relationship("Prescription", back_populates="medication")
+
+class UserActivity(Base):
+    __tablename__ = 'user_activities'
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey('users.id'))
+    activity = Column(String) # login, logout, enter prescription, fill presctiption
+    timestamp = Column(DateTime, default=func.now())
+
+    user = relationship("User", back_populates="user_activities")
+
+class InventoryUpdate(Base):
+    __tablename__ = 'inventory_updates'
+
+    id = Column(Integer, primary_key=True, index=True)
+    medication_id = Column(Integer, ForeignKey('medications.id'))
+    user_id = Column(Integer, ForeignKey('users.id'))
+    quantity = Column(Integer)
+    timestamp = Column(DateTime, default=func.now())
+
+    medication = relationship("Medication", back_populates="inventory_updates")
+    user_activity = relationship("UserActivity", back_populates="inventory_updates")
+    transaction = relationship("Transaction", back_populates="inventory_updates")
+
+class Transaction(Base):
+    __tablename__ = 'transactions'
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey('users.id'))
+    timestamp = Column(DateTime, default=func.now())
+    payment_method = Column(String)
+
+    patients = relationship("Patient", back_populates="transactions", nullable=False)
+    user = relationship("User", back_populates="transactions", nullable=False)
+    inventory_update = relationship("InventoryUpdate", back_populates="transactions", nullable=False)

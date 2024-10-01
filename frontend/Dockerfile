@@ -14,15 +14,9 @@ RUN npm install
 # Copy the rest of the app
 COPY . .
 
-# Build the React app
-RUN npm run build
-
-# Install serve to serve the build
-RUN npm install -g serve
-
 # Expose the port
 EXPOSE 3000
 
-# Command to serve the app
-CMD ["serve", "-s", "build"]
+# Start the React development server
+CMD ["npm", "start"]
 

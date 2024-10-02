@@ -145,12 +145,6 @@ const LoginComponent = () => {
 
 		let failedAttempts = getFailedAttempts(newEmail);
 
-		console.log(
-			"In updateMessageAndLockedOut, newEmail is " +
-				newEmail +
-				", failedAttempts is " +
-				failedAttempts
-		);
 		// no failed attempts on this email yet
 		if (failedAttempts === 0) {
 			// do nothing more

@@ -4,7 +4,7 @@ from typing import Annotated, Union # for definding the types that our functions
 import uvicorn
 import jwt
 from jwt.exceptions import InvalidTokenError
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import Depends, FastAPI, HTTPException, status, Body
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -269,9 +269,31 @@ log_config["formatters"]["access"]["fmt"] = "%(asctime)s - %(levelname)s - %(mes
 
  #--------- Reset Password ---------
 @app.post("/resetpassword")
-def reset_password(password: str):
-    if not password:
-        return {"message": "Password is required"}, 400
+async def reset_password(
+    newPassword: Annotated[str, Body(..., embed=True)],
+    currentUser: Annotated[UserInDB, Depends(get_current_active_user)]
+):
+    if not newPassword:
+        raise HTTPException(status_code=400, detail="Password is required")
     
-    #add logic here to hash the password and update it in the database
-    return {"message": "Password has been successfully reset"}
+    # Checks that password is valid
+    if len(newPassword) < 8:
+        raise HTTPException(status_code=400, detail="Password must be at least 8 characters long.")
+    if not any(char.isdigit() for char in newPassword):
+        raise HTTPException(status_code=400, detail="Password must contain at least one number.")
+    if not any(char.isupper() for char in newPassword):
+        raise HTTPException(status_code=400, detail="Password must contain at least one uppercase letter.")
+    if not any(char.islower() for char in newPassword):
+        raise HTTPException(status_code=400, detail="Password must contain at least one lowercase letter.")
+    if not any(char in "!@#$%^&*()_+" for char in newPassword):
+        raise HTTPException(status_code=400, detail="Password must contain at least one special character.")
+    
+
+    # Hash the new password
+    hashedPassword = get_password_hash(newPassword)
+
+    # Update the user's password in the fake database (in-memory)
+    fake_users_db[currentUser.username]["hashed_password"] = hashedPassword
+
+    return {"message": "Password has been successfully reset."}
+

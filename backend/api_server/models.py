@@ -4,6 +4,10 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from .database import Base
 
+from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy.orm import relationship
+from .database import Base
+
 class User(Base):
     __tablename__ = 'users'
 
@@ -13,9 +17,15 @@ class User(Base):
     password = Column(String)
     is_locked_out = Column(Boolean, default=True)
 
-    prescriptions = relationship("Prescription", back_populates="user")
-    user_activities = relationship("UserActivity", back_populates="user")
-    transactions = relationship("Transaction", back_populates="user")
+    # A user can enter many prescriptions
+    entered_prescriptions = relationship("Prescription", back_populates="user_entered", foreign_keys="[Prescription.user_entered_id]", cascade="all, delete-orphan")
+    # A user can fill many prescriptions
+    filled_prescriptions = relationship("Prescription", back_populates="user_filled", foreign_keys="[Prescription.user_filled_id]", cascade="all, delete-orphan")
+    # A user can have many user activities
+    user_activities = relationship("UserActivity", back_populates="user", cascade="all, delete-orphan")
+    # A user can have many transactions
+    transactions = relationship("Transaction", back_populates="user", cascade="all, delete-orphan")
+
 
 class Patient(Base):
     __tablename__ = 'patients'
@@ -29,7 +39,7 @@ class Patient(Base):
     email = Column(String, index=True, unique=True)
     insurance_name = Column(String)
     insurance_group_number = Column(String)
-    insurance_member_id = Column(String) # is this unique?
+    insurance_member_id = Column(String)
 
     prescriptions = relationship("Prescription", back_populates="patient")
     transactions = relationship("Transaction", back_populates="patient")
@@ -39,21 +49,17 @@ class Prescription(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     patient_id = Column(Integer, ForeignKey('patients.id'))
-    user_entered_id = Column(Integer, ForeignKey('users.id')) # user who typed in the prescription (must be a pharmacy technician or higher level)
-    user_filled_id = Column(Integer, ForeignKey('users.id')) # user who filled the prescription (must be a pharmacist)
+    user_entered_id = Column(Integer, ForeignKey('users.id'))  # User who typed in the prescription
+    user_filled_id = Column(Integer, ForeignKey('users.id'))  # User who filled the prescription
     date_prescribed = Column(DateTime, default=func.now())
-
-    # prescription lifecycle: prescribed -> filled -> picked up
-    # a doctor can prescribe a medication and have a pharmacist manually enter it into the system
-    # a pharmacist can fill the presctiption
-    # a patient can pick up the prescription
     filled_timestamp = Column(DateTime, default=func.now())
-    medication = Column(Integer, ForeignKey('medications.id'))
+    medication_id = Column(Integer, ForeignKey('medications.id'))  # Updated to match foreign key reference
     doctor_name = Column(String)
     dosage = Column(String)
 
     patient = relationship("Patient", back_populates="prescriptions")
-    user = relationship("User", back_populates="prescriptions")
+    user_entered = relationship("User", back_populates="entered_prescriptions", foreign_keys="[Prescription.user_entered_id]")
+    user_filled = relationship("User", back_populates="filled_prescriptions", foreign_keys="[Prescription.user_filled_id]")
     medication = relationship("Medication", back_populates="prescriptions")
 
 class Medication(Base):
@@ -68,38 +74,43 @@ class Medication(Base):
     dollars_per_unit = Column(Float)
 
     prescriptions = relationship("Prescription", back_populates="medication")
+    inventory_updates = relationship("InventoryUpdate", back_populates="medication")
 
 class UserActivity(Base):
     __tablename__ = 'user_activities'
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey('users.id'))
-    activity = Column(String) # login, logout, enter prescription, fill presctiption
+    activity = Column(String)
     timestamp = Column(DateTime, default=func.now())
 
     user = relationship("User", back_populates="user_activities")
+    inventory_updates = relationship("InventoryUpdate", back_populates="user_activity", uselist=False)
 
 class InventoryUpdate(Base):
     __tablename__ = 'inventory_updates'
 
     id = Column(Integer, primary_key=True, index=True)
     medication_id = Column(Integer, ForeignKey('medications.id'))
-    user_id = Column(Integer, ForeignKey('users.id'))
+    user_activity_id = Column(Integer, ForeignKey('user_activities.id'))
+    transaction_id = Column(Integer, ForeignKey('transactions.id'))
+    user_id = Column(Integer, ForeignKey('users.id')) 
     quantity = Column(Integer)
     timestamp = Column(DateTime, default=func.now())
 
     medication = relationship("Medication", back_populates="inventory_updates")
-    user_activity = relationship("UserActivity", back_populates="inventory_updates")
-    transaction = relationship("Transaction", back_populates="inventory_updates")
+    user_activity = relationship("UserActivity", back_populates="inventory_updates")  # Correct the relationship
+    transaction = relationship("Transaction", back_populates="inventory_update")
 
 class Transaction(Base):
     __tablename__ = 'transactions'
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey('users.id'))
+    patient_id = Column(Integer, ForeignKey('patients.id'))
     timestamp = Column(DateTime, default=func.now())
     payment_method = Column(String)
 
-    patients = relationship("Patient", back_populates="transactions")
+    patient = relationship("Patient", back_populates="transactions")
     user = relationship("User", back_populates="transactions")
-    inventory_update = relationship("InventoryUpdate", back_populates="transactions")
+    inventory_update = relationship("InventoryUpdate", back_populates="transaction")  # This should link to the correct attribute

@@ -12,13 +12,13 @@ from passlib.context import CryptContext
 from typing import Optional
 from .database import SessionLocal, engine, Base
 from .schema import UserCreate
-from .models import User  # Import User from models
+from . import models  # Ensure this is the SQLAlchemy model
 from sqlalchemy.orm import Session
-
-app = FastAPI()
 
 # Create the database tables
 Base.metadata.create_all(bind=engine)
+
+app = FastAPI()
 
 # this is to allow our react app to make requests to our fastapi app
 origins = [
@@ -43,7 +43,7 @@ def get_db():
 # POST endpoint to create a user
 @app.post("/users/", response_model=UserCreate)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
-    db_user = User(**user.dict())
+    db_user = models.User(**user.model_dump())
     db.add(db_user)
     db.commit()
     db.refresh(db_user)

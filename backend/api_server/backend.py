@@ -245,12 +245,11 @@ log_config["formatters"]["access"]["fmt"] = "%(asctime)s - %(levelname)s - %(mes
 
 
 
-# #--------- Reset Password ---------
-# @app.post("/resetpassword")
-# def reset_password(password_data: dict = Body(...)):
-#     new_password = password_data.get("password")
+ #--------- Reset Password ---------
+@app.post("/resetpassword")
+def reset_password(password: str):
+    if not password:
+        return {"message": "Password is required"}, 400
     
-#     if not new_password:
-#         return {"message": "Password is required"}, 400
-    
-#     return {"message": "Password has been successfully reset"}
+    #add logic here to hash the password and update it in the database
+    return {"message": "Password has been successfully reset"}

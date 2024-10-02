@@ -1,7 +1,15 @@
+// React imports
 import { React, useRef } from "react";
+
+// Stylesheets
+import "../Styles/styles.css";
+
+// components that we made
 import EditDeleteTable from "../Components/EditDeleteTable";
 import AddEditPatientModal from "../Components/AddEditPatientModal";
 import DeleteModal from "../Components/DeleteModal";
+
+// Material UI and other components
 import Button from "@mui/material/Button";
 
 function ViewOfPatients() {
@@ -9,9 +17,9 @@ function ViewOfPatients() {
 	// headerName is what shows up on the website
 	// width is the default width of the column, user can adjust it
 	const columns = [
-		{ field: "id", headerName: "ID", width: 70 },
-		{ field: "firstName", headerName: "First name", width: 130 },
-		{ field: "lastName", headerName: "Last name", width: 130 },
+		{ field: "id", headerName: "ID", width: 50 },
+		{ field: "firstName", headerName: "First name", width: 90 },
+		{ field: "lastName", headerName: "Last name", width: 110 },
 		// {
 		// 	field: "fullName",
 		// 	headerName: "Full name",
@@ -21,13 +29,13 @@ function ViewOfPatients() {
 		// 	valueGetter: (value, row) =>
 		// 		`${row.firstName || ""} ${row.lastName || ""}`,
 		// },
-		{ field: "dateOfBirth", headerName: "Date of Birth", width: 160 },
+		{ field: "dateOfBirth", headerName: "Date of Birth", width: 100 },
 
 		{
 			field: "age",
 			headerName: "Age",
 			type: "number",
-			width: 90,
+			width: 50,
 			valueGetter: (value, row) => {
 				const today = new Date();
 				const birthDate = new Date(row.dateOfBirth);
@@ -43,19 +51,19 @@ function ViewOfPatients() {
 			},
 		},
 
-		{ field: "address", headerName: "Address", width: 250 },
-		{ field: "phoneNumberStr", headerName: "Phone Number", width: 150 },
-		{ field: "email", headerName: "Email", width: 220 },
-		{ field: "insuranceName", headerName: "Insurance Name", width: 180 },
+		{ field: "address", headerName: "Address", width: 200 },
+		{ field: "phoneNumberStr", headerName: "Phone Number", width: 115 },
+		{ field: "email", headerName: "Email", width: 210 },
+		{ field: "insuranceName", headerName: "Insurance Name", width: 155 },
 		{
 			field: "insuranceGroupNum",
 			headerName: "Insurance Group Number",
-			width: 180,
+			width: 110,
 		},
 		{
 			field: "insuranceMemberID",
 			headerName: "Insurance Member ID",
-			width: 180,
+			width: 110,
 		},
 	];
 
@@ -315,7 +323,7 @@ function ViewOfPatients() {
 	const openAddPatientModal = useRef(null);
 
 	return (
-		<div>
+		<div className="centered-table-view">
 			<h2>Patients Table</h2>
 			<Button
 				variant="contained"
@@ -328,16 +336,18 @@ function ViewOfPatients() {
 				Add Patient
 			</Button>
 
-			<EditDeleteTable
-				rows={rows}
-				columns={columns}
-				editModal={AddEditPatientModal}
-				deleteModal={DeleteModal}
-				customConfirmMessage={patientConfirmMessage}
-				onAdd={(handler) => {
-					openAddPatientModal.current = handler; // Store the open modal handler
-				}}
-			/>
+			<div className="table-div">
+				<EditDeleteTable
+					rows={rows}
+					columns={columns}
+					editModal={AddEditPatientModal}
+					deleteModal={DeleteModal}
+					customConfirmMessage={patientConfirmMessage}
+					onAdd={(handler) => {
+						openAddPatientModal.current = handler; // Store the open modal handler
+					}}
+				/>
+			</div>
 		</div>
 	);
 }

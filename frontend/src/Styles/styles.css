@@ -1,0 +1,23 @@
+/* the div that contains the header, button and all content on the page with a table view */
+/* .centered-table-view {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	/* width: 90vw; */
+/* } */
+
+/* for the div that contains just the complete data table component */
+/* .table-div {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 90vw;
+} */
+
+/* for the actual data table, within the react component */
+/* .data-table-div {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	/* width: 90vw; */
+/* } */

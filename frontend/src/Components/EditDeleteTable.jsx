@@ -1,11 +1,19 @@
 // a component for a table, built off of BaseTable, with the action column having a button to edit and a button to delete
 // handles stuff with open and closing the modals (popups) for these actions
 
+// React imports
 import { React, useState } from "react";
+
+// Stylesheets
+import "../Styles/styles.css";
+
+// Components we made
+import BaseTable from "./BaseTable";
+
+// Material UI components
 import { IconButton, Tooltip } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import BaseTable from "./BaseTable";
 
 const EditDeleteTable = ({
 	rows,
@@ -62,11 +70,14 @@ const EditDeleteTable = ({
 
 	return (
 		<>
-			<BaseTable
-				columns={columns}
-				rows={rows}
-				actionButtons={actionButtons}
-			/>
+			<div className="data-table-div">
+				<BaseTable
+					columns={columns}
+					rows={rows}
+					actionButtons={actionButtons}
+					className="data-table"
+				/>
+			</div>
 
 			{/* Edit Modal */}
 			<EditModal

@@ -1,13 +1,18 @@
+// React imports
 import { React, useRef } from "react";
 
+// Stylesheets
+import "../Styles/styles.css";
+
+// Components we made
 import Header from "../Components/Header";
 import EditDeleteTable from "../Components/EditDeleteTable";
 import AddEditMedicationModal from "../Components/AddEditMedicationModal";
 import DeleteModal from "../Components/DeleteModal";
 
+// Material UI components
 import { IconButton, Tooltip } from "@mui/material";
 import Button from "@mui/material/Button";
-
 import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import WarningIcon from "@mui/icons-material/Warning";

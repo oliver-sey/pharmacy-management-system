@@ -1,7 +1,14 @@
+// React imports
 import React from "react";
-import BaseTable from "../Components/BaseTable";
-import { IconButton } from "@mui/material";
 
+// Stylesheets
+import "../Styles/styles.css";
+
+// COmponents we made
+import BaseTable from "../Components/BaseTable";
+
+// Material UI components
+import { IconButton } from "@mui/material";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 
 function ViewOfUsers() {
@@ -176,7 +183,7 @@ function ViewOfUsers() {
 		row.isLockedOut == "true" && (
 			<div>
 				<IconButton
-				// TODO: do something when they click the button!
+					// TODO: do something when they click the button!
 					onClick={() => console.log("Unlocking:", row.id)}
 					disabled={!row.isLockedOut} // Disable if already unlocked
 				>

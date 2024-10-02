@@ -7,6 +7,15 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str
     is_locked_out: bool = True
+
+class UserResponse(BaseModel):
+    id: int
+    user_type: str
+    email: str
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
     
 class EmployeeResponse(BaseModel):
     id: int

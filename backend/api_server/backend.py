@@ -11,9 +11,10 @@ from pydantic import BaseModel
 from passlib.context import CryptContext
 from typing import Optional
 from .database import SessionLocal, engine, Base
-from .schema import UserCreate
+from .schema import UserCreate, UserResponse, UserLogin
 from . import models  # Ensure this is the SQLAlchemy model
 from sqlalchemy.orm import Session
+from typing import List
 
 # Create the database tables
 Base.metadata.create_all(bind=engine)
@@ -40,22 +41,77 @@ def get_db():
     finally:
         db.close()
 
+#for password hashing
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 # POST endpoint to create a user
-@app.post("/users/", response_model=UserCreate)
+@app.post("/users/", response_model=UserResponse)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
-    db_user = models.User(**user.model_dump())
+    hashed_password = pwd_context.hash(user.password)
+    user_data = user.model_dump()  # Get user data as dict
+    user_data['password'] = hashed_password  # Set the hashed password
+    db_user = models.User(**user_data)  # Now unpack user_data
+
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
     return db_user
 
+@app.get("/users/{user_id}", response_model=UserResponse)
+def get_user(user_id: int, db: Session = Depends(get_db)):
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return db_user
+
+@app.delete("/users/{user_id}", response_model=UserResponse)
+def delete_user(user_id: int, db: Session = Depends(get_db)):
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    db.delete(db_user)
+    db.commit()
+    return db_user
+
+@app.put("/users/{user_id}", response_model=UserResponse)
+def update_user(user_id: int, user: UserCreate, db: Session = Depends(get_db)):
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Update the fields you want to change
+    for key, value in user.model_dump().items():
+        setattr(db_user, key, value)
+
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+
+@app.post("/login")
+def user_login(user: UserLogin, db: Session = Depends(get_db)):
+    db_user = db.query(models.User).filter(models.User.email == user.email).first()
+    if not db_user or not pwd_context.verify(user.password, db_user.password):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+
+    # Return a token or user data
+    return {"message": "Login successful", "user_id": db_user.id}
+
+@app.get("/userslist/", response_model=List[UserResponse])
+def list_users(db: Session = Depends(get_db)):
+    # Query all users from the database
+    users = db.query(models.User).all()
+    
+    return users
 
 #-----authentication values-------
 SECRET_KEY = "90FA9871DC0E001369671A27F90A0213"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 #------authentication classes------
 

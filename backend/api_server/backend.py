@@ -43,6 +43,10 @@ def get_db():
 # POST endpoint to create a user
 @app.post("/users/", response_model=UserCreate)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
+    # check db for existing user
+    db_user = db.query(models.User).filter(models.User.email == user.email).first()
+    if db_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
     db_user = models.User(**user.model_dump())
     db.add(db_user)
     db.commit()

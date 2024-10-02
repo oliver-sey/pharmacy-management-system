@@ -14,12 +14,19 @@ const ResetPassword = () => {
     }
 
     try {
+      const token = localStorage.getItem('token');
+      console.log(`Token sent to backend: ${token}`);  // Ensure token is stored somewhere accessible like localStorage
+      if (!token) {
+          throw new Error('No token found. Please log in.');
+      }
+
       const response = await fetch(`http://localhost:8000/resetpassword`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ newPassword: password }),
       });
 
       const data = await response.json();

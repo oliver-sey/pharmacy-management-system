@@ -9,11 +9,16 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from passlib.context import CryptContext
-from sqlalchemy import create_engine
 from typing import Optional
-
+from .database import SessionLocal, engine, Base
+from .schema import UserCreate
+from .models import User  # Import User from models
+from sqlalchemy.orm import Session
 
 app = FastAPI()
+
+# Create the database tables
+Base.metadata.create_all(bind=engine)
 
 # this is to allow our react app to make requests to our fastapi app
 origins = [
@@ -21,8 +26,29 @@ origins = [
 ]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["http://localhost:3000"],  # Allow your frontend URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
+
+# Dependency to get the database session
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+# POST endpoint to create a user
+@app.post("/users/", response_model=UserCreate)
+def create_user(user: UserCreate, db: Session = Depends(get_db)):
+    db_user = User(**user.dict())
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
 
 #-----authentication values-------
 SECRET_KEY = "90FA9871DC0E001369671A27F90A0213"
@@ -186,10 +212,6 @@ async def read_own_items(
     return [{"item_id": "Foo", "owner": current_user.username}]
 
 
-# Create a database session dependency
-DATABASE_URL = "postgresql://user:password@postgres/mydatabase"
-
-engine = create_engine(DATABASE_URL)
 # test endpoint
 @app.get("/test") # this is a decorator that tells fastapi to run the function below when a GET request is made to http://localhost:8000/test
 def read_root():

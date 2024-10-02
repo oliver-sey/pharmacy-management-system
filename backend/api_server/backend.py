@@ -244,7 +244,7 @@ def delete_user(user_id: int):
 @app.get("/get/patient/{patient_id}")
 def get_patient(patient_id: int):
     # make a call to our future database to get the patient with the given patient_id
-    return {"patient_id": patient_id}
+    return {"patient_id":  patient_id}
 
 @app.post("/post/patient")
 def post_patient(patient: dict):

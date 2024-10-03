@@ -11,7 +11,7 @@ from pydantic import BaseModel
 from passlib.context import CryptContext
 from typing import Optional
 from .database import SessionLocal, engine, Base
-from .schema import UserCreate, UserResponse, UserLogin
+from .schema import UserCreate, UserResponse, UserLogin, UserUpdate
 from . import models  # Ensure this is the SQLAlchemy model
 from sqlalchemy.orm import Session
 from typing import List
@@ -71,19 +71,35 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
     
+    # Check for associated prescriptions
+    prescriptions_count = db.query(models.Prescription).filter(
+        (models.Prescription.user_entered_id == user_id) | 
+        (models.Prescription.user_filled_id == user_id)
+    ).count()
+
+    if prescriptions_count > 0:
+        raise HTTPException(status_code=400, detail="User cannot be deleted while having prescriptions")
+
+
     db.delete(db_user)
     db.commit()
-    return db_user
+    return {"message": "User deleted successfully", "user_id": user_id}
 
 @app.put("/users/{user_id}", response_model=UserResponse)
-def update_user(user_id: int, user: UserCreate, db: Session = Depends(get_db)):
+def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db)):
     db_user = db.query(models.User).filter(models.User.id == user_id).first()
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
     
-    # Update the fields you want to change
-    for key, value in user.model_dump().items():
-        setattr(db_user, key, value)
+        # Update only provided fields
+    if user.user_type is not None:
+        db_user.user_type = user.user_type
+    if user.email is not None:
+        db_user.email = user.email
+    if user.password is not None:
+        db_user.password = pwd_context.hash(user.password)  # Hashing the password if provided
+    if user.is_locked_out is not None:
+        db_user.is_locked_out = user.is_locked_out
 
     db.commit()
     db.refresh(db_user)
@@ -275,25 +291,7 @@ def read_root():
 
 #-------USER CRUD OPERATIONS---------
 
-@app.get("/get/user/{user_id}")
-def get_user(user_id: int):
-    # make a call to our future database to get the user with the given user_id
-    return {"user_id": user_id}
 
-@app.post("/post/user")
-def post_user(user: dict):
-    # make a call to our future database to add the user to the database
-    return user
-
-@app.put("/put/user/{user_id}")
-def put_user(user_id: int, user: dict):
-    # make a call to our future database to update the user with the given user_id
-    return user
-
-@app.delete("/delete/user/{user_id}")
-def delete_user(user_id: int):
-    # make a call to our future database to delete the user with the given user_id
-    return {"user_id": user_id}
 
 ##--------PATIENT CRUD OPERATIONS--------
 

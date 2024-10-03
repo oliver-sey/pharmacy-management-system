@@ -44,6 +44,18 @@ def get_db():
 #for password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+# for create_access_token
+def create_access_token(data: dict, expires_delta: timedelta = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+
 # POST endpoint to create a user
 @app.post("/users/", response_model=UserResponse)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
@@ -112,8 +124,10 @@ def user_login(user: UserLogin, db: Session = Depends(get_db)):
     if not db_user or not pwd_context.verify(user.password, db_user.password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
-    # Return a token or user data
-    return {"message": "Login successful", "user_id": db_user.id}
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(data={"sub": db_user.email}, expires_delta=access_token_expires)
+
+    return {"message": "Login successful", "user_id": db_user.id, "token": access_token}
 
 @app.get("/userslist/", response_model=List[UserResponse])
 def list_users(db: Session = Depends(get_db)):

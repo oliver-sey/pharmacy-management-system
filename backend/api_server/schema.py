@@ -1,5 +1,6 @@
 # build a schema using pydantic
 
+from typing import Optional
 from pydantic import BaseModel, EmailStr
 
 class UserCreate(BaseModel):
@@ -7,6 +8,12 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str
     is_locked_out: bool = True
+
+class UserUpdate(BaseModel):
+    user_type: Optional[str] = None
+    email: Optional[EmailStr] = None
+    password: Optional[str] = None
+    is_locked_out: Optional[bool] = True
 
 class UserResponse(BaseModel):
     id: int

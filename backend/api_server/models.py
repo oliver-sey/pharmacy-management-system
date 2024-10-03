@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Float, Boolean
+from sqlalchemy import Column, DateTime, Date, ForeignKey, Integer, String, Float, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -33,7 +33,7 @@ class Patient(Base):
     id = Column(Integer, primary_key=True, index=True)
     first_name = Column(String, index=True)
     last_name = Column(String, index=True)
-    date_of_birth = Column(DateTime)
+    date_of_birth = Column(Date)
     address = Column(String)
     phone_number = Column(String)
     email = Column(String, index=True, unique=True)
@@ -51,7 +51,7 @@ class Prescription(Base):
     patient_id = Column(Integer, ForeignKey('patients.id'))
     user_entered_id = Column(Integer, ForeignKey('users.id'))  # User who typed in the prescription
     user_filled_id = Column(Integer, ForeignKey('users.id'))  # User who filled the prescription
-    date_prescribed = Column(DateTime, default=func.now())
+    date_prescribed = Column(Date, default=func.now())
     filled_timestamp = Column(DateTime, default=func.now())
     medication_id = Column(Integer, ForeignKey('medications.id'))  # Updated to match foreign key reference
     doctor_name = Column(String)
@@ -70,7 +70,7 @@ class Medication(Base):
     dosage = Column(String)
     quantity = Column(Integer)
     prescription_required = Column(Boolean)
-    expiration_date = Column(DateTime)
+    expiration_date = Column(Date)
     dollars_per_unit = Column(Float)
 
     prescriptions = relationship("Prescription", back_populates="medication")
@@ -97,7 +97,7 @@ class InventoryUpdate(Base):
     user_id = Column(Integer, ForeignKey('users.id')) 
     quantity = Column(Integer)
     timestamp = Column(DateTime, default=func.now())
-
+    
     medication = relationship("Medication", back_populates="inventory_updates")
     user_activity = relationship("UserActivity", back_populates="inventory_updates")  # Correct the relationship
     transaction = relationship("Transaction", back_populates="inventory_update")

@@ -10,8 +10,8 @@ function ViewOfEmployees() {
     const openAddEmployeeModal = useRef(null);
 
   // Debugging console logs to check state
-  console.log("isEditOpen:", isEditOpen);
-  console.log("selectedRow:", selectedRow);
+  // console.log("isEditOpen:", isEditOpen);
+  // console.log("selectedRow:", selectedRow);
 
   // Columns for the table
   const columns = [
@@ -32,7 +32,7 @@ function ViewOfEmployees() {
   // Hardcoded employee rows for testing
   const rows = [
     {
-      id: 1, // Add the id field
+      id: 1, 
       employeeId: 1,
       firstName: "John",
       lastName: "Doe",
@@ -41,7 +41,7 @@ function ViewOfEmployees() {
       employeeType: "Pharmacy Manager",
     },
     {
-      id: 2, // Add the id field
+      id: 2, 
       employeeId: 2,
       firstName: "Jane",
       lastName: "Smith",
@@ -50,7 +50,7 @@ function ViewOfEmployees() {
       employeeType: "Pharmacist",
     },
     {
-      id: 3, // Add the id field
+      id: 3,
       employeeId: 3,
       firstName: "Alice",
       lastName: "Johnson",
@@ -59,7 +59,7 @@ function ViewOfEmployees() {
       employeeType: "Pharmacist Technician",
     },
     {
-      id: 4, // Add the id field
+      id: 4,
       employeeId: 4,
       firstName: "Bob",
       lastName: "Lee",

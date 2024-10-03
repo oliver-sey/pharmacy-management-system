@@ -10,7 +10,6 @@ import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
 import ViewOfMedications from './Pages/ViewOfMedications';
 import ResetPassword from './Pages/ResetPassword'
 
-
 function App() {
 
   
@@ -25,7 +24,6 @@ function App() {
           <Route path='/viewofmedications' element={<ViewOfMedications/>}/>
           <Route path='/viewofusers' element={<ViewOfUsers/>}/>
           <Route path='/resetpassword' element ={<ResetPassword/>}/>
-
         </Routes>
       </Router>
     </div>

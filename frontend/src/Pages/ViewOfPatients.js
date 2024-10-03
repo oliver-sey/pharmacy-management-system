@@ -316,29 +316,31 @@ function ViewOfPatients() {
 
 	return (
 		<div>
-			<h2>Patients Table</h2>
+		  <h2>Patients Table</h2>
 			<Button
-				variant="contained"
-				onClick={() => {
-					if (openAddPatientModal.current) {
-						openAddPatientModal.current(); // Trigger modal to open for adding a patient
-					}
-				}}
+			  variant="contained"
+			  onClick={() => {
+				if (openAddPatientModal.current) {
+				  openAddPatientModal.current(); // Trigger modal to open for adding a patient
+				}
+			  }}
 			>
-				Add Patient
+			  Add Patient
 			</Button>
-
-			<EditDeleteTable
-				rows={rows}
-				columns={columns}
-				editModal={AddEditPatientModal}
-				deleteModal={DeleteModal}
-				customConfirmMessage={patientConfirmMessage}
-				onAdd={(handler) => {
-					openAddPatientModal.current = handler; // Store the open modal handler
-				}}
-			/>
+	  
+	  
+		  <EditDeleteTable
+			rows={rows}
+			columns={columns}
+			editModal={AddEditPatientModal}
+			deleteModal={DeleteModal}
+			customConfirmMessage={patientConfirmMessage}
+			onAdd={(handler) => {
+			  openAddPatientModal.current = handler; // Store the open modal handler
+			}}
+		  />
 		</div>
-	);
+	  );
+	  
 }
 export default ViewOfPatients;

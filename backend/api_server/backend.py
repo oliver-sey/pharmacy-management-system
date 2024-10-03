@@ -4,16 +4,17 @@ from typing import Annotated, Union # for definding the types that our functions
 import uvicorn
 import jwt
 from jwt.exceptions import InvalidTokenError
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import Depends, FastAPI, HTTPException, status, Body
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from passlib.context import CryptContext
 from typing import Optional
 from .database import SessionLocal, engine, Base
-from .schema import UserCreate
+from .schema import UserCreate, UserResponse, UserLogin, UserUpdate
 from . import models  # Ensure this is the SQLAlchemy model
 from sqlalchemy.orm import Session
+from typing import List
 
 # Create the database tables
 Base.metadata.create_all(bind=engine)
@@ -40,22 +41,93 @@ def get_db():
     finally:
         db.close()
 
+#for password hashing
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 # POST endpoint to create a user
-@app.post("/users/", response_model=UserCreate)
+@app.post("/users/", response_model=UserResponse)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
-    db_user = models.User(**user.model_dump())
+    hashed_password = pwd_context.hash(user.password)
+    user_data = user.model_dump()  # Get user data as dict
+    user_data['password'] = hashed_password  # Set the hashed password
+    db_user = models.User(**user_data)  # Now unpack user_data
+
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
     return db_user
 
+@app.get("/users/{user_id}", response_model=UserResponse)
+def get_user(user_id: int, db: Session = Depends(get_db)):
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return db_user
+
+@app.delete("/users/{user_id}", response_model=UserResponse)
+def delete_user(user_id: int, db: Session = Depends(get_db)):
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Check for associated prescriptions
+    prescriptions_count = db.query(models.Prescription).filter(
+        (models.Prescription.user_entered_id == user_id) | 
+        (models.Prescription.user_filled_id == user_id)
+    ).count()
+
+    if prescriptions_count > 0:
+        raise HTTPException(status_code=400, detail="User cannot be deleted while having prescriptions")
+
+
+    db.delete(db_user)
+    db.commit()
+    return {"message": "User deleted successfully", "user_id": user_id}
+
+@app.put("/users/{user_id}", response_model=UserResponse)
+def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db)):
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+        # Update only provided fields
+    if user.user_type is not None:
+        db_user.user_type = user.user_type
+    if user.email is not None:
+        db_user.email = user.email
+    if user.password is not None:
+        db_user.password = pwd_context.hash(user.password)  # Hashing the password if provided
+    if user.is_locked_out is not None:
+        db_user.is_locked_out = user.is_locked_out
+
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+
+@app.post("/login")
+def user_login(user: UserLogin, db: Session = Depends(get_db)):
+    db_user = db.query(models.User).filter(models.User.email == user.email).first()
+    if not db_user or not pwd_context.verify(user.password, db_user.password):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+
+    # Return a token or user data
+    return {"message": "Login successful", "user_id": db_user.id}
+
+@app.get("/userslist/", response_model=List[UserResponse])
+def list_users(db: Session = Depends(get_db)):
+    # Query all users from the database
+    users = db.query(models.User).all()
+    
+    return users
 
 #-----authentication values-------
 SECRET_KEY = "90FA9871DC0E001369671A27F90A0213"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 #------authentication classes------
 
@@ -219,32 +291,14 @@ def read_root():
 
 #-------USER CRUD OPERATIONS---------
 
-@app.get("/get/user/{user_id}")
-def get_user(user_id: int):
-    # make a call to our future database to get the user with the given user_id
-    return {"user_id": user_id}
 
-@app.post("/post/user")
-def post_user(user: dict):
-    # make a call to our future database to add the user to the database
-    return user
-
-@app.put("/put/user/{user_id}")
-def put_user(user_id: int, user: dict):
-    # make a call to our future database to update the user with the given user_id
-    return user
-
-@app.delete("/delete/user/{user_id}")
-def delete_user(user_id: int):
-    # make a call to our future database to delete the user with the given user_id
-    return {"user_id": user_id}
 
 ##--------PATIENT CRUD OPERATIONS--------
 
 @app.get("/get/patient/{patient_id}")
 def get_patient(patient_id: int):
     # make a call to our future database to get the patient with the given patient_id
-    return {"patient_id": patient_id}
+    return {"patient_id":  patient_id}
 
 @app.post("/post/patient")
 def post_patient(patient: dict):
@@ -267,12 +321,33 @@ log_config["formatters"]["access"]["fmt"] = "%(asctime)s - %(levelname)s - %(mes
 
 
 
-# #--------- Reset Password ---------
-# @app.post("/resetpassword")
-# def reset_password(password_data: dict = Body(...)):
-#     new_password = password_data.get("password")
+ #--------- Reset Password ---------
+@app.post("/resetpassword")
+async def reset_password(
+    newPassword: Annotated[str, Body(..., embed=True)],
+    currentUser: Annotated[UserInDB, Depends(get_current_active_user)]
+):
+    if not newPassword:
+        raise HTTPException(status_code=400, detail="Password is required")
     
-#     if not new_password:
-#         return {"message": "Password is required"}, 400
+    # Checks that password is valid
+    if len(newPassword) < 8:
+        raise HTTPException(status_code=400, detail="Password must be at least 8 characters long.")
+    if not any(char.isdigit() for char in newPassword):
+        raise HTTPException(status_code=400, detail="Password must contain at least one number.")
+    if not any(char.isupper() for char in newPassword):
+        raise HTTPException(status_code=400, detail="Password must contain at least one uppercase letter.")
+    if not any(char.islower() for char in newPassword):
+        raise HTTPException(status_code=400, detail="Password must contain at least one lowercase letter.")
+    if not any(char in "!@#$%^&*()_+" for char in newPassword):
+        raise HTTPException(status_code=400, detail="Password must contain at least one special character.")
     
-#     return {"message": "Password has been successfully reset"}
+
+    # Hash the new password
+    hashedPassword = get_password_hash(newPassword)
+
+    # Update the user's password in the fake database (in-memory)
+    fake_users_db[currentUser.username]["hashed_password"] = hashedPassword
+
+    return {"message": "Password has been successfully reset."}
+

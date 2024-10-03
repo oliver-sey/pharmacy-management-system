@@ -326,14 +326,14 @@ function ViewOfPatients() {
 		<div className="centered-table-view">
 			<h2>Patients Table</h2>
 			<Button
-				variant="contained"
-				onClick={() => {
-					if (openAddPatientModal.current) {
-						openAddPatientModal.current(); // Trigger modal to open for adding a patient
-					}
-				}}
+			  variant="contained"
+			  onClick={() => {
+				if (openAddPatientModal.current) {
+				  openAddPatientModal.current(); // Trigger modal to open for adding a patient
+				}
+			  }}
 			>
-				Add Patient
+			  Add Patient
 			</Button>
 
 			<div className="table-div">
@@ -349,6 +349,7 @@ function ViewOfPatients() {
 				/>
 			</div>
 		</div>
-	);
+	  );
+	  
 }
 export default ViewOfPatients;

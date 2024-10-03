@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import "../Styles/Login.css";
 
 const LoginComponent = () => {
+	// ***IMPORTANT:*** OAuth requires that the variable be called username, even though here it is an email
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
 
@@ -66,23 +67,17 @@ const LoginComponent = () => {
 
 		setLoading(true);
 
-		// code from Katelyn's page
-		const formDetails = new URLSearchParams();
-		formDetails.append("username", username);
-		formDetails.append("password", password);
-
-		// TODO: get rid of this
-		// wait 1 second
-		// await new Promise((resolve) => setTimeout(resolve, 1000));
-
 		// try a request to the backend
 		try {
-			const response = await fetch("http://localhost:8000/token", {
+			const response = await fetch("http://localhost:8000/login", {
 				method: "POST",
 				headers: {
-					"Content-Type": "application/x-www-form-urlencoded",
+					"Content-Type": "application/json",
 				},
-				body: formDetails,
+				body: JSON.stringify({
+					email: username,
+					password: password,
+				}),
 			});
 
 			// stop loading now that the request is done
@@ -118,24 +113,6 @@ const LoginComponent = () => {
 		updateFailedAttempts(username);
 
 		updateMessageAndLockedOut(username);
-		// moved this to updateMessageAndLockedOut
-		// setAttemptsMessage(
-		// 	"You have " +
-		// 		(maxAttempts - newFailedAttempts) +
-		// 		" incorrect attempts left before your account gets locked."
-		// );
-		// setShowAttemptsMessage(true);
-
-		// reference newFailedAttempts here, since it can take a moment for the new value to get stored in failedAttempts
-		// if (newFailedAttempts >= maxAttempts) {
-		// 	alert(
-		// 		"Your account has been locked. Please contact your pharmacy manager."
-		// 	);
-		// 	setIsLockedOut(true);
-		// 	setAttemptsMessage(
-		// 		"Your account has been locked. Please contact your pharmacy manager."
-		// 	);
-		// }
 	};
 
 	const updateMessageAndLockedOut = (newEmail) => {

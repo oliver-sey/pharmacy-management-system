@@ -1,44 +1,48 @@
-import React, {useState} from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import "../Styles/Login.css"; // import the specific stylesheet for this page;
+import { useNavigate } from "react-router-dom";
+import LoginComponent from "../Components/LoginComponent"
+import "../Styles/Login.css";
 
-import '../Styles/Login.css';
+// ***IMPORTANT:*** OAuth requires that the variable be called username, even though here it is an email
 
 function Login() {
-  const[username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState('');
+	// username is actually an email
+	const [username, setUsername] = useState("");
+	const [password, setPassword] = useState("");
+	const [error, setError] = useState("");
+	const [loading, setLoading] = useState("");
   const [role, setRole] = useState('');
 
-  const navigate = useNavigate();
+	const navigate = useNavigate();
 
-  const validateForm = () => {
-    if (!username || !password) {
-      setError('Username and password are required');
-      return false;
-    }
-    setError('');
-    return true;
-  }
+	const validateForm = () => {
+		if (!username || !password) {
+			setError("Email and password are required");
+			return false;
+		}
+		setError("");
+		return true;
+	};
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    if (!validateForm()) return;
-    setLoading(true);
+	const handleSubmit = async (event) => {
+		event.preventDefault();
+		if (!validateForm()) return;
+		setLoading(true);
 
-    const formDetails = new URLSearchParams();
-    formDetails.append('username', username);
-    formDetails.append('password', password);
+		const formDetails = new URLSearchParams();
+		formDetails.append("username", username);
+		formDetails.append("password", password);
 
-    try {
-      const response = await fetch('/token', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-
-        },
-        body: formDetails,
-      });
+		try {
+			await (1500)
+			const response = await fetch("http://localhost:8000/token", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				body: formDetails,
+			});
 
       setLoading(false);
       
@@ -108,4 +112,4 @@ function Login() {
   )
 }
 
-export default Login
+export default Login;

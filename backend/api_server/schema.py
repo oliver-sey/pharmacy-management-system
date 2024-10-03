@@ -1,17 +1,33 @@
 # build a schema using pydantic
-from pydantic import BaseModel
 
-class Book(BaseModel):
-    title: str
-    rating: int
-    author_id: int
+from typing import Optional
+from pydantic import BaseModel, EmailStr
 
-    class Config:
-        orm_mode = True
+class UserCreate(BaseModel):
+    user_type: str
+    email: EmailStr
+    password: str
+    is_locked_out: bool = True
 
-class Author(BaseModel):
-    name:str
-    age:int
+class UserUpdate(BaseModel):
+    user_type: Optional[str] = None
+    email: Optional[EmailStr] = None
+    password: Optional[str] = None
+    is_locked_out: Optional[bool] = True
+
+class UserResponse(BaseModel):
+    id: int
+    user_type: str
+    email: str
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
+    
+class EmployeeResponse(BaseModel):
+    id: int
+    name: str
+    email: EmailStr
 
     class Config:
         orm_mode = True

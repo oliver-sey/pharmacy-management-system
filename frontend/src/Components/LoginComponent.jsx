@@ -90,7 +90,7 @@ const LoginComponent = () => {
 				// If login is successful, clear failed attempts for this email address
 				resetFailedAttempts(username);
 
-				localStorage.setItem("token", data.access_token);
+				localStorage.setItem("token", data.token);
 				console.log("navigating now");
 				navigate("../protected", { replace: true });
 			}

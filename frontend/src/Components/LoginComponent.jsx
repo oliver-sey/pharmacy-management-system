@@ -95,9 +95,31 @@ const LoginComponent = () => {
 				// If login is successful, clear failed attempts for this email address
 				resetFailedAttempts(username);
 
-				localStorage.setItem("token", data.access_token);
-				console.log("navigating now");
-				navigate("../protected", { replace: true });
+				localStorage.setItem("token", data.token);
+				
+				//fetches information about current user
+				const userResponse = await fetch('http://localhost:8000/currentuser/me', {
+					method: 'GET',
+					headers: {'Authorization': 'Bearer ' + localStorage.getItem('token')}
+		  
+				  })
+		  
+				  if (userResponse.ok) {
+					//stores user info
+					//TO DO: put user info in local storage?
+					const userData = await userResponse.json();
+					setRole(userData.role)
+		  
+					//redirects user to homepage for their role
+					//more can be added as needed
+					if (userData.role === 'manager') {
+					  navigate('../managerhome', {replace: true})
+					} else if (userData.role === 'pharmacist') {
+					  navigate('../pharmacisthome', {replace: true})
+					} else {
+					  navigate('../protected', {replace: true})
+					}
+				}
 			}
 			// login was unsuccessful
 			else {

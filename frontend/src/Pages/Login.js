@@ -120,18 +120,22 @@ function Login() {
 		if (!validateForm()) return;
 		setLoading(true);
 
-		const formDetails = new URLSearchParams();
-		formDetails.append("username", username);
-		formDetails.append("password", password);
+		// const formDetails = new URLSearchParams();
+		// formDetails.append("username", username);
+		// formDetails.append("password", password);
 
 		try {
 			//checks if the username and password are in the DB and grants a token if so
-			const response = await fetch("http://localhost:8000/token", {
+			const response = await fetch("http://localhost:8000/login", {
 				method: "POST",
 				headers: {
-					"Content-Type": "application/x-www-form-urlencoded",
+					"Content-Type": "application/json",
 				},
-				body: formDetails,
+				// body: formDetails,
+				body: JSON.stringify({
+					"email" : username,
+					"password" : password
+				}),
 			});
 
       setLoading(false);

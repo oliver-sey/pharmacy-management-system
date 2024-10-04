@@ -178,6 +178,7 @@ class TokenData(BaseModel):
 
 class User(BaseModel):
     username: Optional[str] = None
+    role: Optional[str] = None
     full_name: Optional[str] = None
     disabled: Optional[bool] = None
 
@@ -197,6 +198,7 @@ def get_password_hash(password):
 def get_user_auth(db, username: str):
     if username in db:
         user_dict = db[username]
+        
         return UserInDB(**user_dict)
 
 
@@ -243,13 +245,17 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
+            
             raise credentials_exception
         token_data = TokenData(username=username)
     except InvalidTokenError:
+        
         raise credentials_exception
     user = get_user_auth(fake_users_db, username=token_data.username)
     if user is None:
+        
         raise credentials_exception
+    
     return user
 
 
@@ -284,7 +290,7 @@ async def verify_user_token(token: str):
     verify_token(token=token)
     return {'message': 'Token is valid.'}
 
-@app.get("/users/me/", response_model=User)
+@app.get("/currentuser/me/", response_model=User)
 async def read_users_me(
     current_user: Annotated[User, Depends(get_current_active_user)],
 ):

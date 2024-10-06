@@ -46,19 +46,21 @@ const EditDeleteTable = ({
 
 	// Define the action buttons for each row
 	const actionButtons = (row) => (
-		<>
-			<Tooltip id="edit" title="Edit">
-				<IconButton onClick={() => openEditModal(row)}>
-					<EditIcon color="primary" />
-				</IconButton>
-			</Tooltip>
-			<Tooltip id="delete" title="Delete">
-				<IconButton onClick={() => openDeleteModal(row)}>
-					<DeleteIcon color="error" />
-				</IconButton>
-			</Tooltip>
-		</>
-	);
+		<div style={{ display: 'flex', width: '100%' }}>
+		  <Tooltip id="edit" title="Edit" style={{ flex: 1 }}>
+			<IconButton onClick={() => openEditModal(row)} style={{ width: 'auto' }}>
+			  <EditIcon color="primary" />
+			</IconButton>
+		  </Tooltip>
+		  <Tooltip id="delete" title="Delete" style={{ flex: 1 }}>
+			<IconButton onClick={() => openDeleteModal(row)} style={{ width: 'auto' }}>
+			  <DeleteIcon color="error" />
+			</IconButton>
+		  </Tooltip>
+		</div>
+	  );
+	  
+	  
 
 	return (
 		<>
@@ -67,7 +69,6 @@ const EditDeleteTable = ({
 				rows={rows}
 				actionButtons={actionButtons}
 			/>
-
 			{/* Edit Modal */}
 			<EditModal
 				open={isEditOpen}
@@ -78,7 +79,6 @@ const EditDeleteTable = ({
 					closeEditModal();
 				}}
 			/>
-
 			{/* Delete Modal */}
 			<DeleteModal
 				open={isDeleteOpen}

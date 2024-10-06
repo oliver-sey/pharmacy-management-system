@@ -11,7 +11,7 @@ from pydantic import BaseModel
 from passlib.context import CryptContext
 from typing import Optional
 from .database import SessionLocal, engine, Base
-from .schema import UserCreate, UserResponse, UserLogin, UserUpdate
+from .schema import UserCreate, UserResponse, UserLogin, UserUpdate, PatientCreate, PatientUpdate, PatientResponse
 from . import models  # Ensure this is the SQLAlchemy model
 from sqlalchemy.orm import Session
 from typing import List
@@ -320,10 +320,25 @@ def get_patient(patient_id: int):
     # make a call to our future database to get the patient with the given patient_id
     return {"patient_id":  patient_id}
 
+@app.get("/patients", response_model=List[PatientResponse])
+def get_patients(db: Session = Depends(get_db)):
+    patients = db.query(models.Patient).all()
+    # fix the date_of_birth to be a string
+    patients = [PatientResponse.from_orm(patient) for patient in patients]
+    return patients
+
 @app.post("/post/patient")
-def post_patient(patient: dict):
-    # make a call to our future database to add the patient to the database
-    return patient
+def create_patient(patient: PatientResponse, db: Session = Depends(get_db)):
+    patient_data = patient.model_dump()
+    email = patient_data['email']
+    if db.query(models.Patient).filter(models.Patient.email == email).first():
+        raise HTTPException(status_code=400, detail="Email already registered")
+    else:
+        db_patient = models.Patient(**patient_data)
+        db.add(db_patient)
+        db.commit()
+        db.refresh(db_patient)
+        return db_patient
 
 @app.put("/put/patient/{patient_id}")
 def put_patient(patient_id: int, patient: dict):

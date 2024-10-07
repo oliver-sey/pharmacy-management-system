@@ -158,6 +158,7 @@ function Login() {
           //stores user info
           //TO DO: put user info in local storage?
           const userData = await userResponse.json();
+          localStorage.setItem('role', userData.user_type)
           
 
           //redirects user to homepage for their role

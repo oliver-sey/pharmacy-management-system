@@ -3,7 +3,8 @@
 
 -- to delete all the rows out of the table
 -- TRUNCATE TABLE medications;
-ID	name	dosage	quantity	prescription_required	expiration_date	dollars_per_unit
+-- columns: id, name, dosage, quantity, prescription_required, expiration_date, dollars_per_unit
+
 INSERT INTO medications(id, name, dosage, quantity, prescription_required, expiration_date, dollars_per_unit) VALUES(1, 'Ibuprofen', '200mg', 500, FALSE, '2025-05-10', 0.1);
 INSERT INTO medications(id, name, dosage, quantity, prescription_required, expiration_date, dollars_per_unit) VALUES(2, 'Amoxicillin', '500mg', 200, TRUE, '2024-12-01', 2);
 INSERT INTO medications(id, name, dosage, quantity, prescription_required, expiration_date, dollars_per_unit) VALUES(3, 'Lipitor', '20mg', 300, TRUE, '2026-03-15', 0.75);

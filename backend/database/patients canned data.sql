@@ -4,7 +4,7 @@
 -- to delete all the rows out of the table
 -- TRUNCATE TABLE transactions;
 
-id	first_name	last_name	date_of_birth	address	phone_number	email	insurance_name	insurance_group_num	insurance_member_id
+-- columns: id, first_name, last_name, date_of_birth, address, phone_number, email, insurance_name, insurance_group_num, insurance_member_id
 
 
 INSERT INTO patients(1, 'John', 'Doe', '1985-04-12',	'123 Main St', '123-456-7890', 'john.doe@randommail.com', 'HealthCarePlus', 12345, 'MEM10001');

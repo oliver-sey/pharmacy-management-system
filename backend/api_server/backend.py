@@ -44,6 +44,18 @@ def get_db():
 #for password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+# for create_access_token
+def create_access_token(data: dict, expires_delta: timedelta = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+
 # POST endpoint to create a user
 @app.post("/users/", response_model=UserResponse)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
@@ -112,8 +124,10 @@ def user_login(user: UserLogin, db: Session = Depends(get_db)):
     if not db_user or not pwd_context.verify(user.password, db_user.password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
-    # Return a token or user data
-    return {"message": "Login successful", "user_id": db_user.id}
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(data={"sub": db_user.email}, expires_delta=access_token_expires)
+
+    return {"message": "Login successful", "user_id": db_user.id, "token": access_token}
 
 @app.get("/userslist/", response_model=List[UserResponse])
 def list_users(db: Session = Depends(get_db)):
@@ -162,15 +176,14 @@ class TokenData(BaseModel):
     username: Optional[str] = None
 
 
-class User(BaseModel):
-    username: Optional[str] = None
-    role: Optional[str] = None
-    full_name: Optional[str] = None
-    disabled: Optional[bool] = None
+class UserToReturn(BaseModel):
+    id: Optional[int] = None
+    email: Optional[str] = None
+    user_type: Optional[str] = None
 
 
-class UserInDB(User):
-    hashed_password: str
+# class UserInDB(models.User):
+#     hashed_password: str
 
 #-------authentication functions---------
 def verify_password(plain_password, hashed_password):
@@ -181,22 +194,22 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 
-def get_user_auth(db, username: str):
-    if username in db:
-        user_dict = db[username]
-        
-        return UserInDB(**user_dict)
+# def get_user_auth(username: str, db: Session = Depends(get_db)):
+#     db_user = db.query(models.User).filter(models.User.email == username).first()
+    
+#     return db_user
 
 
-def authenticate_user(fake_db, username: str, password: str):
-    user = get_user_auth(fake_db, username)
-    if not user:
-        return False
+# def authenticate_user(db, username: str, password: str):
+#     user = db.query(models.User).filter(models.User.email == username).first()
+
+#     if not user:
+#         return False
         
-    if not verify_password(password, user.hashed_password):
-        return False
+#     if not verify_password(password, user.password):
+#         return False
         
-    return user
+#     return user
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
@@ -221,7 +234,8 @@ def verify_token(token: Annotated[str, Depends(oauth2_scheme)]):
         raise HTTPException(status_code=403, detail="Token is invalid or expired")
 
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)],
+                            db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -237,29 +251,56 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     except InvalidTokenError:
         
         raise credentials_exception
-    user = get_user_auth(fake_users_db, username=token_data.username)
+    user = db.query(models.User).filter(models.User.email == token_data.username).first()
+    current_user = UserToReturn(id=user.id, email=user.email, user_type=user.user_type)
     if user is None:
         
         raise credentials_exception
     
-    return user
-
-
-async def get_current_active_user(
-    current_user: Annotated[User, Depends(get_current_user)],
-):
-    if current_user.disabled:
-        raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
 
+
+# async def get_current_active_user(
+#     current_user: Annotated[models.User, Depends(get_current_user)],
+# ):
+#     if current_user.disabled:
+#         raise HTTPException(status_code=400, detail="Inactive user")
+#     return current_user
+
 #-------user authentication calls-------
+# @app.post("/token_no_DB")
+# async def login_for_access_token(
+#     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    
+# ) -> Token:
+    
+#     user = authenticate_user(fake_users_db, form_data.username, form_data.password)
+#     if not user:
+#         raise HTTPException(
+#             status_code=status.HTTP_401_UNAUTHORIZED,
+#             detail="Incorrect username or password",
+#             headers={"WWW-Authenticate": "Bearer"},
+#         )
+#     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+#     access_token = create_access_token(
+#         data={"sub": user.username}, expires_delta=access_token_expires
+#     )
+#     return Token(access_token=access_token, token_type="bearer")
 
 @app.post("/token")
 async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    db: Session = Depends(get_db)
 ) -> Token:
-    user = authenticate_user(fake_users_db, form_data.username, form_data.password)
+    
+    user = db.query(models.User).filter(models.User.email == form_data.username).first()
     if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    elif not verify_password(form_data.password, user.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
@@ -267,7 +308,7 @@ async def login_for_access_token(
         )
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
+        data={"sub": user.email}, expires_delta=access_token_expires
     )
     return Token(access_token=access_token, token_type="bearer")
 
@@ -276,18 +317,18 @@ async def verify_user_token(token: str):
     verify_token(token=token)
     return {'message': 'Token is valid.'}
 
-@app.get("/currentuser/me/", response_model=User)
+@app.get("/currentuser/me/", response_model=UserToReturn)
 async def read_users_me(
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    current_user:  Annotated[UserToReturn ,Depends(get_current_user)],
 ):
     return current_user
 
 
 @app.get("/users/me/items/")
 async def read_own_items(
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    current_user: Annotated[UserToReturn, Depends(get_current_user)],
 ):
-    return [{"item_id": "Foo", "owner": current_user.username}]
+    return [{"item_id": "Foo", "owner": current_user.email}]
 
 
 # test endpoint
@@ -328,32 +369,32 @@ log_config["formatters"]["access"]["fmt"] = "%(asctime)s - %(levelname)s - %(mes
 
 
  #--------- Reset Password ---------
-@app.post("/resetpassword")
-async def reset_password(
-    newPassword: Annotated[str, Body(..., embed=True)],
-    currentUser: Annotated[UserInDB, Depends(get_current_active_user)]
-):
-    if not newPassword:
-        raise HTTPException(status_code=400, detail="Password is required")
+# @app.post("/resetpassword")
+# async def reset_password(
+#     newPassword: Annotated[str, Body(..., embed=True)],
+#     currentUser: Annotated[UserInDB, Depends(get_current_user)]
+# ):
+#     if not newPassword:
+#         raise HTTPException(status_code=400, detail="Password is required")
     
-    # Checks that password is valid
-    if len(newPassword) < 8:
-        raise HTTPException(status_code=400, detail="Password must be at least 8 characters long.")
-    if not any(char.isdigit() for char in newPassword):
-        raise HTTPException(status_code=400, detail="Password must contain at least one number.")
-    if not any(char.isupper() for char in newPassword):
-        raise HTTPException(status_code=400, detail="Password must contain at least one uppercase letter.")
-    if not any(char.islower() for char in newPassword):
-        raise HTTPException(status_code=400, detail="Password must contain at least one lowercase letter.")
-    if not any(char in "!@#$%^&*()_+" for char in newPassword):
-        raise HTTPException(status_code=400, detail="Password must contain at least one special character.")
+#     # Checks that password is valid
+#     if len(newPassword) < 8:
+#         raise HTTPException(status_code=400, detail="Password must be at least 8 characters long.")
+#     if not any(char.isdigit() for char in newPassword):
+#         raise HTTPException(status_code=400, detail="Password must contain at least one number.")
+#     if not any(char.isupper() for char in newPassword):
+#         raise HTTPException(status_code=400, detail="Password must contain at least one uppercase letter.")
+#     if not any(char.islower() for char in newPassword):
+#         raise HTTPException(status_code=400, detail="Password must contain at least one lowercase letter.")
+#     if not any(char in "!@#$%^&*()_+" for char in newPassword):
+#         raise HTTPException(status_code=400, detail="Password must contain at least one special character.")
     
 
-    # Hash the new password
-    hashedPassword = get_password_hash(newPassword)
+#     # Hash the new password
+#     hashedPassword = get_password_hash(newPassword)
 
-    # Update the user's password in the fake database (in-memory)
-    fake_users_db[currentUser.username]["hashed_password"] = hashedPassword
+#     # Update the user's password in the fake database (in-memory)
+#     fake_users_db[currentUser.username]["hashed_password"] = hashedPassword
 
-    return {"message": "Password has been successfully reset."}
+#     return {"message": "Password has been successfully reset."}
 

@@ -6,6 +6,7 @@ import "../Styles/Login.css";
 const LoginComponent = () => {
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
+	const [role, setRole] = useState("");
 
 	const [emailError, setEmailError] = useState("");
 	const [passwordError, setPasswordError] = useState("");

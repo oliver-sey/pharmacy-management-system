@@ -1,44 +1,17 @@
 import React, {useEffect, useState} from 'react'
-import { useNavigate } from 'react-router-dom'
+import CheckUserType from '../Functions/CheckUserType';
+import { useNavigate } from 'react-router-dom';
 
 function PharmacistHome() {
+    const navigate = useNavigate();
 
-  const navigate = useNavigate();
-    
+    //Change this variable based on what type of user the page is for
+    const role = "pharmacist"
+
     useEffect(() => {
-        const verifyToken = async () => {
-            const token = localStorage.getItem('token');
-            console.log("hello world " + token)
-            try {
-                const response = await fetch('http://localhost:8000/verify-token/' + token);
+        CheckUserType(role, navigate);
 
-                if (!response.ok) {
-                    throw new Error('Token verification failed.');
-                }
-
-                const userResponse = await fetch('http://localhost:8000/currentuser/me', {
-                  method: 'GET',
-                  headers: {'Authorization': 'Bearer ' + token}
-        
-                })
-        
-                if (userResponse.ok) {
-                  const userData = await userResponse.json();
-                  
-        
-                  if (userData.role !== 'pharmacist') {
-                    navigate('../', {replace: true})
-                  } 
-                }
-                
-            } catch (error) {
-                    localStorage.removeItem('token');
-                    navigate('/');
-            }
-        };
-        verifyToken();
-
-    }, [navigate]);
+    }, [role, navigate]);
 
 
   return (

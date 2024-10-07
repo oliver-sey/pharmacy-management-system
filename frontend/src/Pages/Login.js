@@ -64,13 +64,13 @@ function Login() {
           //stores user info
           //TO DO: put user info in local storage?
           const userData = await userResponse.json();
-          setRole(userData.role)
+          setRole(userData.user_type)
 
           //redirects user to homepage for their role
           //more can be added as needed
-          if (userData.role === 'manager') {
+          if (userData.user_type === 'manager') {
             navigate('../managerhome', {replace: true})
-          } else if (userData.role === 'pharmacist') {
+          } else if (userData.user_type === 'pharmacist') {
             navigate('../pharmacisthome', {replace: true})
           } else {
             navigate('../protected', {replace: true})

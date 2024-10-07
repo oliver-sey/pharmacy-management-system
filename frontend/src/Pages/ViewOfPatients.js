@@ -10,23 +10,25 @@ function ViewOfPatients() {
 	// headerName is what shows up on the website
 	// width is the default width of the column, user can adjust it
 	const [rows, setRows] = useState([]);
+
+	// Async function to fetch patients data
+	const fetchPatients = async () => {
+		try {
+		  const response = await fetch('http://localhost:8000/patients');
+		  const data = await response.json(); // Convert response to JSON
+		  setRows(data); // Update rows state with fetched data
+		} catch (error) {
+		  console.error('Error fetching patients:', error);
+		}
+	}; 
+
 	// useEffect to fetch data when the component mounts
 	useEffect(() => {
-		// Async function to fetch patients data
-		const fetchPatients = async () => {
-		  try {
-			const response = await fetch('http://localhost:8000/patients');
-			const data = await response.json(); // Convert response to JSON
-			setRows(data); // Update rows state with fetched data
-		  } catch (error) {
-			console.error('Error fetching patients:', error);
-		  }
-		};
-	
 		fetchPatients(); // Call the async function
 	  }, []); // Empty array means this effect runs once when the component mounts
 
 	  const columns = [
+		{ field: 'id', headerName: 'ID' },
 		{ field: 'first_name', headerName: 'First Name' },
 		{ field: 'last_name', headerName: 'Last Name' },
 		{ field: 'date_of_birth', headerName: 'Date of Birth' },
@@ -38,13 +40,27 @@ function ViewOfPatients() {
 		{ field: 'insurance_member_id', headerName: 'Member ID' }
 	  ];
 	
+	const deletePatient = async (id) => {
+		try {
+			console.log("row haha i dont need to docker compose up again", id);
+			const response = await fetch(`http://localhost:8000/patient/${id}`, {
+				method: 'DELETE',
+			});
+			if (!response.ok) {
+				throw new Error('Failed to delete patient');
+			}
+			fetchPatients();
+		} catch (error) {
+			console.error('Error deleting patient:', error);
+		}
+	}
 
 	// the message format that should get used in the delete confirmation modal (popup) for this table
 	// need this since we want a different format on other tables that use this same base component
 	const patientConfirmMessage = (row) =>
-		`${row?.firstName || "Unknown First Name"} ${
-			row?.lastName || "Unknown Last Name"
-		}, with DOB ${row?.dateOfBirth || "Unknown DOB"}`;
+		`${row?.first_name || "Unknown First Name"} ${
+			row?.last_name || "Unknown Last Name"
+		}, with DOB ${row?.date_of_birth || "Unknown DOB"}`;
 
 	const openAddPatientModal = useRef(null);
 
@@ -62,7 +78,6 @@ function ViewOfPatients() {
 			  Add Patient
 			</Button>
 	  
-	  
 		  <EditDeleteTable
 			rows={rows}
 			columns={columns}
@@ -72,6 +87,7 @@ function ViewOfPatients() {
 			onAdd={(handler) => {
 			  openAddPatientModal.current = handler; // Store the open modal handler
 			}}
+			onConfirmDelete={deletePatient}
 		  />
 		</div>
 	  );

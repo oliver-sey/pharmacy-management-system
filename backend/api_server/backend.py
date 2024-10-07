@@ -327,8 +327,8 @@ def get_patients(db: Session = Depends(get_db)):
     patients = [PatientResponse.from_orm(patient) for patient in patients]
     return patients
 
-@app.post("/post/patient")
-def create_patient(patient: PatientResponse, db: Session = Depends(get_db)):
+@app.post("/patient")
+def create_patient(patient: PatientCreate, db: Session = Depends(get_db)):
     patient_data = patient.model_dump()
     email = patient_data['email']
     if db.query(models.Patient).filter(models.Patient.email == email).first():
@@ -345,10 +345,18 @@ def put_patient(patient_id: int, patient: dict):
     # make a call to our future database to update the patient with the given patient_id
     return patient
 
-@app.delete("/delete/patient/{patient_id}")
-def delete_patient(patient_id: int):
+@app.delete("/patient/{pid}")
+def delete_patient(pid: int, db: Session = Depends(get_db)):
     # make a call to our future database to delete the patient with the given patient_id
-    return {"patient_id": patient_id}
+    patient = db.query(models.Patient).filter(models.Patient.id == pid).first()
+    print(f"patient: {patient}")
+    db.query(models.Prescription).filter(models.Prescription.patient_id == pid).update({models.Prescription.patient_id: None})
+    
+    if patient is None:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    db.delete(patient)
+    db.commit()
+    return {"patient_id": pid}
 
 #--------Logging configurations---------
 log_config = uvicorn.config.LOGGING_CONFIG

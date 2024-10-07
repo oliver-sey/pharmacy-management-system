@@ -13,11 +13,13 @@ const EditDeleteTable = ({
 	editModal: EditModal,
 	deleteModal: DeleteModal,
 	onAdd,
-	customConfirmMessage,
+	onConfirmDelete,
+	customConfirmMessage
 }) => {
 	const [isEditOpen, setEditOpen] = useState(false);
 	const [isDeleteOpen, setDeleteOpen] = useState(false);
 	const [selectedRow, setSelectedRow] = useState(null);
+	// const [deleteMethod, setDeleteMethod] = useState(null);
 
 	// Open/Close handlers
 	const openEditModal = (row) => {
@@ -58,9 +60,7 @@ const EditDeleteTable = ({
 			</IconButton>
 		  </Tooltip>
 		</div>
-	  );
-	  
-	  
+	  );  
 
 	return (
 		<>
@@ -84,11 +84,8 @@ const EditDeleteTable = ({
 				open={isDeleteOpen}
 				onClose={closeDeleteModal}
 				customMessage={getConfirmMessage(selectedRow)}
-				onConfirmDelete={() => {
-					// TODO: Handle delete logic here
-					console.log(`Deleting ${getConfirmMessage(selectedRow)}`);
-					closeDeleteModal();
-				}}
+				onConfirmDelete={onConfirmDelete}
+				itemID={selectedRow?.id}
 			/>
 		</>
 	);

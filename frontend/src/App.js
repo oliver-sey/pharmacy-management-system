@@ -9,6 +9,8 @@ import ViewOfUsers from './Pages/ViewOfUsers';
 import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
 import ViewOfMedications from './Pages/ViewOfMedications';
 import ResetPassword from './Pages/ResetPassword'
+import PharmTechHome from './Pages/PharmTechHome';
+import CashierHome from './Pages/CashierHome';
 
 function App() {
 
@@ -21,6 +23,8 @@ function App() {
           <Route exact path='/managerhome' element={<ManagerHome/>}/>
           <Route exact path='/pharmacisthome' element={<PharmacistHome/>}/>
           <Route exact path="/protected" element={<GeneralProtected/>}/>
+          <Route exact path='/PharmTechHome' element={<PharmTechHome/>}/>
+          <Route exact path='/CashierHome' element={<CashierHome/>}/>
           <Route exact path="/" element={<Login/>}/>
           <Route path='/viewofpatients' element={<ViewOfPatients/>}/>
           <Route path='/viewofmedications' element={<ViewOfMedications/>}/>

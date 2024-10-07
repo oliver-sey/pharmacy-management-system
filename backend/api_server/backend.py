@@ -182,8 +182,8 @@ class UserToReturn(BaseModel):
     user_type: Optional[str] = None
 
 
-# class UserInDB(models.User):
-#     hashed_password: str
+class UserInDB(BaseModel):
+     hashed_password: str
 
 #-------authentication functions---------
 def verify_password(plain_password, hashed_password):
@@ -192,24 +192,6 @@ def verify_password(plain_password, hashed_password):
 
 def get_password_hash(password):
     return pwd_context.hash(password)
-
-
-# def get_user_auth(username: str, db: Session = Depends(get_db)):
-#     db_user = db.query(models.User).filter(models.User.email == username).first()
-    
-#     return db_user
-
-
-# def authenticate_user(db, username: str, password: str):
-#     user = db.query(models.User).filter(models.User.email == username).first()
-
-#     if not user:
-#         return False
-        
-#     if not verify_password(password, user.password):
-#         return False
-        
-#     return user
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
@@ -260,32 +242,6 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)],
     return current_user
 
 
-# async def get_current_active_user(
-#     current_user: Annotated[models.User, Depends(get_current_user)],
-# ):
-#     if current_user.disabled:
-#         raise HTTPException(status_code=400, detail="Inactive user")
-#     return current_user
-
-#-------user authentication calls-------
-# @app.post("/token_no_DB")
-# async def login_for_access_token(
-#     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-    
-# ) -> Token:
-    
-#     user = authenticate_user(fake_users_db, form_data.username, form_data.password)
-#     if not user:
-#         raise HTTPException(
-#             status_code=status.HTTP_401_UNAUTHORIZED,
-#             detail="Incorrect username or password",
-#             headers={"WWW-Authenticate": "Bearer"},
-#         )
-#     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-#     access_token = create_access_token(
-#         data={"sub": user.username}, expires_delta=access_token_expires
-#     )
-#     return Token(access_token=access_token, token_type="bearer")
 
 @app.post("/token")
 async def login_for_access_token(
@@ -369,32 +325,31 @@ log_config["formatters"]["access"]["fmt"] = "%(asctime)s - %(levelname)s - %(mes
 
 
  #--------- Reset Password ---------
-# @app.post("/resetpassword")
-# async def reset_password(
-#     newPassword: Annotated[str, Body(..., embed=True)],
-#     currentUser: Annotated[UserInDB, Depends(get_current_user)]
-# ):
-#     if not newPassword:
-#         raise HTTPException(status_code=400, detail="Password is required")
+@app.post("/resetpassword")
+async def reset_password(
+    newPassword: Annotated[str, Body(..., embed=True)],
+    currentUser: Annotated[UserToReturn, Depends(get_current_user)]
+):
+    if not newPassword:
+        raise HTTPException(status_code=400, detail="Password is required")
     
-#     # Checks that password is valid
-#     if len(newPassword) < 8:
-#         raise HTTPException(status_code=400, detail="Password must be at least 8 characters long.")
-#     if not any(char.isdigit() for char in newPassword):
-#         raise HTTPException(status_code=400, detail="Password must contain at least one number.")
-#     if not any(char.isupper() for char in newPassword):
-#         raise HTTPException(status_code=400, detail="Password must contain at least one uppercase letter.")
-#     if not any(char.islower() for char in newPassword):
-#         raise HTTPException(status_code=400, detail="Password must contain at least one lowercase letter.")
-#     if not any(char in "!@#$%^&*()_+" for char in newPassword):
-#         raise HTTPException(status_code=400, detail="Password must contain at least one special character.")
-    
+    # Checks that password is valid
+    if len(newPassword) < 8:
+        raise HTTPException(status_code=400, detail="Password must be at least 8 characters long.")
+    if not any(char.isdigit() for char in newPassword):
+        raise HTTPException(status_code=400, detail="Password must contain at least one number.")
+    if not any(char.isupper() for char in newPassword):
+        raise HTTPException(status_code=400, detail="Password must contain at least one uppercase letter.")
+    if not any(char.islower() for char in newPassword):
+        raise HTTPException(status_code=400, detail="Password must contain at least one lowercase letter.")
+    if not any(char in "!@#$%^&*()_+" for char in newPassword):
+        raise HTTPException(status_code=400, detail="Password must contain at least one special character.")
 
-#     # Hash the new password
-#     hashedPassword = get_password_hash(newPassword)
+    # Hash the new password
+    hashedPassword = get_password_hash(newPassword)
 
-#     # Update the user's password in the fake database (in-memory)
-#     fake_users_db[currentUser.username]["hashed_password"] = hashedPassword
+    # Update the user's password in the fake database (in-memory)
+    fake_users_db[currentUser.email]["hashed_password"] = hashedPassword
 
-#     return {"message": "Password has been successfully reset."}
+    return {"message": "Password has been successfully reset."}
 

@@ -12,12 +12,16 @@ const EditDeleteTable = ({
 	columns,
 	editModal: EditModal,
 	deleteModal: DeleteModal,
+	showEditButton = true,
+	showDeleteButton = true,
 	onAdd,
+	onConfirmDelete,
 	customConfirmMessage,
 }) => {
 	const [isEditOpen, setEditOpen] = useState(false);
 	const [isDeleteOpen, setDeleteOpen] = useState(false);
 	const [selectedRow, setSelectedRow] = useState(null);
+	// const [deleteMethod, setDeleteMethod] = useState(null);
 
 	// Open/Close handlers
 	const openEditModal = (row) => {
@@ -46,18 +50,31 @@ const EditDeleteTable = ({
 
 	// Define the action buttons for each row
 	const actionButtons = (row) => (
-		<>
-			<Tooltip id="edit" title="Edit">
-				<IconButton onClick={() => openEditModal(row)}>
-					<EditIcon color="primary" />
-				</IconButton>
-			</Tooltip>
-			<Tooltip id="delete" title="Delete">
-				<IconButton onClick={() => openDeleteModal(row)}>
-					<DeleteIcon color="error" />
-				</IconButton>
-			</Tooltip>
-		</>
+		<div style={{ display: "flex", width: "100%" }}>
+			{/* edit button */}
+			{showEditButton && ( // Only show edit button if showEditButton is true
+				<Tooltip id="edit" title="Edit" style={{ flex: 1 }}>
+					<IconButton
+						onClick={() => openEditModal(row)}
+						style={{ width: "auto" }}
+					>
+						<EditIcon color="primary" />
+					</IconButton>
+				</Tooltip>
+			)}
+
+			{/* delete button */}
+			{showDeleteButton && ( // Only show delete button if showDeleteButton is true
+				<Tooltip id="delete" title="Delete" style={{ flex: 1 }}>
+					<IconButton
+						onClick={() => openDeleteModal(row)}
+						style={{ width: "auto" }}
+					>
+						<DeleteIcon color="error" />
+					</IconButton>
+				</Tooltip>
+			)}
+		</div>
 	);
 
 	return (
@@ -67,7 +84,6 @@ const EditDeleteTable = ({
 				rows={rows}
 				actionButtons={actionButtons}
 			/>
-
 			{/* Edit Modal */}
 			<EditModal
 				open={isEditOpen}
@@ -78,17 +94,13 @@ const EditDeleteTable = ({
 					closeEditModal();
 				}}
 			/>
-
 			{/* Delete Modal */}
 			<DeleteModal
 				open={isDeleteOpen}
 				onClose={closeDeleteModal}
 				customMessage={getConfirmMessage(selectedRow)}
-				onConfirmDelete={() => {
-					// TODO: Handle delete logic here
-					console.log(`Deleting ${getConfirmMessage(selectedRow)}`);
-					closeDeleteModal();
-				}}
+				onConfirmDelete={onConfirmDelete}
+				itemID={selectedRow?.id}
 			/>
 		</>
 	);

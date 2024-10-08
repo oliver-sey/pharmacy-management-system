@@ -15,43 +15,44 @@ import {
 const AddEditPatientModal = ({ open, onClose, row, onSave }) => {
 	// Initialize form data
 	const [formData, setFormData] = useState({
-		firstName: "",
-		lastName: "",
-		dateOfBirth: "",
+		id: "",
+		first_name: "",
+		last_name: "",
+		date_of_birth: "",
 		address: "",
-		phoneNumberStr: "",
+		phone_number: "",
 		email: "",
-		insuranceName: "",
-		insuranceGroupNum: "",
-		insuranceMemberID: "",
+		insurance_name: "",
+		insurance_group_number: "",
+		insurance_member_id: "",
 	});
 
 	// Update form data when the row prop changes
 	useEffect(() => {
 		if (row) {
 			setFormData({
-				firstName: row.firstName || "",
-				lastName: row.lastName || "",
-				dateOfBirth: row.dateOfBirth || "",
+				first_name: row.first_name || "",
+				last_name: row.last_name || "",
+				date_of_birth: row.date_of_birth || "",
 				address: row.address || "",
-				phoneNumber: row.phoneNumberStr || "",
+				phone_number: row.phone_number || "",
 				email: row.email || "",
-				insuranceName: row.insuranceName || "",
-				insuranceGroupNum: row.insuranceGroupNum || "",
-				insuranceMemberID: row.insuranceMemberID || "",
+				insurance_name: row.insurance_name || "",
+				insurance_group_number: row.insurance_group_number || "",
+				insurance_member_id: row.insurance_member_id || "",
 			});
 		} else {
 			// Reset to empty fields when adding a new patient
 			setFormData({
-				firstName: "",
-				lastName: "",
-				dateOfBirth: "",
+				first_name: "",
+				last_name: "",
+				date_of_birth: "",
 				address: "",
-				phoneNumberStr: "",
+				phone_number: "",
 				email: "",
-				insuranceName: "",
-				insuranceGroupNum: "",
-				insuranceMemberID: "",
+				insurance_name: "",
+				insurance_group_number: "",
+				insurance_member_id: "",
 			});
 		}
 	}, [row]);
@@ -75,24 +76,24 @@ const AddEditPatientModal = ({ open, onClose, row, onSave }) => {
 				{/* Fields for editing/adding patient */}
 				<TextField
 					label="First Name"
-					name="firstName"
-					value={formData.firstName}
+					name="first_name"
+					value={formData.first_name}
 					onChange={handleChange}
 					fullWidth
 					margin="dense"
 				/>
 				<TextField
 					label="Last Name"
-					name="lastName"
-					value={formData.lastName}
+					name="last_name"
+					value={formData.last_name}
 					onChange={handleChange}
 					fullWidth
 					margin="dense"
 				/>
 				<TextField
 					label="Date of Birth"
-					name="dateOfBirth"
-					value={formData.dateOfBirth}
+					name="date_of_birth"
+					value={formData.date_of_birth}
 					onChange={handleChange}
 					fullWidth
 					margin="dense"
@@ -107,8 +108,8 @@ const AddEditPatientModal = ({ open, onClose, row, onSave }) => {
 				/>
 				<TextField
 					label="Phone Number"
-					name="phoneNumber"
-					value={formData.phoneNumber}
+					name="phone_number"
+					value={formData.phone_number}
 					onChange={handleChange}
 					fullWidth
 					margin="dense"
@@ -123,24 +124,24 @@ const AddEditPatientModal = ({ open, onClose, row, onSave }) => {
 				/>
 				<TextField
 					label="Insurance Name"
-					name="insuranceName"
-					value={formData.insuranceName}
+					name="insurance_name"
+					value={formData.insurance_name}
 					onChange={handleChange}
 					fullWidth
 					margin="dense"
 				/>
 				<TextField
 					label="Insurance Group #"
-					name="insuranceGroupNum"
-					value={formData.insuranceGroupNum}
+					name="insurance_group_number"
+					value={formData.insurance_group_number}
 					onChange={handleChange}
 					fullWidth
 					margin="dense"
 				/>
 				<TextField
 					label="Insurance Member ID"
-					name="insuranceMemberID"
-					value={formData.insuranceMemberID}
+					name="insurance_member_id"
+					value={formData.insurance_member_id}
 					onChange={handleChange}
 					fullWidth
 					margin="dense"

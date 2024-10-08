@@ -55,6 +55,26 @@ function ViewOfPatients() {
 		}
 	}
 
+	const editPatient = async (data, id) => {
+		try {
+			
+			console.log("row in editPatient", id, data)
+			const response = await fetch(`http://localhost:8000/patient/${id}`, {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(data),
+			});
+			if (!response.ok) {
+				throw new Error('Failed to update patient');
+			}
+			fetchPatients();
+		} catch (error) {
+			console.error('Error updating patient:', error);
+		}
+	}
+
 	// the message format that should get used in the delete confirmation modal (popup) for this table
 	// need this since we want a different format on other tables that use this same base component
 	const patientConfirmMessage = (row) =>
@@ -87,6 +107,7 @@ function ViewOfPatients() {
 			onAdd={(handler) => {
 			  openAddPatientModal.current = handler; // Store the open modal handler
 			}}
+			onEdit={editPatient}
 			onConfirmDelete={deletePatient}
 		  />
 		</div>

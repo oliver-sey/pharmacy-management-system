@@ -11,7 +11,7 @@ from pydantic import BaseModel
 from passlib.context import CryptContext
 from typing import Optional
 from .database import SessionLocal, engine, Base
-from .schema import UserCreate, UserResponse, UserLogin, UserUpdate
+from .schema import UserCreate, UserResponse, UserLogin, UserUpdate, PrescriptionUpdate
 from . import models  # Ensure this is the SQLAlchemy model
 from sqlalchemy.orm import Session
 from typing import List
@@ -132,6 +132,9 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 # pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+
+# endregion
+# region Auth classes
 #------authentication classes------
 
 #temporary users
@@ -174,6 +177,8 @@ class UserToReturn(BaseModel):
 class UserInDB(BaseModel):
      hashed_password: str
 
+# endregion
+# region Auth functions
 #-------authentication functions---------
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
@@ -281,11 +286,14 @@ async def read_own_items(
 def read_root():
     return "this is an epic gamer moment!"
 
+# region User CRUD
 #-------USER CRUD OPERATIONS---------
 
 
 
-##--------PATIENT CRUD OPERATIONS--------
+# endregion
+# region Patient CRUD
+#--------PATIENT CRUD OPERATIONS--------
 
 @app.get("/get/patient/{patient_id}")
 def get_patient(patient_id: int):
@@ -307,12 +315,44 @@ def delete_patient(patient_id: int):
     # make a call to our future database to delete the patient with the given patient_id
     return {"patient_id": patient_id}
 
+
+# endregion
+# region Prescription CRUD
+#--------PRESCRIPTION CRUD OPERATIONS--------
+
+# fill a prescription
+@app.put("/prescriptions/{prescription_id}", response_model=PrescriptionResponse)
+def fill_prescription(prescription_id: int, prescription: PrescriptionUpdate, db: Session = Depends(get_db)):
+    db_prescription = db.query(models.Prescription).filter(models.Prescription.id == prescription_id).first()
+    if db_prescription is None:
+        raise HTTPException(status_code=404, detail="Prescription not found")
+    
+    if prescription.is_filled:
+        # 409 conflict. The request conflicts with the current state of the resource (has already been filled)
+        raise HTTPException(status_code=409, detail="Prescription has already been filled")
+
+    db.commit()
+    db.refresh(db_prescription)
+    return db_prescription
+
+
+
+
+
+
+
+
+
+# endregion
+# region Logging config
 #--------Logging configurations---------
 log_config = uvicorn.config.LOGGING_CONFIG
 log_config["formatters"]["access"]["fmt"] = "%(asctime)s - %(levelname)s - %(message)s"
 
 
 
+# endregion
+# region Reset password
  #--------- Reset Password ---------
 @app.post("/resetpassword")
 async def reset_password(
@@ -342,3 +382,4 @@ async def reset_password(
 
     return {"message": "Password has been successfully reset."}
 
+# endregion

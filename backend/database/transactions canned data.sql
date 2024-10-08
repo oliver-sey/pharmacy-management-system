@@ -16,6 +16,6 @@ INSERT INTO transactions (id, user_id, patient_id, timestamp, payment_method) VA
 INSERT INTO transactions (id, user_id, patient_id, timestamp, payment_method) VALUES (8, 11, 6, '2024-10-01 09:32:12', 'credit card');
 INSERT INTO transactions (id, user_id, patient_id, timestamp, payment_method) VALUES (9, 12, 7, '2024-09-30 14:40:37', 'debit card');
 INSERT INTO transactions (id, user_id, patient_id, timestamp, payment_method) VALUES (10, 13, 7, '2024-09-03 12:25:15', 'cash');
-INSERT INTO transactions (id, user_id, patient_id, timestamp, payment_method) VALUES (11, 15, 0, '2024-09-27 17:14:29', 'debit card');
+INSERT INTO transactions (id, user_id, patient_id, timestamp, payment_method) VALUES (11, 15, 3, '2024-09-27 17:14:29', 'debit card');
 INSERT INTO transactions (id, user_id, patient_id, timestamp, payment_method) VALUES (12, 16, 1, '2024-10-01 09:57:41', 'cash');
 INSERT INTO transactions (id, user_id, patient_id, timestamp, payment_method) VALUES (13, 14, 1, '2024-10-02 14:12:34', 'credit card');

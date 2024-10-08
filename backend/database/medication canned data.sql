@@ -10,7 +10,7 @@ INSERT INTO medications(id, name, dosage, quantity, prescription_required, expir
 INSERT INTO medications(id, name, dosage, quantity, prescription_required, expiration_date, dollars_per_unit) VALUES(3, 'Lipitor', '20mg', 300, TRUE, '2026-03-15', 0.75);
 INSERT INTO medications(id, name, dosage, quantity, prescription_required, expiration_date, dollars_per_unit) VALUES(4, 'Acetaminophen', '500mg', 1000, FALSE, '2025-11-30', 0.08);
 INSERT INTO medications(id, name, dosage, quantity, prescription_required, expiration_date, dollars_per_unit) VALUES(5, 'Aspirin', '100mg', 500, FALSE, '2024-07-22', 0.05);
-INSERT INTO medications(id, name, dosage, quantity, prescription_required, expiration_date, dollars_per_unit) VALUES(6, 'Warfarin', '2.5mg' 150, TRUE, '2024-10-10', 1.5);
+INSERT INTO medications(id, name, dosage, quantity, prescription_required, expiration_date, dollars_per_unit) VALUES(6, 'Warfarin', '2.5mg', 150, TRUE, '2024-10-10', 1.5);
 INSERT INTO medications(id, name, dosage, quantity, prescription_required, expiration_date, dollars_per_unit) VALUES(7, 'Metformin', '850mg', 400, TRUE, '2025-02-14', 0.5);
 INSERT INTO medications(id, name, dosage, quantity, prescription_required, expiration_date, dollars_per_unit) VALUES(8, 'Melatonin', '2mg', 5, FALSE, '2024-10-31', 0.0004);
 INSERT INTO medications(id, name, dosage, quantity, prescription_required, expiration_date, dollars_per_unit) VALUES(9, 'Dramamine', '1000mg', 1200, FALSE, '2021-10-01', 0.51);

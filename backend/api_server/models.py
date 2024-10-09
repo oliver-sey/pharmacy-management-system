@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from .database import Base
 
-from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy import Column, Integer, String, Boolean, ARRAY
 from sqlalchemy.orm import relationship
 from .database import Base
 
@@ -48,12 +48,12 @@ class Prescription(Base):
     __tablename__ = 'prescriptions'
 
     id = Column(Integer, primary_key=True, index=True)
-    patient_id = Column(Integer, ForeignKey('patients.id'))
+    patient_id = Column(Integer, ForeignKey('patients.id'), nullable=True)
     user_entered_id = Column(Integer, ForeignKey('users.id'))  # User who typed in the prescription
     user_filled_id = Column(Integer, ForeignKey('users.id'))  # User who filled the prescription
     date_prescribed = Column(DateTime, default=func.now())
     filled_timestamp = Column(DateTime, default=func.now())
-    medication_id = Column(Integer, ForeignKey('medications.id'))  # Updated to match foreign key reference
+    medication_id = Column(Integer, ForeignKey('medications.id'))  # Correct table reference
     doctor_name = Column(String)
     dosage = Column(String)
 

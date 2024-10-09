@@ -14,7 +14,7 @@ import {
 
 // for the date input component
 // import { Dayjs } from 'dayjs';
-// import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+// import { DatePicker } from '@mui/x-date-pickers';
 
 const AddEditPatientModal = ({ open, onClose, row, onSave }) => {
 	// Initialize form data
@@ -31,36 +31,48 @@ const AddEditPatientModal = ({ open, onClose, row, onSave }) => {
 		insurance_member_id: "",
 	});
 
-	// Update form data when the row prop changes
+	// useEffect to set form data and clear errors/touched on modal open
 	useEffect(() => {
-		if (row) {
+		// Function to reset form and error states
+		const resetForm = () => {
+			// Set form data based on whether editing (row exists) or adding
 			setFormData({
-				first_name: row.first_name || "",
-				last_name: row.last_name || "",
-				date_of_birth: row.date_of_birth || "",
-				address: row.address || "",
-				phone_number: row.phone_number || "",
-				email: row.email || "",
-				insurance_name: row.insurance_name || "",
-				insurance_group_number: row.insurance_group_number || "",
-				insurance_member_id: row.insurance_member_id || "",
+				first_name: row?.first_name || "",
+				last_name: row?.last_name || "",
+				date_of_birth: row?.date_of_birth || "",
+				address: row?.address || "",
+				phone_number: row?.phone_number || "",
+				email: row?.email || "",
+				insurance_name: row?.insurance_name || "",
+				insurance_group_number: row?.insurance_group_number || "",
+				insurance_member_id: row?.insurance_member_id || "",
 			});
-		} else {
-			// Reset to empty fields when adding a new patient
-			setFormData({
-				first_name: "",
-				last_name: "",
-				date_of_birth: "",
-				address: "",
-				phone_number: "",
-				email: "",
-				insurance_name: "",
-				insurance_group_number: "",
-				insurance_member_id: "",
-			});
-		}
-	}, [row]);
 
+			// Clear all errors
+			setFormErrors({
+				first_name: '',
+				last_name: '',
+				date_of_birth: '',
+				address: '',
+				phone_number: '',
+				email: '',
+				insurance_name: '',
+				insurance_group_number: '',
+				insurance_member_id: ''
+			});
+
+			// Clear all touched fields
+			setTouched({});
+		};
+
+		// Call the reset function whenever the modal opens (open prop changes)
+		if (open) {
+			resetForm();
+		}
+	}, [open, row]);  // Trigger when modal 'open' state or 'row' changes
+
+
+	
 	// Update form data on input change
 	const handleChange = (e) => {
 		const { name, value } = e.target;
@@ -250,6 +262,18 @@ const AddEditPatientModal = ({ open, onClose, row, onSave }) => {
 					fullWidth
 					margin="dense"
 				/>
+				{/* <DatePicker
+					label="Date of Birth"
+					name="date_of_birth"
+					value={formData.date_of_birth}
+					onChange={handleFieldChange}
+					onBlur={handleBlur}
+					onFocus={handleFocus}
+					error={!!formErrors.date_of_birth && touched.date_of_birth}
+					helperText={touched.date_of_birth && formErrors.date_of_birth}
+					fullWidth
+					margin="dense"
+				/> */}
 				<TextField
 					label="Address"
 					name="address"
@@ -326,7 +350,8 @@ const AddEditPatientModal = ({ open, onClose, row, onSave }) => {
 			</DialogContent>
 			<DialogActions>
 				<Button onClick={onClose}>Cancel</Button>
-				<Button onClick={handleSaveWithValidation} color="primary">
+				<Button onClick={handleSaveWithValidation} color="primary"
+				disabled={Object.values(formErrors).some(error => error !== '')}>
 					{row ? "Save Changes" : "Add Patient"}
 				</Button>
 			</DialogActions>

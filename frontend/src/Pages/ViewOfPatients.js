@@ -39,10 +39,24 @@ function ViewOfPatients() {
 		{ field: 'insurance_group_number', headerName: 'Group Number' },
 		{ field: 'insurance_member_id', headerName: 'Member ID' }
 	  ];
-	
+
+	// all users can edit patients
+	const canEdit = () => {
+		// const userType = localStorage.getItem('userType');
+		// TODO: should we do this with no checks?
+		return true;
+	};
+	  
+	// only pharmacists or pharmacy managers can delete
+	const canDelete = () => {
+		const role = localStorage.getItem('role');
+		return role === 'pharmacist' || role === 'pharmacymanager';
+	};
+
+
 	const deletePatient = async (id) => {
 		try {
-			console.log("row haha i dont need to docker compose up again", id);
+			console.log("row", id);
 			const response = await fetch(`http://localhost:8000/patient/${id}`, {
 				method: 'DELETE',
 			});
@@ -103,6 +117,8 @@ function ViewOfPatients() {
 			columns={columns}
 			editModal={AddEditPatientModal}
 			deleteModal={DeleteModal}
+			showEditButton={canEdit()}
+			showDeleteButton={canDelete()}
 			customConfirmMessage={patientConfirmMessage}
 			onAdd={(handler) => {
 			  openAddPatientModal.current = handler; // Store the open modal handler

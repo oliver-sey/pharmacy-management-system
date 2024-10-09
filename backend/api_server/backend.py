@@ -11,7 +11,7 @@ from pydantic import BaseModel
 from passlib.context import CryptContext
 from typing import Optional
 from .database import SessionLocal, engine, Base
-from .schema import UserCreate, UserResponse, UserLogin, UserUpdate
+from .schema import UserCreate, UserResponse, UserLogin, UserUpdate, PatientCreate, PatientUpdate, PatientResponse
 from . import models  # Ensure this is the SQLAlchemy model
 from sqlalchemy.orm import Session
 from typing import List
@@ -292,20 +292,56 @@ def get_patient(patient_id: int):
     # make a call to our future database to get the patient with the given patient_id
     return {"patient_id":  patient_id}
 
-@app.post("/post/patient")
-def post_patient(patient: dict):
-    # make a call to our future database to add the patient to the database
-    return patient
+@app.get("/patients", response_model=List[PatientResponse])
+def get_patients(db: Session = Depends(get_db)):
+    patients = db.query(models.Patient).all()
+    # fix the date_of_birth to be a string
+    patients = [PatientResponse.from_orm(patient) for patient in patients]
+    return patients
 
-@app.put("/put/patient/{patient_id}")
-def put_patient(patient_id: int, patient: dict):
-    # make a call to our future database to update the patient with the given patient_id
-    return patient
+@app.post("/patient")
+def create_patient(patient: PatientCreate, db: Session = Depends(get_db)):
+    patient_data = patient.model_dump()
+    email = patient_data['email']
+    if db.query(models.Patient).filter(models.Patient.email == email).first():
+        raise HTTPException(status_code=400, detail="Email already registered")
+    else:
+        db_patient = models.Patient(**patient_data)
+        db.add(db_patient)
+        db.commit()
+        db.refresh(db_patient)
+        return db_patient
 
-@app.delete("/delete/patient/{patient_id}")
-def delete_patient(patient_id: int):
+@app.put("/patient/{patient_id}")
+def put_patient(patient_id: int, patient: PatientUpdate, db: Session = Depends(get_db)):
+    # get the patient
+    db_patient = db.query(models.Patient).filter(models.Patient.id == patient_id).first()
+    # if patient is not found, raise an error
+    if db_patient is None:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    # get the data stored in the body of the put request
+    patient_data = patient.model_dump()
+    # update the fields of the existing patient
+    for key, value in patient_data.items():
+        setattr(db_patient, key, value)
+    # commit and refresh
+    db.commit()
+    db.refresh(db_patient)
+
+    return db_patient
+
+@app.delete("/patient/{pid}")
+def delete_patient(pid: int, db: Session = Depends(get_db)):
     # make a call to our future database to delete the patient with the given patient_id
-    return {"patient_id": patient_id}
+    patient = db.query(models.Patient).filter(models.Patient.id == pid).first()
+    print(f"patient: {patient}")
+    db.query(models.Prescription).filter(models.Prescription.patient_id == pid).update({models.Prescription.patient_id: None})
+    
+    if patient is None:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    db.delete(patient)
+    db.commit()
+    return {"patient_id": pid}
 
 #--------Logging configurations---------
 log_config = uvicorn.config.LOGGING_CONFIG

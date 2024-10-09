@@ -11,7 +11,6 @@ import ViewOfMedications from './Pages/ViewOfMedications';
 import ResetPassword from './Pages/ResetPassword'
 import ViewOfEmployees from './Pages/ViewOfEmployees';
 
-
 function App() {
 
   
@@ -20,6 +19,8 @@ function App() {
       <Router>
         <p> Hello world </p>
         <Routes>
+          <Route exact path='/managerhome' element={<ManagerHome/>}/>
+          <Route exact path='/pharmacisthome' element={<PharmacistHome/>}/>
           <Route exact path="/protected" element={<GeneralProtected/>}/>
           <Route exact path="/" element={<Login/>}/>
           <Route path='/viewofpatients' element={<ViewOfPatients/>}/>

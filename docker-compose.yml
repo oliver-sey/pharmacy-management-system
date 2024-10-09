@@ -1,4 +1,4 @@
-version: '3.8'
+
 
 services:
   postgres:
@@ -33,6 +33,7 @@ services:
     ports:
       - "3000:3000"
     command: npm start  # Start the React development server
+    
 
 volumes:
   postgres_data:

@@ -2,6 +2,7 @@
 
 from typing import Optional
 from pydantic import BaseModel, EmailStr
+from datetime import date
 
 class UserCreate(BaseModel):
     user_type: str
@@ -78,10 +79,24 @@ class UserLogin(BaseModel):
     email: str
     password: str
     
-class EmployeeResponse(BaseModel):
-    id: int
+class MedicationCreate(BaseModel):
     name: str
-    email: EmailStr
+    dosage: str
+    quantity: int
+    prescription_required: bool
+    expiration_date: date
+    dollars_per_unit: float
+
+class MedicationResponse(MedicationCreate):
+    id: int
 
     class Config:
         orm_mode = True
+
+class MedicationUpdate(BaseModel):
+    name: Optional[str] = None
+    dosage: Optional[str] = None
+    quantity: Optional[int] = None
+    prescription_required: Optional[bool] = None
+    expiration_date: Optional[date] = None
+    dollars_per_unit: Optional[float] = None

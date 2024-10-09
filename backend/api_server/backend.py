@@ -11,10 +11,11 @@ from pydantic import BaseModel
 from passlib.context import CryptContext
 from typing import Optional
 from .database import SessionLocal, engine, Base
-from .schema import UserCreate, UserResponse, UserLogin, UserUpdate, PatientCreate, PatientUpdate, PatientResponse
+from .schema import UserCreate, UserResponse, UserLogin, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate
 from . import models  # Ensure this is the SQLAlchemy model
 from sqlalchemy.orm import Session
 from typing import List
+from . import schema
 
 # Create the database tables
 Base.metadata.create_all(bind=engine)
@@ -92,7 +93,7 @@ def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db)):
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
     
-        # Update only provided fields
+    # Update only provided fields
     if user.user_type is not None:
         db_user.user_type = user.user_type
     if user.email is not None:
@@ -105,18 +106,6 @@ def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_user)
     return db_user
-
-
-@app.post("/login")
-def user_login(user: UserLogin, db: Session = Depends(get_db)):
-    db_user = db.query(models.User).filter(models.User.email == user.email).first()
-    if not db_user or not pwd_context.verify(user.password, db_user.password):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
-
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(data={"sub": db_user.email}, expires_delta=access_token_expires)
-
-    return {"message": "Login successful", "user_id": db_user.id, "token": access_token}
 
 @app.get("/userslist/", response_model=List[UserResponse])
 def list_users(db: Session = Depends(get_db)):
@@ -378,3 +367,65 @@ async def reset_password(
 
     return {"message": "Password has been successfully reset."}
 
+
+#-----Medication CRUD
+# create medication
+@app.post("/medication/", response_model=schema.MedicationResponse)
+def create_medication(medication: schema.MedicationCreate, db: Session = Depends(get_db)):
+    db_medication = models.Medication(**medication.dict())
+    db.add(db_medication)
+    db.commit()
+    db.refresh(db_medication)
+    return db_medication
+
+# get medication by id
+@app.get("/medication/{medication_id}", response_model=schema.MedicationResponse)
+def get_medication(medication_id: int, db: Session = Depends(get_db)):
+    db_medication = db.query(models.Medication).filter(models.Medication.id == medication_id).first()
+    if db_medication is None:
+        raise HTTPException(status_code=404, detail="Medication not found")
+    
+    return db_medication
+
+# update medication by id
+@app.put("/medication/{medication_id}", response_model=schema.MedicationResponse)
+def update_medication(medication_id: int, new_medication: schema.MedicationUpdate, db: Session = Depends(get_db)):
+    # Retrieve the existing medication from the database
+    db_medication = db.query(models.Medication).filter(models.Medication.id == medication_id).first()
+
+    # Check if the medication exists
+    if db_medication is None:
+        raise HTTPException(status_code=404, detail="Medication not found")
+
+    # Dump the data from the medication model
+    medication_data = new_medication.model_dump()
+
+    # Update the fields of the existing medication
+    for key, value in medication_data.items():
+        if value is not None:
+            setattr(db_medication, key, value)
+
+    # Commit the changes to the database
+    db.commit()
+    db.refresh(db_medication)
+
+    return db_medication
+
+# delete medication
+@app.delete("/medication/{medication_id}")
+def delete_medication(medication_id: int, db: Session = Depends(get_db)):
+    db_medication = db.query(models.Medication).filter(models.Medication.id == medication_id).first()
+    if db_medication is None:
+        raise HTTPException(status_code=404, detail="Medication not found")
+
+    db.delete(db_medication)
+    db.commit()
+    return {"message": "Medication deleted successfully", "medication_id": medication_id}
+
+# get all medication
+@app.get("/medicationlist/")
+def list_medication(db: Session = Depends(get_db)):
+    # Query the database for all medications
+    medications = db.query(models.Medication).all()
+    
+    return medications

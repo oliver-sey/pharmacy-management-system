@@ -341,21 +341,22 @@ def create_patient(patient: PatientCreate, db: Session = Depends(get_db)):
         return db_patient
 
 @app.put("/patient/{patient_id}")
-def put_patient(patient_id: int, db: Session = Depends(get_db)):
+def put_patient(patient_id: int, patient: PatientUpdate, db: Session = Depends(get_db)):
     # get the patient
-    patient = db.query(models.Patient).filter(models.Patient.id == patient_id).first()
+    db_patient = db.query(models.Patient).filter(models.Patient.id == patient_id).first()
     # if patient is not found, raise an error
-    if patient is None:
+    if db_patient is None:
         raise HTTPException(status_code=404, detail="Patient not found")
-    # get the date stored in the body of the put request
+    # get the data stored in the body of the put request
     patient_data = patient.model_dump()
-    db_patient = models.Patient(**patient_data)
-    # add, commit, and refresh
-    db.add(db_patient)
+    # update the fields of the existing patient
+    for key, value in patient_data.items():
+        setattr(db_patient, key, value)
+    # commit and refresh
     db.commit()
     db.refresh(db_patient)
 
-    return patient
+    return db_patient
 
 @app.delete("/patient/{pid}")
 def delete_patient(pid: int, db: Session = Depends(get_db)):

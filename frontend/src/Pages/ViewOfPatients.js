@@ -53,7 +53,6 @@ function ViewOfPatients() {
 		return role === 'pharmacist' || role === 'pharmacymanager';
 	};
 
-
 	const deletePatient = async (id) => {
 		try {
 			console.log("row", id);
@@ -66,6 +65,14 @@ function ViewOfPatients() {
 			fetchPatients();
 		} catch (error) {
 			console.error('Error deleting patient:', error);
+		}
+	}
+
+	const addEditPatient = async (data, id) => {
+		if (id) {
+			editPatient(data, id);
+		} else {
+			addPatient(data);
 		}
 	}
 
@@ -86,6 +93,25 @@ function ViewOfPatients() {
 			fetchPatients();
 		} catch (error) {
 			console.error('Error updating patient:', error);
+		}
+	}
+
+	const addPatient = async (data) => {
+		try {
+			console.log("row in addPatient", data)
+			const response = await fetch(`http://localhost:8000/patient`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(data),
+			});
+			if (!response.ok) {
+				throw new Error('Failed to add patient');
+			}
+			fetchPatients();
+		} catch (error) {
+			console.error('Error adding patient:', error);
 		}
 	}
 
@@ -123,7 +149,7 @@ function ViewOfPatients() {
 			onAdd={(handler) => {
 			  openAddPatientModal.current = handler; // Store the open modal handler
 			}}
-			onEdit={editPatient}
+			onEdit={addEditPatient}
 			onConfirmDelete={deletePatient}
 		  />
 		</div>

@@ -10,6 +10,8 @@ import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
 import ViewOfMedications from './Pages/ViewOfMedications';
 import ResetPassword from './Pages/ResetPassword'
 import ViewOfEmployees from './Pages/ViewOfEmployees';
+import ViewOfPatientPrescriptions from './Pages/ViewOfPatientPrescriptions';
+
 
 function App() {
 
@@ -24,6 +26,7 @@ function App() {
           <Route exact path="/protected" element={<GeneralProtected/>}/>
           <Route exact path="/" element={<Login/>}/>
           <Route path='/viewofpatients' element={<ViewOfPatients/>}/>
+          <Route path='/viewofpatients/:patientId/prescriptions' element ={<ViewOfPatientPrescriptions/>}/>
           <Route path='/viewofmedications' element={<ViewOfMedications/>}/>
           <Route path='/viewofusers' element={<ViewOfUsers/>}/>
           <Route path='/resetpassword' element ={<ResetPassword/>}/>

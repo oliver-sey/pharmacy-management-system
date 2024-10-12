@@ -1,5 +1,5 @@
 import { React, useRef, useState, useEffect } from "react";
-
+import { useNavigate } from 'react-router-dom';
 import EditDeleteTable from "../Components/EditDeleteTable";
 import AddEditPatientModal from "../Components/AddEditPatientModal";
 import DeleteModal from "../Components/DeleteModal";
@@ -10,7 +10,7 @@ function ViewOfPatients() {
 	// headerName is what shows up on the website
 	// width is the default width of the column, user can adjust it
 	const [rows, setRows] = useState([]);
-
+	const navigate = useNavigate();
 	// Async function to fetch patients data
 	const fetchPatients = async () => {
 		try {
@@ -27,6 +27,10 @@ function ViewOfPatients() {
 		fetchPatients(); // Call the async function
 	  }, []); // Empty array means this effect runs once when the component mounts
 
+	  const handleViewPrescriptions = (patientId) => {
+        navigate(`/patients/${patientId}/prescriptions`);
+    };
+	
 	  const columns = [
 		{ field: 'id', headerName: 'ID' },
 		{ field: 'first_name', headerName: 'First Name' },
@@ -37,7 +41,15 @@ function ViewOfPatients() {
 		{ field: 'email', headerName: 'Email' },
 		{ field: 'insurance_name', headerName: 'Insurance Name' },
 		{ field: 'insurance_group_number', headerName: 'Group Number' },
-		{ field: 'insurance_member_id', headerName: 'Member ID' }
+		{ field: 'insurance_member_id', headerName: 'Member ID' },
+		{field : 'view_prescriptions', headerName: 'View Prescriptions', renderCell: (params) => (
+			<Button 
+			variant='contained' 
+			color ="primary" 
+			oonClick={() => handleViewPrescriptions(params.row.id)}
+			>
+				View Prescriptions
+			</Button>)}
 	  ];
 
 	// all users can edit patients
@@ -156,4 +168,6 @@ function ViewOfPatients() {
 	  );
 	  
 }
+
+
 export default ViewOfPatients;

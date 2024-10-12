@@ -332,6 +332,18 @@ def delete_patient(pid: int, db: Session = Depends(get_db)):
     db.commit()
     return {"patient_id": pid}
 
+
+#--------------Getting Patients Prescription---------------------------
+#Im so sorry i didnt know where this fit so here for now
+@app.get("/patients/{patient_id}/prescriptions")
+def get_prescriptions_for_patient(patient_id: int, db: Session = Depends(get_db)):
+    patient = db.query(models.Patient).filter(models.Patient.id == patient_id).first()
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    prescriptions = db.query(models.Prescription).filter(models.Prescription.patient_id == patient_id).all()
+    return {"patient_name": patient.name, "prescriptions": prescriptions}
+
+
 #--------Logging configurations---------
 log_config = uvicorn.config.LOGGING_CONFIG
 log_config["formatters"]["access"]["fmt"] = "%(asctime)s - %(levelname)s - %(message)s"

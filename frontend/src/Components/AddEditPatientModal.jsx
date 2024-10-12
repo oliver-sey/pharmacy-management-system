@@ -73,12 +73,6 @@ const AddEditPatientModal = ({ open, onClose, row, onSave }) => {
 
 
 	
-	// Update form data on input change
-	const handleChange = (e) => {
-		const { name, value } = e.target;
-		setFormData((prev) => ({ ...prev, [name]: value }));
-	};
-
 	// Handle saving of the updated data
 	const handleSave = () => {
 		onSave(formData, row?.id); // Pass updated form data to parent component
@@ -131,10 +125,14 @@ const AddEditPatientModal = ({ open, onClose, row, onSave }) => {
 					}
 					break;
 				case 'email':
+					// pretty sure this is the regex used by pydantic in the backend, so we want to use the same one to give users
+					// warnings before they try to submit.
+					// otherwise they submit and get errors about invalid emails that they didn't get warning about
+					const emailRegex = /^(?:[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-zA-Z0-9-]*[a-zA-Z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*)\])$/;
 					if (!value) {
 						errors.email = 'Email is required';
-					} else if (!/\S+@\S+\.\S+/.test(value)) {
-						errors.email = 'Email is invalid';
+					} else if (!emailRegex.test(value)) {
+						errors.email = 'Email format is invalid';
 					} else {
 						errors.email = '';
 					}

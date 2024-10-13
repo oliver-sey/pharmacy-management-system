@@ -5,12 +5,16 @@ from pydantic import BaseModel, EmailStr
 from datetime import date
 
 class UserCreate(BaseModel):
+    first_name: str
+    last_name: str
     user_type: str
     email: EmailStr
     password: str
     is_locked_out: bool = True
 
 class UserUpdate(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
     user_type: Optional[str] = None
     email: Optional[EmailStr] = None
     password: Optional[str] = None

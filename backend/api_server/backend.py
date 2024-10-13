@@ -94,6 +94,8 @@ def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
     
     # Update only provided fields
+    if user.first_name is not None:
+        db_user.first_name = user.first_name
     if user.user_type is not None:
         db_user.user_type = user.user_type
     if user.email is not None:

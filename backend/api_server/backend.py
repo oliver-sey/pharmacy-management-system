@@ -526,20 +526,20 @@ def fill_prescription(prescription_id: int, fill_request: schema.PrescriptionFil
     if db_prescription is None:
         raise HTTPException(status_code=404, detail="Prescription not found")
     
-    # if db_prescription.is_filled:
-    #     # 409 conflict. The request conflicts with the current state of the resource (has already been filled)
-    #     raise HTTPException(status_code=409, detail="Prescription has already been filled")
-    # else:
-    # set is_filled to True
-    # setattr(db_prescription, is_filled, True)
-    # setattr(db_prescription, filled_timestamp, datetime.now())
-    db_prescription.filled_timestamp = datetime.now()
+    # if there is a value in the timestamp
+    # (if the timestamp is not null/None)
+    if not db_prescription.filled_timestamp is None:
+        # 409 conflict. The request conflicts with the current state of the resource (has already been filled)
+        raise HTTPException(status_code=409, detail="Prescription has already been filled")
+    else:
+        # setattr(db_prescription, filled_timestamp, datetime.now())
+        db_prescription.filled_timestamp = datetime.now()
 
-    # TODO: do we need to do any checks that fill_request has user_filled_id???
-    # setattr(db_prescription, user_filled_id, fill_request.user_filled_id)
-    db_prescription.user_filled_id = fill_request.user_filled_id
+        # TODO: do we need to do any checks that fill_request has user_filled_id???
+        # setattr(db_prescription, user_filled_id, fill_request.user_filled_id)
+        db_prescription.user_filled_id = fill_request.user_filled_id
 
-    # TODO: need to update medication inventory!!!!
+        # TODO: need to update medication inventory!!!!
         
     db.commit()
     db.refresh(db_prescription)

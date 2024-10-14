@@ -34,6 +34,33 @@ services:
       - "3000:3000"
     command: npm start  # Start the React development server
     
+  
+  postgres_test: # database for testing
+    image: postgres:13
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: test_database  # Separate test database
+    ports:
+      - "5433:5432"  # Optional: expose on a different port if needed
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+
+
+  test:
+    build:
+      context: ./backend  # Adjust as needed
+      dockerfile: Dockerfile
+    command: ["pytest", "tests/"]  # Adjust to your test command
+    working_dir: /app  # Set this to the correct working directory
+    depends_on:
+      - postgres_test
+    environment:
+      DATABASE_URL: postgres://user:password@postgres_test/test_database  # Connection string for the test database
+      PYTHONPATH: /app  # Set PYTHONPATH to help with imports
+
+
 
 volumes:
   postgres_data:
+  postgres_test_data:  

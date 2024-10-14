@@ -46,6 +46,7 @@ def get_db():
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
+# region User CRUD
 # POST endpoint to create a user
 @app.post("/users/", response_model=UserResponse)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
@@ -277,10 +278,6 @@ async def read_own_items(
 def read_root():
     return "this is an epic gamer moment!"
 
-# region User CRUD
-#-------USER CRUD OPERATIONS---------
-
-
 
 # endregion
 # region Patient CRUD
@@ -341,30 +338,6 @@ def delete_patient(pid: int, db: Session = Depends(get_db)):
     db.delete(patient)
     db.commit()
     return {"patient_id": pid}
-
-
-# endregion
-# region Prescription CRUD
-#--------PRESCRIPTION CRUD OPERATIONS--------
-
-# fill a prescription
-@app.put("/prescriptions/{prescription_id}", response_model=PrescriptionResponse)
-def fill_prescription(prescription_id: int, prescription: PrescriptionUpdate, db: Session = Depends(get_db)):
-    db_prescription = db.query(models.Prescription).filter(models.Prescription.id == prescription_id).first()
-    if db_prescription is None:
-        raise HTTPException(status_code=404, detail="Prescription not found")
-    
-    if prescription.is_filled:
-        # 409 conflict. The request conflicts with the current state of the resource (has already been filled)
-        raise HTTPException(status_code=409, detail="Prescription has already been filled")
-
-    db.commit()
-    db.refresh(db_prescription)
-    return db_prescription
-
-
-
-
 
 
 
@@ -473,6 +446,9 @@ def list_medication(db: Session = Depends(get_db)):
     
     return medications
 
+# endregion
+# region Prescription CRUD
+#--------PRESCRIPTION CRUD OPERATIONS--------
 ### Prescription CRUD ###
 @app.get("/prescriptions", response_model=List[schema.PrescriptionResponse])
 def get_prescriptions(patient_id: Optional[int] = Query(None), db: Session = Depends(get_db)):
@@ -541,3 +517,19 @@ def delete_prescription(prescription_id: int, db: Session = Depends(get_db)):
     db.delete(db_prescription)
     db.commit()
     return {"message": "Prescription deleted successfully", "prescription_id": prescription_id}
+
+
+# fill a prescription
+@app.put("/prescriptions/{prescription_id}", response_model=PrescriptionResponse)
+def fill_prescription(prescription_id: int, prescription: PrescriptionUpdate, db: Session = Depends(get_db)):
+    db_prescription = db.query(models.Prescription).filter(models.Prescription.id == prescription_id).first()
+    if db_prescription is None:
+        raise HTTPException(status_code=404, detail="Prescription not found")
+    
+    if prescription.is_filled:
+        # 409 conflict. The request conflicts with the current state of the resource (has already been filled)
+        raise HTTPException(status_code=409, detail="Prescription has already been filled")
+
+    db.commit()
+    db.refresh(db_prescription)
+    return db_prescription

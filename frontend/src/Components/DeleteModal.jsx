@@ -9,7 +9,7 @@ import {
 	Button,
 } from "@mui/material";
 
-const DeleteModal = ({ open, onClose, customMessage: customConfirmMessage, onConfirmDelete }) => {
+const DeleteModal = ({ open, onClose, customMessage: customConfirmMessage, onConfirmDelete, itemID }) => {
 	return (
 		<Dialog open={open} onClose={onClose}>
 			<DialogTitle>Delete {customConfirmMessage}?</DialogTitle>
@@ -18,7 +18,11 @@ const DeleteModal = ({ open, onClose, customMessage: customConfirmMessage, onCon
 			</DialogContent>
 			<DialogActions>
 				<Button onClick={onClose}>Cancel</Button>
-				<Button onClick={onConfirmDelete} color="error">
+				<Button onClick={() => {
+					onConfirmDelete(itemID);
+					onClose();
+				}} 
+				color="error">
 					Delete
 				</Button>
 			</DialogActions>

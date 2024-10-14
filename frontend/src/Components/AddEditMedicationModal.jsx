@@ -16,11 +16,11 @@ const AddEditMedicationModal = ({ open, onClose, row, onSave }) => {
 	// Initialize form data
 	const [formData, setFormData] = useState({
 		name: "",
-		dosageStr: "",
+		dosage: "",
 		quantity: "",
-		prescriptionRequired: "",
-		expirationDate: "",
-		dollarsPerUnit: "",
+		prescription_required: "",
+		expiration_date: "",
+		dollars_per_unit: "",
 	});
 
 	// Update form data when the row prop changes
@@ -28,21 +28,21 @@ const AddEditMedicationModal = ({ open, onClose, row, onSave }) => {
 		if (row) {
 			setFormData({
 				name: row?.name || "",
-				dosageStr: row?.dosageStr || "",
+				dosage: row?.dosage || "",
 				quantity: row?.quantity || "",
-				prescriptionRequired: row?.prescriptionRequired || "",
-				expirationDate: row?.expirationDate || "",
-				dollarsPerUnit: row?.dollarsPerUnit || "",
+				prescription_required: row?.prescription_required || "",
+				expiration_date: row?.expiration_date || "",
+				dollars_per_unit: row?.dollars_per_unit || "",
 			});
 		} else {
 			// Reset to empty fields when adding a new patient
 			setFormData({
 				name: "",
-				dosageStr: "",
+				dosage: "",
 				quantity: "",
-				prescriptionRequired: "",
-				expirationDate: "",
-				dollarsPerUnit: "",
+				prescription_required: "",
+				expiration_date: "",
+				dollars_per_unit: "",
 			});
 		}
 	}, [row]);
@@ -78,8 +78,8 @@ const AddEditMedicationModal = ({ open, onClose, row, onSave }) => {
 				/>
 				<TextField
 					label="Dosage"
-					name="dosageStr"
-					value={formData.dosageStr}
+					name="dosage"
+					value={formData.dosage}
 					onChange={handleChange}
 					fullWidth
 					margin="dense"
@@ -94,24 +94,24 @@ const AddEditMedicationModal = ({ open, onClose, row, onSave }) => {
 				/>
 				<TextField
 					label="Prescription Required"
-					name="prescriptionRequired"
-					value={formData.prescriptionRequired}
+					name="prescription_required"
+					value={formData.prescription_required}
 					onChange={handleChange}
 					fullWidth
 					margin="dense"
 				/>
 				<TextField
 					label="Expiration Date"
-					name="expirationDate"
-					value={formData.expirationDate}
+					name="expiration_date"
+					value={formData.expiration_date}
 					onChange={handleChange}
 					fullWidth
 					margin="dense"
 				/>
 				<TextField
 					label="$ Per Unit"
-					name="dollarsPerUnit"
-					value={formData.dollarsPerUnit}
+					name="dollars_per_unit"
+					value={formData.dollars_per_unit}
 					onChange={handleChange}
 					fullWidth
 					margin="dense"

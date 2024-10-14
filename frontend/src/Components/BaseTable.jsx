@@ -20,7 +20,9 @@ const BaseTable = ({ columns, rows, actionButtons }) => {
 						width: 100,
 						sortable: false,
 						renderCell: (params) => (
-							<span>{actionButtons(params.row)}</span>
+							<>
+								{actionButtons(params.row)}
+							</>
 						),
 					},
 			  ]
@@ -29,19 +31,24 @@ const BaseTable = ({ columns, rows, actionButtons }) => {
 
 	return (
 		<Paper sx={{ height: "85vh", width: "100%" }}>
-			<DataGrid
-				rows={rows}
-				columns={modifiedColumns}
-				pageSizeOptions={[5, 10]}
-				sx={{
-					border: 0,
-					"& .MuiDataGrid-columnHeaders": {
-						fontWeight: "bold",
-						backgroundColor: "#00008B",
-						color: "#000000",
-					},
-				}}
-			/>
+		<DataGrid
+			rows={rows}
+			columns={modifiedColumns}
+			pageSizeOptions={[5, 10]}
+			sx={{
+			border: 0,
+			"& .MuiDataGrid-columnHeaders": {
+				fontWeight: "bold",
+				backgroundColor: "#00008B",
+				color: "#000000",
+			},
+			"& .MuiDataGrid-cell": {
+				display: 'flex',
+				alignItems: 'center',
+				gap: '4px', // Adjust space between buttons
+			},
+			}}
+		/>
 		</Paper>
 	);
 };

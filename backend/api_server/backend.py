@@ -11,7 +11,7 @@ from pydantic import BaseModel
 from passlib.context import CryptContext
 from typing import Optional
 from .database import SessionLocal, engine, Base
-from .schema import UserCreate, UserResponse, UserLogin, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate
+from .schema import UserCreate, UserResponse, UserLogin, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate, SimpleResponse
 from . import models  # Ensure this is the SQLAlchemy model
 from sqlalchemy.orm import Session
 from typing import List
@@ -67,7 +67,7 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
     
     return db_user
 
-@app.delete("/users/{user_id}", response_model=UserResponse)
+@app.delete("/users/{user_id}", response_model=SimpleResponse)
 def delete_user(user_id: int, db: Session = Depends(get_db)):
     db_user = db.query(models.User).filter(models.User.id == user_id).first()
     if db_user is None:
@@ -85,7 +85,7 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
 
     db.delete(db_user)
     db.commit()
-    return {"message": "User deleted successfully", "user_id": user_id}
+    return SimpleResponse(message="User deleted successfully")
 
 @app.put("/users/{user_id}", response_model=UserResponse)
 def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db)):

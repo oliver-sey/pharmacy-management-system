@@ -4,6 +4,8 @@ from typing import Optional
 from pydantic import BaseModel, EmailStr
 from datetime import date
 
+class SimpleResponse(BaseModel):
+    message: str
 class UserCreate(BaseModel):
     user_type: str
     email: EmailStr

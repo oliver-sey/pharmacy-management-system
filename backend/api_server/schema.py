@@ -2,7 +2,7 @@
 
 from typing import Optional
 from pydantic import BaseModel, EmailStr
-from datetime import date
+from datetime import date, datetime
 
 class UserCreate(BaseModel):
     first_name: str
@@ -109,9 +109,9 @@ class PrescriptionResponse(BaseModel):
     id: int
     patient_id: int
     user_entered_id: int
-    user_filled_id: int
+    user_filled_id: Optional[int]
     date_prescribed: date
-    filled_timestamp: date
+    filled_timestamp: Optional[datetime]
     medication_id: int
     doctor_name: str
     dosage: str
@@ -122,9 +122,14 @@ class PrescriptionResponse(BaseModel):
 class PrescriptionCreate(BaseModel):
     patient_id: int
     user_entered_id: int
+    user_filled_id: Optional[int] = None
+    filled_timestamp: Optional[datetime] = None
     medication_id: int
     doctor_name: str
     dosage: str
+
+    class Config:
+        orm_mode = True
 
 class PrescriptionUpdate(BaseModel):
     patient_id: Optional[int] = None

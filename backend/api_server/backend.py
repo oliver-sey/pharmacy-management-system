@@ -491,7 +491,7 @@ def update_prescription(prescription_id: int, prescription: schema.PrescriptionU
     db.refresh(db_prescription)
     return db_prescription
 
-@app.delete("/prescription/{prescription_id}"):
+@app.delete("/prescription/{prescription_id}")
 def delete_prescription(prescription_id: int, db: Session = Depends(get_db)):
     db_prescription = db.query(models.Prescription).filter(models.Prescription.id == prescription_id).first()
     if db_prescription is None:

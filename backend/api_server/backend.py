@@ -520,16 +520,25 @@ def delete_prescription(prescription_id: int, db: Session = Depends(get_db)):
 
 
 # fill a prescription
-@app.put("/prescriptions/{prescription_id}", response_model=PrescriptionResponse)
-def fill_prescription(prescription_id: int, prescription: PrescriptionUpdate, db: Session = Depends(get_db)):
+@app.put("/prescription/{prescription_id}/fill", response_model=schema.PrescriptionResponse)
+def fill_prescription(prescription_id: int, fill_request: schema.PrescriptionFillRequest, db: Session = Depends(get_db)):
     db_prescription = db.query(models.Prescription).filter(models.Prescription.id == prescription_id).first()
     if db_prescription is None:
         raise HTTPException(status_code=404, detail="Prescription not found")
     
-    if prescription.is_filled:
-        # 409 conflict. The request conflicts with the current state of the resource (has already been filled)
-        raise HTTPException(status_code=409, detail="Prescription has already been filled")
+    # if db_prescription.is_filled:
+    #     # 409 conflict. The request conflicts with the current state of the resource (has already been filled)
+    #     raise HTTPException(status_code=409, detail="Prescription has already been filled")
+    # else:
+    # set is_filled to True
+    # setattr(db_prescription, is_filled, True)
+    # setattr(db_prescription, filled_timestamp, datetime.now())
+    db_prescription.filled_timestamp = datetime.now()
 
+    # TODO: do we need to do any checks that fill_request has user_filled_id???
+    # setattr(db_prescription, user_filled_id, fill_request.user_filled_id)
+    db_prescription.user_filled_id = fill_request.user_filled_id
+        
     db.commit()
     db.refresh(db_prescription)
     return db_prescription

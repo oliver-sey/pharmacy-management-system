@@ -144,3 +144,9 @@ class PrescriptionUpdate(BaseModel):
     medication_id: Optional[int] = None
     doctor_name: Optional[str] = None
     dosage: Optional[str] = None
+
+
+class PrescriptionFillRequest(BaseModel):
+    user_filled_id: int
+    class Config:
+        orm_mode = True

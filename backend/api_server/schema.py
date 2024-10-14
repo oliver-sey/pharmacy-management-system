@@ -104,3 +104,34 @@ class MedicationUpdate(BaseModel):
     prescription_required: Optional[bool] = None
     expiration_date: Optional[date] = None
     dollars_per_unit: Optional[float] = None
+
+class PrescriptionResponse(BaseModel):
+    id: int
+    patient_id: int
+    user_entered_id: int
+    user_filled_id: int
+    date_prescribed: date
+    filled_timestamp: date
+    medication_id: int
+    doctor_name: str
+    dosage: str
+
+    class Config:  
+        orm_mode = True
+
+class PrescriptionCreate(BaseModel):
+    patient_id: int
+    user_entered_id: int
+    medication_id: int
+    doctor_name: str
+    dosage: str
+
+class PrescriptionUpdate(BaseModel):
+    patient_id: Optional[int] = None
+    user_entered_id: Optional[int] = None
+    user_filled_id: Optional[int] = None
+    date_prescribed: Optional[date] = None
+    filled_timestamp: Optional[date] = None
+    medication_id: Optional[int] = None
+    doctor_name: Optional[str] = None
+    dosage: Optional[str] = None

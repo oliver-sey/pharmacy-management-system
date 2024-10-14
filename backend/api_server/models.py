@@ -51,10 +51,10 @@ class Prescription(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     patient_id = Column(Integer, ForeignKey('patients.id'), nullable=True)
-    user_entered_id = Column(Integer, ForeignKey('users.id'))  # User who typed in the prescription
-    user_filled_id = Column(Integer, ForeignKey('users.id'))  # User who filled the prescription
-    date_prescribed = Column(Date, default=func.now())
-    filled_timestamp = Column(DateTime, default=func.now())
+    user_entered_id = Column(Integer, ForeignKey('users.id'), nullable=False)  # User who typed in the prescription
+    user_filled_id = Column(Integer, ForeignKey('users.id'), default=None, nullable=True)  # User who filled the prescription
+    date_prescribed = Column(Date, default=func.now(), nullable=False)
+    filled_timestamp = Column(DateTime, default=None, nullable=True)
     medication_id = Column(Integer, ForeignKey('medications.id'))  # Correct table reference
     doctor_name = Column(String)
     dosage = Column(String)

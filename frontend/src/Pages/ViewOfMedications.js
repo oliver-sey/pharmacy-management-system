@@ -24,15 +24,15 @@ function ViewOfMedications() {
 	const columns = [
 		{ field: "id", headerName: "ID", width: 70 },
 		{ field: "name", headerName: "Medication Name", width: 200 },
-		{ field: "dosageStr", headerName: "Dosage", width: 100 },
+		{ field: "dosage", headerName: "Dosage", width: 100 },
 		{ field: "quantity", headerName: "Quantity", width: 100 },
 		{
-			field: "prescriptionRequired",
+			field: "prescription_required",
 			headerName: "Prescription Required",
 			width: 100,
 		},
-		{ field: "expirationDate", headerName: "Expiration Date", width: 100 },
-		{ field: "dollarsPerUnit", headerName: "$ Per Unit", width: 100 },
+		{ field: "expiration_date", headerName: "Expiration Date", width: 100 },
+		{ field: "dollars_per_unit", headerName: "$ Per Unit", width: 100 },
 		{
 			field: "alerts",
 			headerName: "Alerts",
@@ -41,7 +41,7 @@ function ViewOfMedications() {
 			renderCell: (params) => {
 				// TODO: fix some weird stuff with time zones??? dates still print weird
 				const today = new Date();
-				const expirationDate = new Date(params.row.expirationDate);
+				const expirationDate = new Date(params.row.expiration_date);
 
 				// cut off anything beyond the date to avoid weird stuff with time zones
 				const todayUTC = new Date(
@@ -156,36 +156,36 @@ function ViewOfMedications() {
 			name: "dat good stuff",
 			dosage: "not strong enuff",
 			quantity: "200",
-			prescriptionRequired: "true",
-			expirationDate: "2024-10-25",
-			dollarsPerUnit: "0.001",
+			prescription_required: "true",
+			expiration_date: "2024-10-25",
+			dollars_per_unit: "0.001",
 		},
 		{
 			id: 2,
 			name: "tylenol",
 			dosage: "5mg",
 			quantity: "100",
-			prescriptionRequired: "false",
-			expirationDate: "2024-09-25",
-			dollarsPerUnit: "0.00002",
+			prescription_required: "false",
+			expiration_date: "2024-09-25",
+			dollars_per_unit: "0.00002",
 		},
 		{
 			id: 3,
 			name: "melatonin",
 			dosage: "3 mg",
 			quantity: "1000",
-			prescriptionRequired: "false",
-			expirationDate: "2029-01-02",
-			dollarsPerUnit: "0.0003",
+			prescription_required: "false",
+			expiration_date: "2029-01-02",
+			dollars_per_unit: "0.0003",
 		},
 		{
 			id: 4,
 			name: "oxy",
 			dosage: "100mg",
 			quantity: "2",
-			prescriptionRequired: "true",
-			expirationDate: "2024-09-24",
-			dollarsPerUnit: "1",
+			prescription_required: "true",
+			expiration_date: "2024-09-24",
+			dollars_per_unit: "1",
 		},
 	];
 

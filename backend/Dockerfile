@@ -10,6 +10,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the application code
 COPY api_server/ ./api_server
+# Include the tests directory
+COPY tests/ ./tests  
 
 # Expose the port the app runs on
 EXPOSE 8000

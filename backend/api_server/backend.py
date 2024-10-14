@@ -538,6 +538,8 @@ def fill_prescription(prescription_id: int, fill_request: schema.PrescriptionFil
     # TODO: do we need to do any checks that fill_request has user_filled_id???
     # setattr(db_prescription, user_filled_id, fill_request.user_filled_id)
     db_prescription.user_filled_id = fill_request.user_filled_id
+
+    # TODO: need to update medication inventory!!!!
         
     db.commit()
     db.refresh(db_prescription)

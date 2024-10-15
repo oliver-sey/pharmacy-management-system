@@ -337,11 +337,30 @@ def delete_patient(pid: int, db: Session = Depends(get_db)):
 #Im so sorry i didnt know where this fit so here for now
 @app.get("/patients/{patient_id}/prescriptions")
 def get_prescriptions_for_patient(patient_id: int, db: Session = Depends(get_db)):
-    patient = db.query(models.Patient).filter(models.Patient.id == patient_id).first()
-    if not patient:
-        raise HTTPException(status_code=404, detail="Patient not found")
-    prescriptions = db.query(models.Prescription).filter(models.Prescription.patient_id == patient_id).all()
-    return {"patient_name": patient.name, "prescriptions": prescriptions}
+    try:
+        # Fetch the patient by ID
+        patient = db.query(models.Patient).filter(models.Patient.id == patient_id).first()
+        if not patient:
+            raise HTTPException(status_code=404, detail="Patient not found")
+
+        # Fetch prescriptions for this patient
+        prescriptions = db.query(models.Prescription).filter(models.Prescription.patient_id == patient_id).all()
+
+        # If no prescriptions found, return empty list with patient's name
+        if not prescriptions:
+            return {"patient_name": f"{patient.first_name} {patient.last_name}", "prescriptions": []}
+
+        # Return the patient name and prescriptions in a serializable format
+        return {
+            "patient_name": f"{patient.first_name} {patient.last_name}",
+            "prescriptions": [prescription.to_dict() for prescription in prescriptions]  # Convert to dict if needed
+        }
+
+    except Exception as e:
+        print(f"Error fetching prescriptions for patient ID {patient_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
+
 
 
 #--------Logging configurations---------

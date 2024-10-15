@@ -27,9 +27,6 @@ function ViewOfPatients() {
 		fetchPatients(); // Call the async function
 	  }, []); // Empty array means this effect runs once when the component mounts
 
-	  const handleViewPrescriptions = (patientId) => {
-        navigate(`/patients/${patientId}/prescriptions`);
-    };
 	
 	  const columns = [
 		{ field: 'id', headerName: 'ID' },
@@ -45,12 +42,17 @@ function ViewOfPatients() {
 		{field : 'view_prescriptions', headerName: 'View Prescriptions', renderCell: (params) => (
 			<Button 
 			variant='contained' 
-			color ="primary" 
-			oonClick={() => handleViewPrescriptions(params.row.id)}
+			color="primary" 
+			onClick={() => handleViewPrescriptions(params.row.id)}  // Corrected the typo here
 			>
 				View Prescriptions
-			</Button>)}
+			</Button>
+		)}
 	  ];
+
+	  const handleViewPrescriptions = (patientId) => {
+        navigate(`/ViewOfPatients/${patientId}/prescriptions`);
+    };
 
 	// all users can edit patients
 	const canEdit = () => {

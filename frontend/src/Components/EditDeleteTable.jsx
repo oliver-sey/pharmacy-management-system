@@ -16,7 +16,8 @@ const EditDeleteTable = ({
 	showDeleteButton = true,
 	onAdd,
 	onConfirmDelete,
-	customConfirmMessage,
+	onEdit,
+	customConfirmMessage
 }) => {
 	const [isEditOpen, setEditOpen] = useState(false);
 	const [isDeleteOpen, setDeleteOpen] = useState(false);
@@ -89,10 +90,7 @@ const EditDeleteTable = ({
 				open={isEditOpen}
 				onClose={closeEditModal}
 				row={selectedRow}
-				onSave={(updatedRow) => {
-					console.log("Saved new data:", updatedRow);
-					closeEditModal();
-				}}
+				onSave={onEdit}
 			/>
 			{/* Delete Modal */}
 			<DeleteModal

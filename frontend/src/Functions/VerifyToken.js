@@ -22,7 +22,7 @@ async function VerifyToken (navigate)  {
           const userData = await userResponse.json();
 
           //Put user role in local storage
-          localStorage.setItem('role', userData.user_type)
+          //localStorage.setItem('role', userData.user_type)
         }
 
     } catch (error) {

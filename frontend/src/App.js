@@ -9,6 +9,7 @@ import ViewOfUsers from './Pages/ViewOfUsers';
 import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
 import ViewOfMedications from './Pages/ViewOfMedications';
 import ResetPassword from './Pages/ResetPassword'
+import ViewOfEmployees from './Pages/ViewOfEmployees';
 import PharmTechHome from './Pages/PharmTechHome';
 import CashierHome from './Pages/CashierHome';
 
@@ -30,6 +31,8 @@ function App() {
           <Route path='/viewofmedications' element={<ViewOfMedications/>}/>
           <Route path='/viewofusers' element={<ViewOfUsers/>}/>
           <Route path='/resetpassword' element ={<ResetPassword/>}/>
+          <Route path='/viewofemployees' element ={<ViewOfEmployees/>}/>
+
         </Routes>
       </Router>
     </div>

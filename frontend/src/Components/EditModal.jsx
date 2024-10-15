@@ -27,7 +27,8 @@ const EditModal = ({ open, onClose, row, onSave }) => {
 
 	// Handle saving of the updated data
 	const handleSave = () => {
-		onSave(formData); // Pass updated form data to parent component
+		console.log("row", row?.id);
+		onSave(formData, row?.id); // Pass updated form data to parent component
 	};
 
 	return (

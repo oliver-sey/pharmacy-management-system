@@ -2,14 +2,21 @@
 
 from typing import Optional
 from pydantic import BaseModel, EmailStr
+from datetime import date, datetime
 
+class SimpleResponse(BaseModel):
+    message: str
 class UserCreate(BaseModel):
+    first_name: str
+    last_name: str
     user_type: str
     email: EmailStr
     password: str
     is_locked_out: bool = True
 
 class UserUpdate(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
     user_type: Optional[str] = None
     email: Optional[EmailStr] = None
     password: Optional[str] = None
@@ -78,10 +85,60 @@ class UserLogin(BaseModel):
     email: str
     password: str
     
-class EmployeeResponse(BaseModel):
-    id: int
+class MedicationCreate(BaseModel):
     name: str
-    email: EmailStr
+    dosage: str
+    quantity: int
+    prescription_required: bool
+    expiration_date: date
+    dollars_per_unit: float
+
+class MedicationResponse(MedicationCreate):
+    id: int
 
     class Config:
         orm_mode = True
+
+class MedicationUpdate(BaseModel):
+    name: Optional[str] = None
+    dosage: Optional[str] = None
+    quantity: Optional[int] = None
+    prescription_required: Optional[bool] = None
+    expiration_date: Optional[date] = None
+    dollars_per_unit: Optional[float] = None
+
+class PrescriptionResponse(BaseModel):
+    id: int
+    patient_id: int
+    user_entered_id: int
+    user_filled_id: Optional[int]
+    date_prescribed: date
+    filled_timestamp: Optional[datetime]
+    medication_id: int
+    doctor_name: str
+    dosage: str
+
+    class Config:  
+        orm_mode = True
+
+class PrescriptionCreate(BaseModel):
+    patient_id: int
+    user_entered_id: int
+    user_filled_id: Optional[int] = None
+    filled_timestamp: Optional[datetime] = None
+    medication_id: int
+    doctor_name: str
+    dosage: str
+
+    class Config:
+        orm_mode = True
+
+class PrescriptionUpdate(BaseModel):
+    patient_id: Optional[int] = None
+    user_entered_id: Optional[int] = None
+    user_filled_id: Optional[int] = None
+    date_prescribed: Optional[date] = None
+    filled_timestamp: Optional[date] = None
+    medication_id: Optional[int] = None
+    doctor_name: Optional[str] = None
+    dosage: Optional[str] = None

@@ -9,3 +9,6 @@ python-multipart
 typing
 pydantic[email]
 alembic
+pytest
+pytest-asyncio
+httpx  # For async requests

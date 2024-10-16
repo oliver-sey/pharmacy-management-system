@@ -10,6 +10,7 @@ import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
 import ViewOfMedications from './Pages/ViewOfMedications';
 import ResetPassword from './Pages/ResetPassword'
 import ViewOfEmployees from './Pages/ViewOfEmployees';
+import FillPrescriptionForm from './Pages/FillPrescriptionForm';
 
 function App() {
 
@@ -28,6 +29,7 @@ function App() {
           <Route path='/viewofusers' element={<ViewOfUsers/>}/>
           <Route path='/resetpassword' element ={<ResetPassword/>}/>
           <Route path='/viewofemployees' element ={<ViewOfEmployees/>}/>
+          <Route path='/fill' element ={<FillPrescriptionForm/>}/>
 
         </Routes>
       </Router>

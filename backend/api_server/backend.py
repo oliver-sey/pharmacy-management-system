@@ -4,14 +4,14 @@ from typing import Annotated, Union # for definding the types that our functions
 import uvicorn
 import jwt
 from jwt.exceptions import InvalidTokenError
-from fastapi import Depends, FastAPI, HTTPException, status, Body
+from fastapi import Depends, FastAPI, HTTPException, Query, status, Body
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from passlib.context import CryptContext
 from typing import Optional
 from .database import SessionLocal, engine, Base
-from .schema import UserCreate, UserResponse, UserLogin, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate
+from .schema import UserCreate, UserResponse, UserLogin, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate, SimpleResponse
 from . import models  # Ensure this is the SQLAlchemy model
 from sqlalchemy.orm import Session
 from typing import List
@@ -67,6 +67,7 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
     
     return db_user
 
+
 @app.delete("/users/{user_id}")
 def delete_user(user_id: int, db: Session = Depends(get_db)):
     db_user = db.query(models.User).filter(models.User.id == user_id).first()
@@ -85,7 +86,7 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
 
     db.delete(db_user)
     db.commit()
-    return {"message": "User deleted successfully", "user_id": user_id}
+    return SimpleResponse(message="User deleted successfully")
 
 @app.put("/users/{user_id}", response_model=UserResponse)
 def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db)):
@@ -435,3 +436,90 @@ def list_medication(db: Session = Depends(get_db)):
     medications = db.query(models.Medication).all()
     
     return medications
+
+### Prescription CRUD ###
+@app.get("/prescriptions", response_model=List[schema.PrescriptionResponse])
+def get_prescriptions(patient_id: Optional[int] = Query(None), db: Session = Depends(get_db)):
+    '''
+    endpoint to get prescriptions with optional patient_id.
+    If patient_id is provided, only prescriptions for that patient are returned.
+    call like so: /prescriptions?patient_id=1 or /prescriptions to get all prescriptions
+    '''
+    if patient_id:
+        prescriptions = db.query(models.Prescription).filter(models.Prescription.patient_id == patient_id).all()
+    else:
+        prescriptions = db.query(models.Prescription).all()
+    return prescriptions
+
+@app.get("/prescription/{prescription_id}", response_model=schema.PrescriptionResponse)
+def get_prescription(prescription_id: int, db: Session = Depends(get_db)):
+    db_prescription = db.query(models.Prescription).filter(models.Prescription.id == prescription_id).first()
+    if db_prescription is None:
+        raise HTTPException(status_code=404, detail="Prescription not found")
+    
+    return db_prescription
+
+@app.post("/prescription", response_model=schema.PrescriptionResponse)
+def create_prescription(prescription: schema.PrescriptionCreate, db: Session = Depends(get_db)):
+    '''
+    we may need to edit this in the future depending on how we pass the patient info and medication info
+    currently, this code assumes it gets the id of patient and medication, but if it recieves a name or something
+    other than the id, we will need to query the DB to get the ids.
+    '''
+    # Ensure that prescription data is valid
+    try:
+        db_prescription = models.Prescription(**prescription.model_dump())  # Use .model_dump() for Pydantic V2
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    # Check prescription amount with medication inventory, if none or not enough, return 400, otherwise, decrease inventory dosage
+    db_medication = db.query(models.Medication).filter(models.Medication.id == db_prescription.medication_id)
+    if db_medication is None or db_medication.dosage < db_prescription.dosage:
+        return HTTPException(status_code=400, detail="Without sufficient inventory for such medication")
+    else:
+        db_medication.dosage -= db_prescription
+
+    # if successfully deduct medication from inventory, create a inventory instance in InventoryUpdate table
+    inventory_update = models.InventoryUpdate(
+        medication_id=db_medication.id,
+        user_activity_id=db_prescription.user_filled_id,    # user who filled the prescription
+        dosage=db_prescription.dosage                  # The quantity deducted
+    )
+
+    # Add the inventory update to the session
+    db.add(inventory_update)
+
+    # after update medication in inventory and create an inventory update, finally add the prescription
+    db.add(db_prescription)
+    db.commit()
+    db.refresh(db_prescription)
+    return db_prescription
+
+@app.put("/prescription/{prescription_id}", response_model=schema.PrescriptionUpdate)
+def update_prescription(prescription_id: int, prescription: schema.PrescriptionUpdate, db: Session = Depends(get_db)):
+    '''
+    deletes prescriptions
+    not sure if this should be allowed tho... we should talk ab it
+    '''
+    db_prescription = db.query(models.Prescription).filter(models.Prescription.id == prescription_id).first()
+    if db_prescription is None:
+        raise HTTPException(status_code=404, detail="Prescription not found")
+    
+    # Update only provided fields
+    for key, value in prescription.model_dump().items():
+        if value is not None:
+            setattr(db_prescription, key, value)
+
+    db.commit()
+    db.refresh(db_prescription)
+    return db_prescription
+
+@app.delete("/prescription/{prescription_id}")
+def delete_prescription(prescription_id: int, db: Session = Depends(get_db)):
+    db_prescription = db.query(models.Prescription).filter(models.Prescription.id == prescription_id).first()
+    if db_prescription is None:
+        raise HTTPException(status_code=404, detail="Prescription not found")
+    
+    db.delete(db_prescription)
+    db.commit()
+    return {"message": "Prescription deleted successfully", "prescription_id": prescription_id}

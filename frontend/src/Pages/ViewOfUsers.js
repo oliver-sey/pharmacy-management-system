@@ -1,9 +1,6 @@
-import { React, useRef, useState, useEffect } from "react";
+// React imports
+import React, { useState, useEffect } from "react";
 
-import EditDeleteTable from "../Components/EditDeleteTable";
-import AddEditUserModal from "../Components/AddEditUserModal";
-import DeleteModal from "../Components/DeleteModal";
-import Button from "@mui/material/Button";
 // Stylesheets
 import "../Styles/styles.css";
 
@@ -15,38 +12,38 @@ import { IconButton } from "@mui/material";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 
 function ViewOfUsers() {
-	const [rows, setUsers] = useState([]);
-
-	const fetchUsers = async () => {
-		console.log("In fetchUsers");
-		try {
-			const response = await fetch(
-				"http://localhost:8000/userslist/",
-				{
-					method: "GET",
-					// TODO: do we need this??
-					headers: {
-						"Content-Type": "application/json",
-					},
-				}
-			);
-
-			if (!response.ok) {
-				throw new Error("Failed to fetch users");
-
-				// TODO: add a snackbar for an alert?
-			}
-
-			const data = await response.json();
-			console.log(data);
-			// update the state with the fetched users
-			setUsers(data);
-		} catch (error) {
-			console.error("Error fetching users:", error);
-		}
-	};
+	const [users, setUsers] = useState([]);
 
 	useEffect(() => {
+		const fetchUsers = async () => {
+			console.log("In fetchUsers");
+			try {
+				const response = await fetch(
+					"http://localhost:8000/userslist/",
+					{
+						method: "GET",
+						// TODO: do we need this??
+						headers: {
+							"Content-Type": "application/json",
+						},
+					}
+				);
+
+				if (!response.ok) {
+					throw new Error("Failed to fetch users");
+
+					// TODO: add a snackbar for an alert?
+				}
+
+				const data = await response.json();
+				console.log(data);
+				// update the state with the fetched users
+				setUsers(data);
+			} catch (error) {
+				console.error("Error fetching users:", error);
+			}
+		};
+
 		fetchUsers();
 	}, []);
 
@@ -54,9 +51,11 @@ function ViewOfUsers() {
 	// headerName is what shows up on the website
 	// width is the default width of the column, user can adjust it
 	const columns = [
-		{ field: "id", headerName: "ID", width: 70 },
-		{ field: "firstName", headerName: "First name", width: 130 },
-		{ field: "lastName", headerName: "Last name", width: 130 },
+		// { field: "id", headerName: "ID", width: 70 },
+		// { field: "firstName", headerName: "First name", width: 130 },
+		// { field: "lastName", headerName: "Last name", width: 130 },
+		{ field: "email", headerName: "Email", width: 220 },
+
 		{
 			field: "user_type",
 			headerName: "User Type",
@@ -77,11 +76,6 @@ function ViewOfUsers() {
 				}
 			},
 		},
-		{ field: "email", headerName: "Email", width: 220 },
-		{ field: "password", headerName: "Password", width: 220 }
-
-
-		
 	];
 
 	// hardcoded values for development, this will come from the backend/database later
@@ -110,121 +104,32 @@ function ViewOfUsers() {
 	// 	},
 	// ];
 
-	// all users can edit patients
-	const canEdit = () => {
-		// const userType = localStorage.getItem('userType');
-		// TODO: should we do this with no checks?
-		return true;
-	};
-	  
-	// only pharmacists or pharmacy managers can delete
-	const canDelete = () => {
-		//const role = localStorage.getItem('role');
-		//return role === 'pharmacist' || role === 'pharmacymanager';
-		return true;
-	};
-
-	const deleteUser = async (id) => {
-		try {
-			console.log("row", id);
-			const response = await fetch(`http://localhost:8000/users/${id}`, {
-				method: 'DELETE',
-			});
-			if (!response.ok) {
-				throw new Error('Failed to delete user');
-			}
-			fetchUsers();
-		} catch (error) {
-			console.error('Error deleting user:', error);
-		}
-	}
-
-	const addEditUser = async (data, id) => {
-		if (id) {
-			editUser(data, id);
-		} else {
-			addUser(data);
-		}
-	}
-
-	const editUser = async (data, id) => {
-		try {
-			
-			console.log("row in editUser", id, data)
-			const response = await fetch(`http://localhost:8000/users/${id}`, {
-				method: 'PUT',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(data),
-			});
-			if (!response.ok) {
-				throw new Error('Failed to update user');
-			}
-			fetchUsers();
-		} catch (error) {
-			console.error('Error updating user:', error);
-		}
-	}
-
-	const addUser = async (data) => {
-		try {
-			console.log("row in addUser", data)
-			const response = await fetch(`http://localhost:8000/users`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(data),
-			});
-			if (!response.ok) {
-				throw new Error('Failed to add user');
-			}
-			fetchUsers();
-		} catch (error) {
-			console.error('Error adding user:', error);
-		}
-	}
 	// a column for buttons the user can click
-	// the message format that should get used in the delete confirmation modal (popup) for this table
-	// need this since we want a different format on other tables that use this same base component
-	const userConfirmMessage = (row) =>
-		`${row?.first_name || "Unknown First Name"} ${
-			row?.last_name || "Unknown Last Name"
-		}, with email ${row?.email || "Unknown Email"}`;
-
-	const openAddUserModal = useRef(null);
+	const actionButtons = (row) =>
+		// only make the unlock icon appear if the user is locked out
+		row.isLockedOut == "true" && (
+			<div>
+				<IconButton
+					// TODO: do something when they click the button!
+					onClick={() => console.log("Unlocking:", row.id)}
+					disabled={!row.isLockedOut} // Disable if already unlocked
+				>
+					{/* <LockOpenIcon color={row.isLockedOut ? "primary" : "disabled"} /> */}
+					<LockOpenIcon color="primary" />
+				</IconButton>
+			</div>
+		);
 
 	// return the page, using the BaseTable component with a few changes (custom columns and rows, the actionButtons column)
 	return (
 		<div>
-		  <h2>Users Table</h2>
-			<Button
-			  variant="contained"
-			  onClick={() => {
-				if (openAddUserModal.current) {
-				  openAddUserModal.current(); // Trigger modal to open for adding a user
-				}
-			  }}
-			>
-			  Add User
-			</Button>
-	  
-		  <EditDeleteTable
-			rows={rows}
-			columns={columns}
-			editModal={AddEditUserModal}
-			deleteModal={DeleteModal}
-			showEditButton={canEdit()}
-			showDeleteButton={canDelete()}
-			customConfirmMessage={userConfirmMessage}
-			onAdd={(handler) => {
-			  openAddUserModal.current = handler; // Store the open modal handler
-			}}
-			onEdit={addEditUser}
-			onConfirmDelete={deleteUser}
-		  />
+			<h2>Users Table</h2>
+			<BaseTable
+				columns={columns}
+				rows={users}
+				actionButtons={actionButtons}
+			/>
 		</div>
-	  );
+	);
 }
 export default ViewOfUsers;

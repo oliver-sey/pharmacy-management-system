@@ -4,18 +4,20 @@ from typing import Annotated, Union # for definding the types that our functions
 import uvicorn
 import jwt
 from jwt.exceptions import InvalidTokenError
-from fastapi import Depends, FastAPI, HTTPException, status, Body
+from fastapi import Depends, FastAPI, HTTPException, Query, status, Body
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from passlib.context import CryptContext
 from typing import Optional
 from .database import SessionLocal, engine, Base
-from .schema import UserCreate, UserResponse, UserLogin, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate
+from .schema import UserCreate, UserResponse, UserLogin, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate, SimpleResponse
 from . import models  # Ensure this is the SQLAlchemy model
 from sqlalchemy.orm import Session
 from typing import List
 from . import schema
+from sqlalchemy.exc import IntegrityError
+from pydantic import ValidationError
 
 # Create the database tables
 Base.metadata.create_all(bind=engine)
@@ -67,7 +69,7 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
     
     return db_user
 
-@app.delete("/users/{user_id}", response_model=UserResponse)
+@app.delete("/users/{user_id}", response_model=SimpleResponse)
 def delete_user(user_id: int, db: Session = Depends(get_db)):
     db_user = db.query(models.User).filter(models.User.id == user_id).first()
     if db_user is None:
@@ -85,7 +87,7 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
 
     db.delete(db_user)
     db.commit()
-    return {"message": "User deleted successfully", "user_id": user_id}
+    return SimpleResponse(message="User deleted successfully")
 
 @app.put("/users/{user_id}", response_model=UserResponse)
 def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db)):
@@ -94,6 +96,8 @@ def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
     
     # Update only provided fields
+    if user.first_name is not None:
+        db_user.first_name = user.first_name
     if user.user_type is not None:
         db_user.user_type = user.user_type
     if user.email is not None:
@@ -292,14 +296,28 @@ def get_patients(db: Session = Depends(get_db)):
 def create_patient(patient: PatientCreate, db: Session = Depends(get_db)):
     patient_data = patient.model_dump()
     email = patient_data['email']
+    # check if the email is already registered
     if db.query(models.Patient).filter(models.Patient.email == email).first():
         raise HTTPException(status_code=400, detail="Email already registered")
     else:
-        db_patient = models.Patient(**patient_data)
-        db.add(db_patient)
-        db.commit()
-        db.refresh(db_patient)
-        return db_patient
+        # try to add patient to the database
+        try:
+            db_patient = models.Patient(**patient_data)
+            db.add(db_patient)
+            db.commit()
+            db.refresh(db_patient)
+            return db_patient
+        # if there is an error, raise an error
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        except IntegrityError as e:
+            db.rollback()
+            raise HTTPException(status_code=400, detail=str(e.orig))
+        except ValidationError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(status_code=400, detail=str(e))
 
 @app.put("/patient/{patient_id}")
 def put_patient(patient_id: int, patient: PatientUpdate, db: Session = Depends(get_db)):
@@ -310,14 +328,17 @@ def put_patient(patient_id: int, patient: PatientUpdate, db: Session = Depends(g
         raise HTTPException(status_code=404, detail="Patient not found")
     # get the data stored in the body of the put request
     patient_data = patient.model_dump()
-    # update the fields of the existing patient
-    for key, value in patient_data.items():
-        setattr(db_patient, key, value)
-    # commit and refresh
-    db.commit()
-    db.refresh(db_patient)
 
-    return db_patient
+    try:
+        # update the fields of the existing patient
+        for key, value in patient_data.items():
+            setattr(db_patient, key, value)
+        # commit and refresh
+        db.commit()
+        db.refresh(db_patient)
+        return db_patient
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))    
 
 @app.delete("/patient/{pid}")
 def delete_patient(pid: int, db: Session = Depends(get_db)):
@@ -457,3 +478,90 @@ def list_medication(db: Session = Depends(get_db)):
     medications = db.query(models.Medication).all()
     
     return medications
+
+### Prescription CRUD ###
+@app.get("/prescriptions", response_model=List[schema.PrescriptionResponse])
+def get_prescriptions(patient_id: Optional[int] = Query(None), db: Session = Depends(get_db)):
+    '''
+    endpoint to get prescriptions with optional patient_id.
+    If patient_id is provided, only prescriptions for that patient are returned.
+    call like so: /prescriptions?patient_id=1 or /prescriptions to get all prescriptions
+    '''
+    if patient_id:
+        prescriptions = db.query(models.Prescription).filter(models.Prescription.patient_id == patient_id).all()
+    else:
+        prescriptions = db.query(models.Prescription).all()
+    return prescriptions
+
+@app.get("/prescription/{prescription_id}", response_model=schema.PrescriptionResponse)
+def get_prescription(prescription_id: int, db: Session = Depends(get_db)):
+    db_prescription = db.query(models.Prescription).filter(models.Prescription.id == prescription_id).first()
+    if db_prescription is None:
+        raise HTTPException(status_code=404, detail="Prescription not found")
+    
+    return db_prescription
+
+@app.post("/prescription", response_model=schema.PrescriptionResponse)
+def create_prescription(prescription: schema.PrescriptionCreate, db: Session = Depends(get_db)):
+    '''
+    we may need to edit this in the future depending on how we pass the patient info and medication info
+    currently, this code assumes it gets the id of patient and medication, but if it recieves a name or something
+    other than the id, we will need to query the DB to get the ids.
+    '''
+    # Ensure that prescription data is valid
+    try:
+        db_prescription = models.Prescription(**prescription.model_dump())  # Use .model_dump() for Pydantic V2
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    # Check prescription amount with medication inventory, if none or not enough, return 400, otherwise, decrease inventory dosage
+    db_medication = db.query(models.Medication).filter(models.Medication.id == db_prescription.medication_id)
+    if db_medication is None or db_medication.dosage < db_prescription.dosage:
+        return HTTPException(status_code=400, detail="Without sufficient inventory for such medication")
+    else:
+        db_medication.dosage -= db_prescription
+
+    # if successfully deduct medication from inventory, create a inventory instance in InventoryUpdate table
+    inventory_update = models.InventoryUpdate(
+        medication_id=db_medication.id,
+        user_activity_id=db_prescription.user_filled_id,    # user who filled the prescription
+        dosage=db_prescription.dosage                  # The quantity deducted
+    )
+
+    # Add the inventory update to the session
+    db.add(inventory_update)
+
+    # after update medication in inventory and create an inventory update, finally add the prescription
+    db.add(db_prescription)
+    db.commit()
+    db.refresh(db_prescription)
+    return db_prescription
+
+@app.put("/prescription/{prescription_id}", response_model=schema.PrescriptionUpdate)
+def update_prescription(prescription_id: int, prescription: schema.PrescriptionUpdate, db: Session = Depends(get_db)):
+    '''
+    deletes prescriptions
+    not sure if this should be allowed tho... we should talk ab it
+    '''
+    db_prescription = db.query(models.Prescription).filter(models.Prescription.id == prescription_id).first()
+    if db_prescription is None:
+        raise HTTPException(status_code=404, detail="Prescription not found")
+    
+    # Update only provided fields
+    for key, value in prescription.model_dump().items():
+        if value is not None:
+            setattr(db_prescription, key, value)
+
+    db.commit()
+    db.refresh(db_prescription)
+    return db_prescription
+
+@app.delete("/prescription/{prescription_id}")
+def delete_prescription(prescription_id: int, db: Session = Depends(get_db)):
+    db_prescription = db.query(models.Prescription).filter(models.Prescription.id == prescription_id).first()
+    if db_prescription is None:
+        raise HTTPException(status_code=404, detail="Prescription not found")
+    
+    db.delete(db_prescription)
+    db.commit()
+    return {"message": "Prescription deleted successfully", "prescription_id": prescription_id}

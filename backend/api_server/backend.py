@@ -484,24 +484,24 @@ def create_prescription(prescription: schema.PrescriptionCreate, db: Session = D
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    # Check prescription amount with medication inventory, if none or not enough, return 400, otherwise, decrease inventory dosage
-    db_medication = db.query(models.Medication).filter(models.Medication.id == db_prescription.medication_id)
-    if db_medication is None or db_medication.dosage < db_prescription.dosage:
-        return HTTPException(status_code=400, detail="Without sufficient inventory for such medication")
-    else:
-        db_medication.dosage -= db_prescription
+    # # Check prescription amount with medication inventory, if none or not enough, return 400, otherwise, decrease inventory dosage
+    # db_medication = db.query(models.Medication).filter(models.Medication.id == db_prescription.medication_id)
+    # if db_medication is None or db_medication.dosage < db_prescription.dosage:
+    #     return HTTPException(status_code=400, detail="Without sufficient inventory for such medication")
+    # else:
+    #     db_medication.dosage -= db_prescription
 
-    # if successfully deduct medication from inventory, create a inventory instance in InventoryUpdate table
-    inventory_update = models.InventoryUpdate(
-        medication_id=db_medication.id,
-        user_activity_id=db_prescription.user_filled_id,    # user who filled the prescription
-        dosage=db_prescription.dosage                  # The quantity deducted
-    )
+    # # if successfully deduct medication from inventory, create a inventory instance in InventoryUpdate table
+    # inventory_update = models.InventoryUpdate(
+    #     medication_id=db_medication.id,
+    #     user_activity_id=db_prescription.user_filled_id,    # user who filled the prescription
+    #     dosage=db_prescription.dosage                  # The quantity deducted
+    # )
 
-    # Add the inventory update to the session
-    db.add(inventory_update)
+    # # Add the inventory update to the session
+    # db.add(inventory_update)
 
-    # after update medication in inventory and create an inventory update, finally add the prescription
+    # # after update medication in inventory and create an inventory update, finally add the prescription
     db.add(db_prescription)
     db.commit()
     db.refresh(db_prescription)
@@ -550,15 +550,32 @@ def fill_prescription(prescription_id: int, fill_request: schema.PrescriptionFil
         # 409 conflict. The request conflicts with the current state of the resource (has already been filled)
         raise HTTPException(status_code=409, detail="Prescription has already been filled")
     else:
-        # setattr(db_prescription, filled_timestamp, datetime.now())
-        db_prescription.filled_timestamp = datetime.now()
 
-        # TODO: do we need to do any checks that fill_request has user_filled_id???
-        # setattr(db_prescription, user_filled_id, fill_request.user_filled_id)
+        # Check prescription amount with medication inventory
+        db_medication = db.query(models.Medication).filter(models.Medication.id == db_prescription.medication_id)
+        # if none or not enough inventory, return 400, otherwise, decrease inventory dosage
+        if db_medication is None or db_medication.dosage < db_prescription.dosage:
+            return HTTPException(status_code=400, detail="There is no or insufficient inventory of this medication to fill the prescription")
+        else:
+            db_medication.dosage -= db_prescription
+
+        # if we successfully deduct medication from inventory, create an inventory update instance in InventoryUpdate table
+        # TODO: ******is this sufficient to update the inventory?????
+        inventory_update = models.InventoryUpdate(
+            medication_id=db_medication.id,
+            user_activity_id=db_prescription.user_filled_id,    # user who filled the prescription
+            dosage=db_prescription.dosage                  # The quantity deducted
+        )
+
+        # Add the inventory update to the session
+        db.add(inventory_update)
+
+        # after update medication in inventory and create an inventory update, finally fill the prescription
+        # set the timestamp of filling to the current time
+        db_prescription.filled_timestamp = datetime.now()
+        # get the user who filled the prescription from PrescriptionFillRequest
         db_prescription.user_filled_id = fill_request.user_filled_id
 
-        # TODO: need to update medication inventory!!!!
-        
     db.commit()
     db.refresh(db_prescription)
     return db_prescription

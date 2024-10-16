@@ -12,10 +12,6 @@ import {
 	TextField,
 } from "@mui/material";
 
-// for the date input component
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 
 const AddEditPatientModal = ({ open, onClose, row, onSave }) => {
 	// Initialize form data
@@ -252,7 +248,7 @@ const AddEditPatientModal = ({ open, onClose, row, onSave }) => {
 					fullWidth
 					margin="dense" 
 				/>
-				{/* <TextField
+				<TextField
 					label="Date of Birth"
 					name="date_of_birth"
 					value={formData.date_of_birth}
@@ -263,23 +259,7 @@ const AddEditPatientModal = ({ open, onClose, row, onSave }) => {
 					helperText={touched.date_of_birth && formErrors.date_of_birth}
 					fullWidth
 					margin="dense"
-				/> */}
-				
-
-				<LocalizationProvider dateAdapter={AdapterDayjs}>
-					<DatePicker
-					label="Date of Birth"
-					name="date_of_birth"
-					value={formData.date_of_birth}
-					onChange={handleFieldChange}
-					onBlur={handleBlur}
-					// onFocus={handleFocus}
-					error={!!formErrors.date_of_birth && touched.date_of_birth}
-					helperText={touched.date_of_birth && formErrors.date_of_birth}
-					fullWidth
-					margin="dense"
-				/>
-				</LocalizationProvider>
+				/> 
 				<TextField
 					label="Address"
 					name="address"

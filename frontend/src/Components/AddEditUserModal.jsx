@@ -59,7 +59,7 @@ const AddEditUserModal = ({open, onClose, row, onSave}) => {
 			{/* depending on if row is not null or null, change the title from editing to adding a new user */}
 			<DialogTitle>{row ? "Edit User" : "Add User"}</DialogTitle>
 			<DialogContent>
-				{/* Fields for editing/adding patient */}
+				{/* Fields for editing/adding user */}
 				<TextField
 					label="First Name"
 					name="first_name"

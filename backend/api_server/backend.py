@@ -467,6 +467,24 @@ def create_prescription(prescription: schema.PrescriptionCreate, db: Session = D
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+    # Check prescription amount with medication inventory, if none or not enough, return 400, otherwise, decrease inventory dosage
+    db_medication = db.query(models.Medication).filter(models.Medication.id == db_prescription.medication_id)
+    if db_medication is None or db_medication.dosage < db_prescription.dosage:
+        return HTTPException(status_code=400, detail="Without sufficient inventory for such medication")
+    else:
+        db_medication.dosage -= db_prescription
+
+    # if successfully deduct medication from inventory, create a inventory instance in InventoryUpdate table
+    inventory_update = models.InventoryUpdate(
+        medication_id=db_medication.id,
+        user_activity_id=db_prescription.user_filled_id,    # user who filled the prescription
+        dosage=db_prescription.dosage                  # The quantity deducted
+    )
+
+    # Add the inventory update to the session
+    db.add(inventory_update)
+
+    # after update medication in inventory and create an inventory update, finally add the prescription
     db.add(db_prescription)
     db.commit()
     db.refresh(db_prescription)

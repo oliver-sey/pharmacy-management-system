@@ -20,6 +20,10 @@ class UserUpdate(BaseModel):
     password: Optional[str] = None
     is_locked_out: Optional[bool] = True
 
+class UserDeleteResponse(BaseModel):
+    message: str
+    user_id: int
+
 class PatientCreate(BaseModel):
     first_name: str
     last_name: str
@@ -76,8 +80,11 @@ class PatientResponse(BaseModel):
 
 class UserResponse(BaseModel):
     id: int
+    first_name: str
+    last_name: str
     user_type: str
     email: str
+    password: str
 
 class UserLogin(BaseModel):
     email: str

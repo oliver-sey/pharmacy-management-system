@@ -121,7 +121,7 @@ function ViewOfUsers() {
 	// 	},
 	// ];
 
-	// all users can edit patients
+	// all users can edit users
 	const canEdit = () => {
 		// const userType = localStorage.getItem('userType');
 		// TODO: should we do this with no checks?

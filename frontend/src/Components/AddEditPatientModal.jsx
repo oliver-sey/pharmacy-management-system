@@ -13,8 +13,9 @@ import {
 } from "@mui/material";
 
 // for the date input component
-// import { Dayjs } from 'dayjs';
-// import { DatePicker } from '@mui/x-date-pickers';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 
 const AddEditPatientModal = ({ open, onClose, row, onSave }) => {
 	// Initialize form data
@@ -128,6 +129,9 @@ const AddEditPatientModal = ({ open, onClose, row, onSave }) => {
 					// pretty sure this is the regex used by pydantic in the backend, so we want to use the same one to give users
 					// warnings before they try to submit.
 					// otherwise they submit and get errors about invalid emails that they didn't get warning about
+					
+					// the line below this disables the warning on the regex for only the line below it
+					// eslint-disable-next-line no-control-regex
 					const emailRegex = /^(?:[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-zA-Z0-9-]*[a-zA-Z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*)\])$/;
 					if (!value) {
 						errors.email = 'Email is required';
@@ -157,13 +161,13 @@ const AddEditPatientModal = ({ open, onClose, row, onSave }) => {
 	};
 	
 	// Validate field on focus to re-check errors when the user clicks back in
-	const handleFocus = (e) => {
-		const fieldName = e.target.name;
-	// 	// setTouched((prevTouched) => ({ ...prevTouched, [fieldName]: true }));
+	// const handleFocus = (e) => {
+	// 	const fieldName = e.target.name;
+	// // 	// setTouched((prevTouched) => ({ ...prevTouched, [fieldName]: true }));
 
-	// 	// Re-validate field when user focuses back on it
-	// 	validateFields(fieldName);
-	};
+	// // 	// Re-validate field when user focuses back on it
+	// // 	validateFields(fieldName);
+	// };
 
 	// Adjust handleFieldChange to validate immediately if the field has already been touched once
 	const handleFieldChange = (e) => {
@@ -230,7 +234,7 @@ const AddEditPatientModal = ({ open, onClose, row, onSave }) => {
 					value={formData.first_name}
 					onChange={handleFieldChange}
 					onBlur={handleBlur}
-					onFocus={handleFocus}
+					// onFocus={handleFocus}
 					error={!!formErrors.first_name && touched.first_name}
 					helperText={touched.first_name && formErrors.first_name}
 					fullWidth
@@ -242,43 +246,47 @@ const AddEditPatientModal = ({ open, onClose, row, onSave }) => {
 					value={formData.last_name}
 					onChange={handleFieldChange}
 					onBlur={handleBlur}
-					onFocus={handleFocus}
+					// onFocus={handleFocus}
 					error={!!formErrors.last_name && touched.last_name}
 					helperText={touched.last_name && formErrors.last_name}
 					fullWidth
-					margin="dense"
+					margin="dense" 
 				/>
-				<TextField
+				{/* <TextField
 					label="Date of Birth"
 					name="date_of_birth"
 					value={formData.date_of_birth}
 					onChange={handleFieldChange}
 					onBlur={handleBlur}
-					onFocus={handleFocus}
-					error={!!formErrors.date_of_birth && touched.date_of_birth}
-					helperText={touched.date_of_birth && formErrors.date_of_birth}
-					fullWidth
-					margin="dense"
-				/>
-				{/* <DatePicker
-					label="Date of Birth"
-					name="date_of_birth"
-					value={formData.date_of_birth}
-					onChange={handleFieldChange}
-					onBlur={handleBlur}
-					onFocus={handleFocus}
+					// onFocus={handleFocus}
 					error={!!formErrors.date_of_birth && touched.date_of_birth}
 					helperText={touched.date_of_birth && formErrors.date_of_birth}
 					fullWidth
 					margin="dense"
 				/> */}
+				
+
+				<LocalizationProvider dateAdapter={AdapterDayjs}>
+					<DatePicker
+					label="Date of Birth"
+					name="date_of_birth"
+					value={formData.date_of_birth}
+					onChange={handleFieldChange}
+					onBlur={handleBlur}
+					// onFocus={handleFocus}
+					error={!!formErrors.date_of_birth && touched.date_of_birth}
+					helperText={touched.date_of_birth && formErrors.date_of_birth}
+					fullWidth
+					margin="dense"
+				/>
+				</LocalizationProvider>
 				<TextField
 					label="Address"
 					name="address"
 					value={formData.address}
 					onChange={handleFieldChange}
 					onBlur={handleBlur}
-					onFocus={handleFocus}
+					// onFocus={handleFocus}
 					error={!!formErrors.address && touched.address}
 					helperText={touched.address && formErrors.address}
 					fullWidth
@@ -290,7 +298,7 @@ const AddEditPatientModal = ({ open, onClose, row, onSave }) => {
 					value={formData.phone_number}
 					onChange={handleFieldChange}
 					onBlur={handleBlur}
-					onFocus={handleFocus}
+					// onFocus={handleFocus}
 					error={!!formErrors.phone_number && touched.phone_number}
 					helperText={touched.phone_number && formErrors.phone_number}
 					fullWidth
@@ -302,7 +310,7 @@ const AddEditPatientModal = ({ open, onClose, row, onSave }) => {
 					value={formData.email}
 					onChange={handleFieldChange}
 					onBlur={handleBlur}
-					onFocus={handleFocus}
+					// onFocus={handleFocus}
 					error={!!formErrors.email && touched.email}
 					helperText={touched.email && formErrors.email}
 					fullWidth
@@ -314,7 +322,7 @@ const AddEditPatientModal = ({ open, onClose, row, onSave }) => {
 					value={formData.insurance_name}
 					onChange={handleFieldChange}
 					onBlur={handleBlur}
-					onFocus={handleFocus}
+					// onFocus={handleFocus}
 					error={!!formErrors.insurance_name && touched.insurance_name}
 					helperText={touched.insurance_name && formErrors.insurance_name}
 					fullWidth
@@ -326,7 +334,7 @@ const AddEditPatientModal = ({ open, onClose, row, onSave }) => {
 					value={formData.insurance_group_number}
 					onChange={handleFieldChange}
 					onBlur={handleBlur}
-					onFocus={handleFocus}
+					// onFocus={handleFocus}
 					error={!!formErrors.insurance_group_number && touched.insurance_group_number}
 					helperText={touched.insurance_group_number && formErrors.insurance_group_number}
 					fullWidth
@@ -338,7 +346,7 @@ const AddEditPatientModal = ({ open, onClose, row, onSave }) => {
 					value={formData.insurance_member_id}
 					onChange={handleFieldChange}
 					onBlur={handleBlur}
-					onFocus={handleFocus}
+					// onFocus={handleFocus}
 					error={!!formErrors.insurance_member_id && touched.insurance_member_id}
 					helperText={touched.insurance_member_id && formErrors.insurance_member_id}
 					fullWidth

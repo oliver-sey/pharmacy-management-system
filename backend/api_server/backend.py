@@ -335,7 +335,7 @@ def delete_patient(pid: int, db: Session = Depends(get_db)):
 
 #--------------Getting Patients Prescription---------------------------
 #Im so sorry i didnt know where this fit so here for now
-@app.get("/patients/{patient_id}/prescriptions")
+@app.get("/patients/{patient_id}/prescriptions", response_model=List[schema.PrescriptionResponse])
 def get_prescriptions_for_patient(patient_id: int, db: Session = Depends(get_db)):
     try:
         # Fetch the patient by ID
@@ -343,19 +343,16 @@ def get_prescriptions_for_patient(patient_id: int, db: Session = Depends(get_db)
         if not patient:
             raise HTTPException(status_code=404, detail="Patient not found")
 
-        # Fetch prescriptions for this patient
+        # Fetch prescriptions for the patient
         prescriptions = db.query(models.Prescription).filter(models.Prescription.patient_id == patient_id).all()
 
-        # If no prescriptions found, return empty list with patient's name
+        # If no prescriptions found, return an empty list
         if not prescriptions:
-            return {"patient_name": f"{patient.first_name} {patient.last_name}", "prescriptions": []}
+            return []
 
-        # Return the patient name and prescriptions in a serializable format
-        return {
-            "patient_name": f"{patient.first_name} {patient.last_name}",
-            "prescriptions": [prescription.to_dict() for prescription in prescriptions]  # Convert to dict if needed
-        }
-
+        # Serialize the prescriptions using Pydantic and return them
+        return [schema.PrescriptionResponse.from_orm(prescription) for prescription in prescriptions]
+    
     except Exception as e:
         print(f"Error fetching prescriptions for patient ID {patient_id}: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal Server Error")

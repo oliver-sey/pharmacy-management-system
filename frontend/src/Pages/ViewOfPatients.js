@@ -51,9 +51,13 @@ function ViewOfPatients() {
 	  ];
 
 	  const handleViewPrescriptions = (patientId) => {
-        navigate(`/ViewOfPatients/${patientId}/prescriptions`);
-    };
-
+		if (!patientId) {
+			console.error("Patient ID is undefined");
+			return;
+		}
+		navigate(`/viewofpatients/${patientId}/prescriptions`);
+	};
+	
 	// all users can edit patients
 	const canEdit = () => {
 		// const userType = localStorage.getItem('userType');

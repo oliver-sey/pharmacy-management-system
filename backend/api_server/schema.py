@@ -2,7 +2,7 @@
 
 from typing import Optional
 from pydantic import BaseModel, EmailStr
-from datetime import date
+from datetime import date, datetime
 
 class UserCreate(BaseModel):
     user_type: str
@@ -100,3 +100,17 @@ class MedicationUpdate(BaseModel):
     prescription_required: Optional[bool] = None
     expiration_date: Optional[date] = None
     dollars_per_unit: Optional[float] = None
+
+class PrescriptionResponse(BaseModel):
+    id: int
+    patient_id: int
+    user_entered_id: int
+    user_filled_id: int
+    date_prescribed: date
+    filled_timestamp: datetime  # Make sure datetime is imported
+    medication_id: int
+    doctor_name: str
+    dosage: str
+
+    class Config:
+       from_attributes = True  # Thcis tells Pydantic to work with SQLAlchemy models

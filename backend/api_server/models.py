@@ -12,8 +12,8 @@ class User(Base):
     __tablename__ = 'users'
 
     id = Column(Integer, primary_key=True, index=True)
-    first_name = Column(String, index=True)
-    last_name = Column(String, index=True)
+    first_name = Column(Integer, index=True)
+    last_name = Column(Integer, index=True)
     user_type = Column(String, index=True)
     email = Column(String, unique=True, index=True)
     password = Column(String)
@@ -51,13 +51,13 @@ class Prescription(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     patient_id = Column(Integer, ForeignKey('patients.id'), nullable=True)
-    user_entered_id = Column(Integer, ForeignKey('users.id'), nullable=False)  # User who typed in the prescription
-    user_filled_id = Column(Integer, ForeignKey('users.id'), default=None, nullable=True)  # User who filled the prescription
-    date_prescribed = Column(Date, default=func.now(), nullable=False)
-    filled_timestamp = Column(DateTime, default=None, nullable=True)
+    user_entered_id = Column(Integer, ForeignKey('users.id'))  # User who typed in the prescription
+    user_filled_id = Column(Integer, ForeignKey('users.id'))  # User who filled the prescription
+    date_prescribed = Column(Date, default=func.now())
+    filled_timestamp = Column(DateTime, default=func.now())
     medication_id = Column(Integer, ForeignKey('medications.id'))  # Correct table reference
     doctor_name = Column(String)
-    dosage = Column(Integer)
+    dosage = Column(String)
 
     patient = relationship("Patient", back_populates="prescriptions")
     user_entered = relationship("User", back_populates="entered_prescriptions", foreign_keys="[Prescription.user_entered_id]")
@@ -69,7 +69,7 @@ class Medication(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
-    dosage = Column(Integer)
+    dosage = Column(String)
     quantity = Column(Integer)
     prescription_required = Column(Boolean)
     expiration_date = Column(Date)
@@ -95,15 +95,14 @@ class InventoryUpdate(Base):
     id = Column(Integer, primary_key=True, index=True)
     medication_id = Column(Integer, ForeignKey('medications.id'))
     user_activity_id = Column(Integer, ForeignKey('user_activities.id'))
-    # transaction_id = Column(Integer, ForeignKey('transactions.id')) # don't think we need this
-    # user_id = Column(Integer, ForeignKey('users.id')) # don't think we need this
-    dosage = Column(Integer)
-    # quantity = Column(Integer) # just keep dosage for now
+    transaction_id = Column(Integer, ForeignKey('transactions.id'))
+    user_id = Column(Integer, ForeignKey('users.id')) 
+    quantity = Column(Integer)
     timestamp = Column(DateTime, default=func.now())
     
     medication = relationship("Medication", back_populates="inventory_updates")
     user_activity = relationship("UserActivity", back_populates="inventory_updates")  # Correct the relationship
-    # transaction = relationship("Transaction", back_populates="inventory_update")
+    transaction = relationship("Transaction", back_populates="inventory_update")
 
 class Transaction(Base):
     __tablename__ = 'transactions'
@@ -116,4 +115,4 @@ class Transaction(Base):
 
     patient = relationship("Patient", back_populates="transactions")
     user = relationship("User", back_populates="transactions")
-    # inventory_update = relationship("InventoryUpdate", back_populates="transaction")  # This should link to the correct attribute
+    inventory_update = relationship("InventoryUpdate", back_populates="transaction")  # This should link to the correct attribute

@@ -6,9 +6,6 @@ import AddEditPatientModal from "../Components/AddEditPatientModal";
 import DeleteModal from "../Components/DeleteModal";
 
 function ViewOfPatients() {
-	// the columns for the table
-	// headerName is what shows up on the website
-	// width is the default width of the column, user can adjust it
 	const [rows, setRows] = useState([]);
 	const [errorMessage, setErrorMessage] = useState(null);
 	const [openSnackbar, setOpenSnackbar] = useState(false);
@@ -32,7 +29,10 @@ function ViewOfPatients() {
 		fetchPatients(); // Call the async function
 	  }, []); // Empty array means this effect runs once when the component mounts
 
-	  const columns = [
+	// the columns for the table
+	// headerName is what shows up on the website
+	// width is the default width of the column, user can adjust it
+	const columns = [
 		{ field: 'id', headerName: 'ID' },
 		{ field: 'first_name', headerName: 'First Name' },
 		{ field: 'last_name', headerName: 'Last Name' },
@@ -43,7 +43,7 @@ function ViewOfPatients() {
 		{ field: 'insurance_name', headerName: 'Insurance Name' },
 		{ field: 'insurance_group_number', headerName: 'Group Number' },
 		{ field: 'insurance_member_id', headerName: 'Member ID' }
-	  ];
+	];
 
 	// all users can edit patients
 	const canEdit = () => {

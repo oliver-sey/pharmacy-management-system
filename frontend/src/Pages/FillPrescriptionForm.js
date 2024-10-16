@@ -2,10 +2,9 @@ import React, { useState } from 'react';
 
 function FillPrescriptionForm() {
   const [formData, setFormData] = useState({
-    patientName: '',
     medication: '',
     dosage: '',
-    pharmacist: ''
+    doctor: ''
   });
 
   const handleChange = (e) => {
@@ -19,30 +18,17 @@ function FillPrescriptionForm() {
     e.preventDefault();
     console.log(formData);
     setFormData({
-      patientName: '',
       medication: '',
       dosage: '',
-      pharmacist: ''
+      doctor: ''
     });
   };
 
   return (
     <div style={styles.container}>
       <div className="FillPrescriptionForm" style={styles.formWrapper}>
-        <h1>Fill Prescription Form</h1>
+        <h1>Fill Prescription</h1>
         <form onSubmit={handleSubmit}>
-          <div style={styles.formGroup}>
-            <label htmlFor="patientName" style={styles.label}>Patient Name:</label>
-            <input
-              type="text"
-              name="patientName"
-              value={formData.patientName}
-              onChange={handleChange}
-              required
-              style={styles.input}
-            />
-          </div>
-
           <div style={styles.formGroup}>
             <label htmlFor="medication" style={styles.label}>Medication:</label>
             <input
@@ -68,11 +54,11 @@ function FillPrescriptionForm() {
           </div>
 
           <div style={styles.formGroup}>
-            <label htmlFor="pharmacist" style={styles.label}>Pharmacist:</label>
+            <label htmlFor="doctor" style={styles.label}>Doctor:</label>
             <input
               type="text"
-              name="pharmacist"
-              value={formData.pharmacist}
+              name="doctor"
+              value={formData.doctor}
               onChange={handleChange}
               required
               style={styles.input}
@@ -94,7 +80,7 @@ const styles = {
     alignItems: 'flex-start',  // Comment this line if you only want horizontal centering
     paddingTop: '50px',
     height: '100vh',       // Full height to center vertically as well
-    backgroundColor: '#f5f5f5' // Optional: Set background color for visibility
+    backgroundColor: '#f5f5f5' 
   },
   formWrapper: {
     width: '400px',        // Set a fixed width for the form to control layout

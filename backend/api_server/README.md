@@ -5,30 +5,32 @@ Hello y'all, I hope this readme helps. The backend will use FastAPI to define ro
 - FastAPI docs: https://fastapi.tiangolo.com/
 - Uvicorn docs: https://www.uvicorn.org/
 
-To srart, you should create a Python virtual environment, it basically is just a container that will hold all of our Python stuff. Sort of similar to Maven, all the libraries our Python code uses can be found in backend/requirements.txt
-To do this run these commands
+To start, you should create a Python virtual environment, it basically is just a container that will hold all of our Python stuff. Sort of similar to Maven, all the libraries our Python code uses can be found in backend/requirements.
+txt
 
-make sure you are in the `pharmacy-management-system` directory
+**To do this run these commands:**
 
-Thie command creates your virtual environment
+**Important:** make sure you are in the `pharmacy-management-system` directory in your terminal
+
+This command creates your virtual environment:
 
 ```shell
 python -m venv env
 ```
 
-This command activates your virtual environment
+This command activates your virtual environment:
 
 ```shell
 env/Scripts/activate
 ```
 
-This command downloads all of the packages we will need
+This command downloads all of the packages we will need:
 
 ```shell
 pip install -r backend/requirements.txt
 ```
 
-Great! Now you should have your environment setup and you can run the server. Use this command to do so.
+Great! Now you should have your environment setup and you can run the server. Use this command to do so:
 
 ```shell
 uvicorn backend.api_server.backend:app --reload

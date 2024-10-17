@@ -44,7 +44,8 @@ const AddEditMedicationModal = ({ open, onClose, row, onSave }) => {
 				name: row?.name || "",
 				dosage: row?.dosage || "",
 				quantity: row?.quantity || "",
-				prescription_required: row?.prescription_required || "",
+				// Ensure boolean is converted to string
+				prescription_required: typeof row?.prescription_required === 'boolean' ? String(row.prescription_required) : "",  
 				expiration_date: row?.expiration_date || "",
 				dollars_per_unit: row?.dollars_per_unit || "",
 			});
@@ -208,7 +209,7 @@ const AddEditMedicationModal = ({ open, onClose, row, onSave }) => {
 					margin="dense"
 				/>
 				<TextField
-					label="Quantity"
+					label="Quantity (e.g. 120)"
 					name="quantity"
 					value={formData.quantity}
 					onChange={handleFieldChange}
@@ -219,7 +220,7 @@ const AddEditMedicationModal = ({ open, onClose, row, onSave }) => {
 					margin="dense"
 				/>
 				<TextField
-					label="Prescription Required"
+					label="Prescription Required (true/false)"
 					name="prescription_required"
 					value={formData.prescription_required}
 					onChange={handleFieldChange}
@@ -230,7 +231,7 @@ const AddEditMedicationModal = ({ open, onClose, row, onSave }) => {
 					margin="dense"
 				/>
 				<TextField
-					label="Expiration Date"
+					label="Expiration Date (YYYY-MM-DD)"
 					name="expiration_date"
 					value={formData.expiration_date}
 					onChange={handleFieldChange}
@@ -241,7 +242,7 @@ const AddEditMedicationModal = ({ open, onClose, row, onSave }) => {
 					margin="dense"
 				/>
 				<TextField
-					label="Dollars per Unit"
+					label="Dollars per Unit (e.g. 0.13)"
 					name="dollars_per_unit"
 					value={formData.dollars_per_unit}
 					onChange={handleFieldChange}

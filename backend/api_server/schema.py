@@ -94,7 +94,7 @@ class UserLogin(BaseModel):
     
 class MedicationCreate(BaseModel):
     name: str
-    dosage: str
+    dosage: int
     quantity: int
     prescription_required: bool
     expiration_date: date
@@ -108,7 +108,7 @@ class MedicationResponse(MedicationCreate):
 
 class MedicationUpdate(BaseModel):
     name: Optional[str] = None
-    dosage: Optional[str] = None
+    dosage: Optional[int] = None
     quantity: Optional[int] = None
     prescription_required: Optional[bool] = None
     expiration_date: Optional[date] = None
@@ -123,7 +123,7 @@ class PrescriptionResponse(BaseModel):
     filled_timestamp: Optional[datetime]
     medication_id: int
     doctor_name: str
-    dosage: str
+    dosage: int
 
     class Config:  
         orm_mode = True
@@ -135,7 +135,7 @@ class PrescriptionCreate(BaseModel):
     filled_timestamp: Optional[datetime] = None
     medication_id: int
     doctor_name: str
-    dosage: str
+    dosage: int
 
     class Config:
         orm_mode = True
@@ -148,4 +148,4 @@ class PrescriptionUpdate(BaseModel):
     filled_timestamp: Optional[date] = None
     medication_id: Optional[int] = None
     doctor_name: Optional[str] = None
-    dosage: Optional[str] = None
+    dosage: Optional[int] = None

@@ -517,12 +517,10 @@ def create_prescription(prescription: schema.PrescriptionCreate, db: Session = D
     db.refresh(db_prescription)
     return db_prescription
 
+# update prescription
 @app.put("/prescription/{prescription_id}", response_model=schema.PrescriptionUpdate)
 def update_prescription(prescription_id: int, prescription: schema.PrescriptionUpdate, db: Session = Depends(get_db)):
-    '''
-    deletes prescriptions
-    not sure if this should be allowed tho... we should talk ab it
-    '''
+    
     db_prescription = db.query(models.Prescription).filter(models.Prescription.id == prescription_id).first()
     if db_prescription is None:
         raise HTTPException(status_code=404, detail="Prescription not found")
@@ -536,8 +534,14 @@ def update_prescription(prescription_id: int, prescription: schema.PrescriptionU
     db.refresh(db_prescription)
     return db_prescription
 
+
+# delete prescription
 @app.delete("/prescription/{prescription_id}")
 def delete_prescription(prescription_id: int, db: Session = Depends(get_db)):
+    '''
+    deletes prescriptions
+    not sure if this should be allowed tho... we should talk ab it
+    '''
     db_prescription = db.query(models.Prescription).filter(models.Prescription.id == prescription_id).first()
     if db_prescription is None:
         raise HTTPException(status_code=404, detail="Prescription not found")
@@ -547,7 +551,7 @@ def delete_prescription(prescription_id: int, db: Session = Depends(get_db)):
     return {"message": "Prescription deleted successfully", "prescription_id": prescription_id}
 
 
-#Filters prescription using patienmt ID
+# Get prescriptions for one specific patient
 @app.get("/prescription/patient/{patient_id}", response_model=List[schema.PrescriptionResponse])
 def get_prescriptions_for_patient(patient_id: int, db: Session = Depends(get_db)):
     try:

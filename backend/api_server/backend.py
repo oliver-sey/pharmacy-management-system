@@ -620,7 +620,7 @@ def fill_prescription(prescription_id: int, fill_request: schema.PrescriptionFil
         # inventory_update = models.InventoryUpdate(
         #     medication_id=db_medication.id,
         #     user_activity_id=db_prescription.user_filled_id,    # user who filled the prescription
-        #     dosage=db_prescription.dosage                  # The quantity deducted
+        #     quantity_changed=db_prescription.quantity                  # The quantity deducted
         # )
 
         # Add the inventory update to the session

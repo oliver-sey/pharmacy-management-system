@@ -100,8 +100,11 @@ class InventoryUpdate(Base):
     user_activity_id = Column(Integer, ForeignKey('user_activities.id'))
     # transaction_id = Column(Integer, ForeignKey('transactions.id')) # don't think we need this
     # user_id = Column(Integer, ForeignKey('users.id')) # don't think we need this
-    dosage = Column(Integer)
-    # quantity = Column(Integer) # just keep dosage for now
+    # don't need dosage, that's stored in medication
+    # dosage = Column(Integer)
+    # quantity changed by
+    # TODO: are we doing this so it could be positive or negative?
+    quantity_changed_by = Column(Integer)
     timestamp = Column(DateTime, default=func.now())
     
     medication = relationship("Medication", back_populates="inventory_updates")

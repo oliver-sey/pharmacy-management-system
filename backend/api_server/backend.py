@@ -16,6 +16,8 @@ from . import models  # Ensure this is the SQLAlchemy model
 from sqlalchemy.orm import Session
 from typing import List
 from . import schema
+from sqlalchemy.exc import IntegrityError
+from pydantic import ValidationError
 
 # Create the database tables
 Base.metadata.create_all(bind=engine)
@@ -299,14 +301,28 @@ def get_patients(db: Session = Depends(get_db)):
 def create_patient(patient: PatientCreate, db: Session = Depends(get_db)):
     patient_data = patient.model_dump()
     email = patient_data['email']
+    # check if the email is already registered
     if db.query(models.Patient).filter(models.Patient.email == email).first():
         raise HTTPException(status_code=400, detail="Email already registered")
     else:
-        db_patient = models.Patient(**patient_data)
-        db.add(db_patient)
-        db.commit()
-        db.refresh(db_patient)
-        return db_patient
+        # try to add patient to the database
+        try:
+            db_patient = models.Patient(**patient_data)
+            db.add(db_patient)
+            db.commit()
+            db.refresh(db_patient)
+            return db_patient
+        # if there is an error, raise an error
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        except IntegrityError as e:
+            db.rollback()
+            raise HTTPException(status_code=400, detail=str(e.orig))
+        except ValidationError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(status_code=400, detail=str(e))
 
 @app.put("/patient/{patient_id}")
 def put_patient(patient_id: int, patient: PatientUpdate, db: Session = Depends(get_db)):
@@ -317,14 +333,17 @@ def put_patient(patient_id: int, patient: PatientUpdate, db: Session = Depends(g
         raise HTTPException(status_code=404, detail="Patient not found")
     # get the data stored in the body of the put request
     patient_data = patient.model_dump()
-    # update the fields of the existing patient
-    for key, value in patient_data.items():
-        setattr(db_patient, key, value)
-    # commit and refresh
-    db.commit()
-    db.refresh(db_patient)
 
-    return db_patient
+    try:
+        # update the fields of the existing patient
+        for key, value in patient_data.items():
+            setattr(db_patient, key, value)
+        # commit and refresh
+        db.commit()
+        db.refresh(db_patient)
+        return db_patient
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))    
 
 @app.delete("/patient/{pid}")
 def delete_patient(pid: int, db: Session = Depends(get_db)):

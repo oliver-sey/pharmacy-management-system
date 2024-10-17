@@ -24,6 +24,10 @@ class UserUpdate(BaseModel):
     password: Optional[str] = None
     is_locked_out: Optional[bool] = True
 
+class UserDeleteResponse(BaseModel):
+    message: str
+    user_id: int
+
 class PatientCreate(BaseModel):
     first_name: str
     last_name: str
@@ -80,8 +84,11 @@ class PatientResponse(BaseModel):
 
 class UserResponse(BaseModel):
     id: int
+    first_name: str
+    last_name: str
     user_type: str
     email: str
+    password: str
 
 class UserLogin(BaseModel):
     email: str
@@ -89,7 +96,7 @@ class UserLogin(BaseModel):
     
 class MedicationCreate(BaseModel):
     name: str
-    dosage: str
+    dosage: int
     quantity: int
     prescription_required: bool
     expiration_date: date
@@ -103,7 +110,7 @@ class MedicationResponse(MedicationCreate):
 
 class MedicationUpdate(BaseModel):
     name: Optional[str] = None
-    dosage: Optional[str] = None
+    dosage: Optional[int] = None
     quantity: Optional[int] = None
     prescription_required: Optional[bool] = None
     expiration_date: Optional[date] = None
@@ -118,10 +125,10 @@ class PrescriptionResponse(BaseModel):
     filled_timestamp: Optional[datetime]
     medication_id: int
     doctor_name: str
-    dosage: str
+    dosage: int
 
     class Config:  
-        orm_mode = True
+        from_attributes = True 
 
 class PrescriptionCreate(BaseModel):
     patient_id: int
@@ -130,7 +137,7 @@ class PrescriptionCreate(BaseModel):
     filled_timestamp: Optional[datetime] = None
     medication_id: int
     doctor_name: str
-    dosage: str
+    dosage: int
 
     class Config:
         orm_mode = True
@@ -143,7 +150,7 @@ class PrescriptionUpdate(BaseModel):
     filled_timestamp: Optional[date] = None
     medication_id: Optional[int] = None
     doctor_name: Optional[str] = None
-    dosage: Optional[str] = None
+    dosage: Optional[int] = None
 
 
 class PrescriptionFillRequest(BaseModel):

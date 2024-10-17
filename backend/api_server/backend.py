@@ -69,7 +69,8 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
     
     return db_user
 
-@app.delete("/users/{user_id}", response_model=SimpleResponse)
+
+@app.delete("/users/{user_id}")
 def delete_user(user_id: int, db: Session = Depends(get_db)):
     db_user = db.query(models.User).filter(models.User.id == user_id).first()
     if db_user is None:
@@ -98,6 +99,8 @@ def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db)):
     # Update only provided fields
     if user.first_name is not None:
         db_user.first_name = user.first_name
+    if user.last_name is not None:
+        db_user.last_name = user.last_name
     if user.user_type is not None:
         db_user.user_type = user.user_type
     if user.email is not None:
@@ -159,6 +162,8 @@ class TokenData(BaseModel):
 
 
 class UserToReturn(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
     id: Optional[int] = None
     email: Optional[str] = None
     user_type: Optional[str] = None
@@ -487,11 +492,11 @@ def create_prescription(prescription: schema.PrescriptionCreate, db: Session = D
         raise HTTPException(status_code=400, detail=str(e))
 
     # Check prescription amount with medication inventory, if none or not enough, return 400, otherwise, decrease inventory dosage
-    db_medication = db.query(models.Medication).filter(models.Medication.id == db_prescription.medication_id)
+    db_medication = db.query(models.Medication).filter(models.Medication.id == db_prescription.medication_id).first()
     if db_medication is None or db_medication.dosage < db_prescription.dosage:
         return HTTPException(status_code=400, detail="Without sufficient inventory for such medication")
     else:
-        db_medication.dosage -= db_prescription
+         db_medication.dosage -= db_prescription.dosage
 
     # if successfully deduct medication from inventory, create a inventory instance in InventoryUpdate table
     inventory_update = models.InventoryUpdate(

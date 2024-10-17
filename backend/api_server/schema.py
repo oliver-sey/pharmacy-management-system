@@ -142,8 +142,10 @@ class PrescriptionResponse(BaseModel):
 class PrescriptionCreate(BaseModel):
     patient_id: int
     user_entered_id: int
-    user_filled_id: Optional[int] = None
-    filled_timestamp: Optional[datetime] = None
+    # TODO: i don't think you should be allowed to create an already filled prescription right away
+    # it makes more sense to make them call the fill prescription route after creating the prescription
+    # user_filled_id: Optional[int] = None
+    # filled_timestamp: Optional[datetime] = None
     medication_id: int
     doctor_name: str
     # the number of pills the patient is allowed to have of this medication with this prescription
@@ -155,9 +157,11 @@ class PrescriptionCreate(BaseModel):
 class PrescriptionUpdate(BaseModel):
     patient_id: Optional[int] = None
     user_entered_id: Optional[int] = None
-    user_filled_id: Optional[int] = None
+    # I think you should have to call the fill prescription route to edit these
+    # so we can have control over checking if we're able to fill the prescription
+    # user_filled_id: Optional[int] = None
+    # filled_timestamp: Optional[date] = None
     date_prescribed: Optional[date] = None
-    filled_timestamp: Optional[date] = None
     medication_id: Optional[int] = None
     doctor_name: Optional[str] = None
     # the number of pills the patient is allowed to have of this medication with this prescription

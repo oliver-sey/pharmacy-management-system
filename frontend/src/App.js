@@ -11,7 +11,7 @@ import ViewOfMedications from './Pages/ViewOfMedications';
 import ResetPassword from './Pages/ResetPassword'
 import ViewOfEmployees from './Pages/ViewOfEmployees';
 import FillPrescriptionForm from './Pages/FillPrescriptionForm';
-
+import ViewOfPatientPrescriptions from './Pages/ViewOfPatientPrescriptions';
 function App() {
 
   
@@ -30,6 +30,7 @@ function App() {
           <Route path='/resetpassword' element ={<ResetPassword/>}/>
           <Route path='/viewofemployees' element ={<ViewOfEmployees/>}/>
           <Route path='/fill' element ={<FillPrescriptionForm/>}/>
+          <Route path='/viewofpatients/:patientId/prescriptions' element ={<ViewOfPatientPrescriptions/>}/>
 
         </Routes>
       </Router>

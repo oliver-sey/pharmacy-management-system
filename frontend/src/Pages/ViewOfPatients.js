@@ -1,5 +1,5 @@
 import { React, useRef, useState, useEffect } from "react";
-import { Snackbar, Alert, Button} from "@mui/material";
+import { useNavigate } from 'react-router-dom';import { Snackbar, Alert, Button} from "@mui/material";
 
 import EditDeleteTable from "../Components/EditDeleteTable";
 import AddEditPatientModal from "../Components/AddEditPatientModal";
@@ -12,7 +12,7 @@ function ViewOfPatients() {
 	const [rows, setRows] = useState([]);
 	const [errorMessage, setErrorMessage] = useState(null);
 	const [openSnackbar, setOpenSnackbar] = useState(false);
-
+	const navigate = useNavigate();
 	// Async function to fetch patients data
 	const fetchPatients = async () => {
 		try {
@@ -42,8 +42,25 @@ function ViewOfPatients() {
 		{ field: 'email', headerName: 'Email' },
 		{ field: 'insurance_name', headerName: 'Insurance Name' },
 		{ field: 'insurance_group_number', headerName: 'Group Number' },
-		{ field: 'insurance_member_id', headerName: 'Member ID' }
+		{ field: 'insurance_member_id', headerName: 'Member ID' },
+		{field : 'view_prescriptions', headerName: 'View Prescriptions', renderCell: (params) => (
+			<Button 
+			variant='contained' 
+			color="primary" 
+			onClick={() => handleViewPrescriptions(params.row.id)}  // Corrected the typo here
+			>
+				View Prescriptions
+			</Button>
+		)}//d
 	  ];
+
+	  const handleViewPrescriptions = (patientId) => {
+		if (!patientId) {
+			console.error("Patient ID is undefined");
+			return;
+		}
+		navigate(`/viewofpatients/${patientId}/prescriptions`);
+	};
 
 	// all users can edit patients
 	const canEdit = () => {

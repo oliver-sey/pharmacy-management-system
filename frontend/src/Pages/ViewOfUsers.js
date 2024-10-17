@@ -89,7 +89,7 @@ function ViewOfUsers() {
 			},
 		},
 		{ field: "email", headerName: "Email", width: 220 },
-		{ field: "password", headerName: "Password", width: 220 }
+		{ field: "password", headerName: "Password", width: 220, renderCell: (params) => '•••••••' }
 
 
 		

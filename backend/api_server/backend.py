@@ -468,11 +468,11 @@ def create_prescription(prescription: schema.PrescriptionCreate, db: Session = D
         raise HTTPException(status_code=400, detail=str(e))
 
     # Check prescription amount with medication inventory, if none or not enough, return 400, otherwise, decrease inventory dosage
-    db_medication = db.query(models.Medication).filter(models.Medication.id == db_prescription.medication_id)
+    db_medication = db.query(models.Medication).filter(models.Medication.id == db_prescription.medication_id).first()
     if db_medication is None or db_medication.dosage < db_prescription.dosage:
         return HTTPException(status_code=400, detail="Without sufficient inventory for such medication")
     else:
-        db_medication.dosage -= db_prescription
+         db_medication.dosage -= db_prescription.dosage
 
     # if successfully deduct medication from inventory, create a inventory instance in InventoryUpdate table
     inventory_update = models.InventoryUpdate(

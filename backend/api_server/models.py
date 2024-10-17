@@ -57,7 +57,10 @@ class Prescription(Base):
     filled_timestamp = Column(DateTime, default=None, nullable=True)
     medication_id = Column(Integer, ForeignKey('medications.id'))  # Correct table reference
     doctor_name = Column(String)
-    dosage = Column(Integer)
+    # not putting dosage here, since dosage is stored in the medication (which we can access through medication_id)
+    # but we do need to know the quantity, i.e. how many pills the patient is allowed to have
+    # quantity is the amount of pills the patient is allowed to have with this prescription
+    quantity = Column(Integer)
 
     patient = relationship("Patient", back_populates="prescriptions")
     user_entered = relationship("User", back_populates="entered_prescriptions", foreign_keys="[Prescription.user_entered_id]")

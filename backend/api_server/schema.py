@@ -133,7 +133,8 @@ class PrescriptionResponse(BaseModel):
     filled_timestamp: Optional[datetime]
     medication_id: int
     doctor_name: str
-    dosage: int
+    # the number of pills the patient is allowed to have of this medication with this prescription
+    quantity: int
 
     class Config:  
         from_attributes = True 
@@ -145,7 +146,8 @@ class PrescriptionCreate(BaseModel):
     filled_timestamp: Optional[datetime] = None
     medication_id: int
     doctor_name: str
-    dosage: int
+    # the number of pills the patient is allowed to have of this medication with this prescription
+    quantity: int
 
     class Config:
         orm_mode = True
@@ -158,7 +160,8 @@ class PrescriptionUpdate(BaseModel):
     filled_timestamp: Optional[date] = None
     medication_id: Optional[int] = None
     doctor_name: Optional[str] = None
-    dosage: Optional[int] = None
+    # the number of pills the patient is allowed to have of this medication with this prescription
+    quantity: Optional[int] = None
 
 
 class PrescriptionFillRequest(BaseModel):

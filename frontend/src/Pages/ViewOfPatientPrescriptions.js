@@ -14,7 +14,10 @@ const ViewOfPatientPrescriptions = () => {
     // Fetch prescriptions for the patient from the API
     const fetchPrescriptions = async () => {
         try {
-            const response = await fetch(`http://localhost:8000/prescription/patient/${patientId}`);
+            // replacing this call with the updated API that we have
+            // const response = await fetch(`http://localhost:8000/prescription/patient/${patientId}`);
+            const response = await fetch(`http://localhost:8000/prescriptions/?patient_id=${patientId}`);
+
             if (!response.ok) {
                 throw new Error('Failed to fetch prescriptions');
             }

@@ -119,7 +119,7 @@ class PrescriptionResponse(BaseModel):
     dosage: str
 
     class Config:  
-        orm_mode = True
+        from_attributes = True 
 
 class PrescriptionCreate(BaseModel):
     patient_id: int

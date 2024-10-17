@@ -518,3 +518,28 @@ def delete_prescription(prescription_id: int, db: Session = Depends(get_db)):
     db.delete(db_prescription)
     db.commit()
     return {"message": "Prescription deleted successfully", "prescription_id": prescription_id}
+
+
+#Filters prescription using patienmt ID
+@app.get("/prescription/patient/{patient_id}", response_model=List[schema.PrescriptionResponse])
+def get_prescriptions_for_patient(patient_id: int, db: Session = Depends(get_db)):
+    try:
+        # Fetch the patient by ID
+        patient = db.query(models.Patient).filter(models.Patient.id == patient_id).first()
+        if not patient:
+            raise HTTPException(status_code=404, detail="Patient not found")
+
+        # Fetch prescriptions for the patient
+        prescriptions = db.query(models.Prescription).filter(models.Prescription.patient_id == patient_id).all()
+
+        # If no prescriptions found, return an empty list
+        if not prescriptions:
+            return []
+
+        return [schema.PrescriptionResponse.from_orm(prescription) for prescription in prescriptions]
+    
+    except Exception as e:
+        print(f"Error fetching prescriptions for patient ID {patient_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
+

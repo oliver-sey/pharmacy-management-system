@@ -11,11 +11,35 @@ import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import WarningIcon from "@mui/icons-material/Warning";
 
 function ViewOfMedications() {
+	const [rows, setRows] = useState([]);
+	const [errorMessage, setErrorMessage] = useState(null);
+	const [openSnackbar, setOpenSnackbar] = useState(false);
+
+	// Async function to fetch medications data
+	const fetchMedications = async () => {
+		try {
+			const response = await fetch('http://localhost:8000/medicationlist');
+			const data = await response.json(); // Convert response to JSON
+			setRows(data); // Update rows state with fetched data
+		} catch (error) {
+			console.error('Error fetching medications:', error);
+			// error handling
+			setErrorMessage('Failed to fetch medications');
+			setOpenSnackbar(true); // Show Snackbar when error occurs
+		}
+	}; 
+
+	// useEffect to fetch data when the component mounts
+	useEffect(() => {
+		fetchMedications(); // Call the async function
+	  }, []); // Empty array means this effect runs once when the component mounts
+
+
 	// the columns for the table
 	// headerName is what shows up on the website
 	// width is the default width of the column, user can adjust it
 	const columns = [
-		{ field: "id", headerName: "ID", width: 70 },
+		// { field: "id", headerName: "ID", width: 70 },
 		{ field: "name", headerName: "Medication Name", width: 200 },
 		{ field: "dosage", headerName: "Dosage", width: 100 },
 		{ field: "quantity", headerName: "Quantity", width: 100 },
@@ -141,46 +165,105 @@ function ViewOfMedications() {
 		},
 	];
 
-	// hardcoded values for development, this will come from the backend/database later
-	// TODO: get rid of hardcoded values
-	const rows = [
-		{
-			id: 1,
-			name: "dat good stuff",
-			dosage: "not strong enuff",
-			quantity: "200",
-			prescription_required: "true",
-			expiration_date: "2024-10-25",
-			dollars_per_unit: "0.001",
-		},
-		{
-			id: 2,
-			name: "tylenol",
-			dosage: "5mg",
-			quantity: "100",
-			prescription_required: "false",
-			expiration_date: "2024-09-25",
-			dollars_per_unit: "0.00002",
-		},
-		{
-			id: 3,
-			name: "melatonin",
-			dosage: "3 mg",
-			quantity: "1000",
-			prescription_required: "false",
-			expiration_date: "2029-01-02",
-			dollars_per_unit: "0.0003",
-		},
-		{
-			id: 4,
-			name: "oxy",
-			dosage: "100mg",
-			quantity: "2",
-			prescription_required: "true",
-			expiration_date: "2024-09-24",
-			dollars_per_unit: "1",
-		},
-	];
+
+	// TODO: is this right?
+	// only pharmacy manager can edit
+	const canEdit = () => {
+		const role = localStorage.getItem('role');
+		// console.log("canEdit:", (role === 'pharmacymanager'));
+		return role === 'pharmacymanager';
+	};
+	  
+	// TODO: is this right?
+	// only pharmacy managers can delete
+	const canDelete = () => {
+		const role = localStorage.getItem('role');
+		// console.log("canDelete:", (role === 'pharmacymanager'));
+		return role === 'pharmacymanager';
+	};
+
+
+	const deleteMedication = async (id) => {
+		try {
+			console.log("row", id);
+			const response = await fetch(`http://localhost:8000/medication/${id}`, {
+				method: 'DELETE',
+			});
+			if (!response.ok) {
+				throw new Error('Failed to delete medication');
+			}
+			fetchMedications();
+		} catch (error) {
+			console.error('Error deleting medication:', error);
+			setErrorMessage('Failed to delete medication' + error);
+			setOpenSnackbar(true);
+		}
+	}
+
+	const addEditMedication = async (data, id) => {
+		if (id) {
+			editMedication(data, id);
+		} else {
+			addMedication(data);
+		}
+	}
+
+	const editMedication = async (data, id) => {
+		try {
+			console.log("row in editMedication", id, data)
+			const response = await fetch(`http://localhost:8000/medication/${id}`, {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(data),
+			});
+			if (!response.ok) {
+				const responseData = await response.json(); // Wait for the JSON to be parsed
+				console.log("Error detail from response:", responseData.detail[0].msg);
+				throw new Error(responseData.detail[0].msg);
+			}
+			fetchMedications();
+		} catch (error) {
+			setErrorMessage('Failed to update medication');
+			setOpenSnackbar(true);
+		}
+	}
+
+	const addMedication = async (data) => {
+		try {
+			console.log("row in addMedication", data)
+			const response = await fetch(`http://localhost:8000/medication`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(data),
+			});
+			if (!response.ok) {
+				const responseData = await response.json(); // Wait for the JSON to be parsed
+				var errorMessage;
+				// if responseData.detail is a string, return the strig, else return the first element of the array
+				if (typeof(responseData.detail) == 'string') {// check if response.detail is a string or an array
+					errorMessage = responseData.detail;
+				} else {
+					errorMessage = responseData.detail[0].msg;
+				}
+				throw new Error(errorMessage);
+			}
+			fetchMedications();
+		} catch (error) {
+			setErrorMessage('Failed to add medication: ' + error);
+			setOpenSnackbar(true);
+		}
+	}
+
+
+	// Handle closing of the Snackbar
+	const handleCloseSnackbar = () => {
+		setOpenSnackbar(false);
+	};
+
 
 	// the message format that should get used in the delete confirmation modal (popup) for this table
 	// need this since we want a different format on other tables that use this same base component
@@ -210,10 +293,14 @@ function ViewOfMedications() {
 				rows={rows}
 				editModal={AddEditMedicationModal}
 				deleteModal={DeleteModal}
+				showEditButton={canEdit()}
+				showDeleteButton={canDelete()}
 				customConfirmMessage={medicationConfirmMessage}
 				onAdd={(handler) => {
 					openAddMedicationModal.current = handler; // Store the open modal handler
 				}}
+				onEdit={addEditMedication}
+				onConfirmDelete={deleteMedication}
 			></EditDeleteTable>
 			{/* Snackbar for error messages */}
 			<Snackbar 

@@ -75,6 +75,7 @@ function ViewOfPatients() {
 		}
 	}
 
+	// this is 'onSave()'
 	const addEditPatient = async (data, id) => {
 		if (id) {
 			editPatient(data, id);

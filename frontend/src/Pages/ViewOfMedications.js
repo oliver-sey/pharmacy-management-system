@@ -1,11 +1,10 @@
-import { React, useRef } from "react";
+import { React, useRef, useState, useEffect } from "react";
 
 import EditDeleteTable from "../Components/EditDeleteTable";
 import AddEditMedicationModal from "../Components/AddEditMedicationModal";
 import DeleteModal from "../Components/DeleteModal";
 
-import { IconButton, Tooltip } from "@mui/material";
-import Button from "@mui/material/Button";
+import { IconButton, Button, Tooltip, Snackbar, Alert } from "@mui/material";
 
 import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
@@ -216,6 +215,16 @@ function ViewOfMedications() {
 					openAddMedicationModal.current = handler; // Store the open modal handler
 				}}
 			></EditDeleteTable>
+			{/* Snackbar for error messages */}
+			<Snackbar 
+				open={openSnackbar} 
+				autoHideDuration={6000} 
+				onClose={handleCloseSnackbar}
+		 	>
+				<Alert onClose={handleCloseSnackbar} severity="error">
+					{errorMessage}
+				</Alert>
+		  	</Snackbar>
 		</div>
 	);
 }

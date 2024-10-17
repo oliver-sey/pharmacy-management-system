@@ -24,9 +24,23 @@ const HomePage = () => {
                         and we’re known for serving up just what the doctor ordered—no fancy drinks here, 
                         but you’ll leave feeling better than ever. Dive into a healthier you with Fishbowl, where wellness is always on tap!
                     </p>
+                    
                     <button className="login-button" onClick={handleLogInClick}>
                         Login
                     </button>
+
+                    {/* Basic Pharmacy Information */}
+                    <div className="pharmacy-info">
+                        <h2>Contact Information</h2>
+                        <p><strong>Address:</strong> 123 Ocean Drive, Seaside City, CA 90210</p>
+                        <p><strong>Owner:</strong> Mary FishBowl</p>
+                        <p><strong>Phone Number:</strong> (555) 123-4567</p>
+                        <p><strong>Working Hours:</strong></p>
+                        <ul>
+                            <li>Monday to Friday: 9:00 AM - 7:00 PM</li>
+                            <li>Saturday and Sunday: 10:00 AM - 5:00 PM</li>
+                        </ul>
+                    </div>
                 </div>
             </header>
         </div>

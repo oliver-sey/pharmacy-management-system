@@ -40,3 +40,8 @@
 .login-button:hover {
     background-color: #0056b3;
 }
+.pharmacy-info ul {
+    list-style-type: none;  /* This removes the dots */
+    padding: 0;
+    margin: 0;  /* Ensures no extra margin is added */
+}

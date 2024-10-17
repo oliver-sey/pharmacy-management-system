@@ -166,5 +166,6 @@ class PrescriptionUpdate(BaseModel):
 
 class PrescriptionFillRequest(BaseModel):
     user_filled_id: int
+    # token: str
     class Config:
         orm_mode = True

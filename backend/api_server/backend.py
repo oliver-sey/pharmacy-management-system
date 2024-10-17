@@ -585,10 +585,11 @@ def fill_prescription(prescription_id: int, fill_request: PrescriptionFillReques
         raise HTTPException(status_code=409, detail="Prescription has already been filled")
     else:
         # Check prescription amount with medication inventory
-        db_medication = db.query(models.Medication).filter(models.Medication.id == db_prescription.medication_id)
+        # there will only be one medication with the matching id (since the id is unique), so using first() is fine
+        db_medication = db.query(models.Medication).filter(models.Medication.id == db_prescription.medication_id).first()
         # if none or not enough inventory, return 400, otherwise, decrease inventory quantity
         if db_medication is None or db_medication.quantity < db_prescription.quantity:
-            return HTTPException(status_code=400, detail="There is no or insufficient inventory of this medication to fill the prescription")
+            raise HTTPException(status_code=400, detail="There is no or insufficient inventory of this medication to fill the prescription")
         else:
             db_medication.quantity -= db_prescription.quantity
 

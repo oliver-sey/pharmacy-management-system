@@ -96,7 +96,11 @@ class UserLogin(BaseModel):
     
 class MedicationCreate(BaseModel):
     name: str
+    # the strength of the medication per pill
+    # if we have multiple different strengths for the same medicine (e.g. tylenol), 
+    # those need to be multiple different rows in the medication table
     dosage: int
+    # the total number of pills of this medication we have
     quantity: int
     prescription_required: bool
     expiration_date: date
@@ -110,7 +114,11 @@ class MedicationResponse(MedicationCreate):
 
 class MedicationUpdate(BaseModel):
     name: Optional[str] = None
+    # the strength of the medication per pill
+    # if we have multiple different strengths for the same medicine (e.g. tylenol), 
+    # those need to be multiple different rows in the medication table
     dosage: Optional[int] = None
+    # the total number of pills of this medication we have
     quantity: Optional[int] = None
     prescription_required: Optional[bool] = None
     expiration_date: Optional[date] = None

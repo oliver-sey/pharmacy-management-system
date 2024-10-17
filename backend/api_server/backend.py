@@ -474,6 +474,8 @@ def list_medication(db: Session = Depends(get_db)):
 # region Prescription CRUD
 #--------PRESCRIPTION CRUD OPERATIONS--------
 ### Prescription CRUD ###
+
+# get all prescriptions (**optional patient_id param lets you filter by one patient)
 @app.get("/prescriptions", response_model=List[schema.PrescriptionResponse])
 def get_prescriptions(patient_id: Optional[int] = Query(None), db: Session = Depends(get_db)):
     '''
@@ -487,6 +489,8 @@ def get_prescriptions(patient_id: Optional[int] = Query(None), db: Session = Dep
         prescriptions = db.query(models.Prescription).all()
     return prescriptions
 
+
+# get prescription
 @app.get("/prescription/{prescription_id}", response_model=schema.PrescriptionResponse)
 def get_prescription(prescription_id: int, db: Session = Depends(get_db)):
     db_prescription = db.query(models.Prescription).filter(models.Prescription.id == prescription_id).first()
@@ -495,6 +499,8 @@ def get_prescription(prescription_id: int, db: Session = Depends(get_db)):
     
     return db_prescription
 
+
+# create prescription
 @app.post("/prescription", response_model=schema.PrescriptionResponse)
 def create_prescription(prescription: schema.PrescriptionCreate, db: Session = Depends(get_db)):
     '''
@@ -516,6 +522,7 @@ def create_prescription(prescription: schema.PrescriptionCreate, db: Session = D
     db.commit()
     db.refresh(db_prescription)
     return db_prescription
+
 
 # update prescription
 @app.put("/prescription/{prescription_id}", response_model=schema.PrescriptionUpdate)

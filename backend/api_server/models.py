@@ -69,7 +69,10 @@ class Medication(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
+    # dosage is the strength of each pill, i.e. how much of the medicine is actually in it
+    # if we have a medicine with 2 different dosage values, that needs to be stored as 2 different rows in medication
     dosage = Column(Integer)
+    # quantity here is how many pills we have of this medication
     quantity = Column(Integer)
     prescription_required = Column(Boolean)
     expiration_date = Column(Date)

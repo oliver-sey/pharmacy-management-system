@@ -89,16 +89,31 @@ const AddEditMedicationModal = ({ open, onClose, row, onSave }) => {
 					}
 					break;
 				case 'prescription_required':
-					errors.prescription_required = !value ? 'Prescription required field is required' : '';
+					if (!value) {
+						errors.prescription_required = 'Prescription required field is required';
+					} else if (String(value) !== "true" && String(value) !== "false") {
+						errors.prescription_required = 'Prescription required must be either "true" or "false", lowercase';
+					} else {
+						errors.prescription_required = '';
+					}
 					break;
 				case 'expiration_date':
-					errors.expiration_date = !value ? 'Expiration date is required' : '';
+					if (!value) {
+						errors.expiration_date ='Expiration date is required';
+					}
+					// expect a ####-##-## format 
+					else if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+						errors.expiration_date = 'Expiration date must be in the format YYYY-MM-DD';
+					}
+					else {
+						errors.expiration_date = '';
+					}
 					break;
 				case 'dollars_per_unit':
 					if (!value) {
-						errors.dollars_per_unit = 'Price is required';
+						errors.dollars_per_unit = 'Dollars per unit is required';
 					} else if (!/^\d+(\.\d+)?$/.test(value) || parseFloat(value) < 0) {
-						errors.dollars_per_unit = 'Price must be a positive number';
+						errors.dollars_per_unit = 'Dollars per unit must be a positive number';
 					} else {
 						errors.dollars_per_unit = '';
 					}

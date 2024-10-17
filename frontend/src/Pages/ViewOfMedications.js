@@ -65,13 +65,13 @@ function ViewOfMedications() {
 
 				// expiration date is today or earlier
 				if (differenceDays <= 0) {
-					console.log(
-						"Difference between expiration",
-						expirationDate,
-						"and today is",
-						differenceDays,
-						"**is expired"
-					);
+					// console.log(
+					// 	"Difference between expiration",
+					// 	expirationDate,
+					// 	"and today is",
+					// 	differenceDays,
+					// 	"**is expired"
+					// );
 					icons.push(
 						// empty hourglass icon, says "Expired" when you hover
 						<IconButton>
@@ -83,13 +83,13 @@ function ViewOfMedications() {
 				}
 				// expiration date is within the next 30 days
 				else if (differenceDays <= 30) {
-					console.log(
-						"Difference between expiration (in UTC)",
-						expirationDate,
-						"and today is",
-						differenceDays,
-						"not expired, **but need a warning"
-					);
+					// console.log(
+					// 	"Difference between expiration (in UTC)",
+					// 	expirationDate,
+					// 	"and today is",
+					// 	differenceDays,
+					// 	"not expired, **but need a warning"
+					// );
 					icons.push(
 						// TODO: fix style?
 						// <div style={[{"display": "flex"}, { "align-items": "center" }]}>
@@ -107,19 +107,19 @@ function ViewOfMedications() {
 				}
 				// expiration date is over 30 days into the future
 				else {
-					console.log(
-						"Difference between expiration (in UTC)",
-						expirationDate,
-						"and today is",
-						differenceDays,
-						"not expired, and don't need a warning"
-					);
+					// console.log(
+					// 	"Difference between expiration (in UTC)",
+					// 	expirationDate,
+					// 	"and today is",
+					// 	differenceDays,
+					// 	"not expired, and don't need a warning"
+					// );
 				}
 
 				// check inventory
 				// less than 120 should give a warning
 				if (params.row.quantity < 120) {
-					console.log("Less than 120 units/doses, giving a warning");
+					// console.log("Less than 120 units/doses, giving a warning");
 					icons.push(
 						<IconButton>
 							<Tooltip

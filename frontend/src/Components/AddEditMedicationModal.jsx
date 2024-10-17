@@ -154,9 +154,16 @@ const AddEditMedicationModal = ({ open, onClose, row, onSave }) => {
 		});
 
 		if (allValid) {
-			onSave(formData); // Call onSave function passed as prop with valid form data
-			onClose();        // Close the modal
+			// onSave(formData); // Call onSave function passed as prop with valid form data
+			// onClose();        // Close the modal
+			handleSave();
 		}
+	};
+
+	// Handle saving of the updated data
+	const handleSave = () => {
+		onSave(formData, row?.id); // Pass updated form data to parent component
+		onClose(); // Close the modal
 	};
 
 	return (

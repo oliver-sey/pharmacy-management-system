@@ -74,7 +74,7 @@ class Medication(Base):
     name = Column(String, index=True)
     # dosage is the strength of each pill, i.e. how much of the medicine is actually in it
     # if we have a medicine with 2 different dosage values, that needs to be stored as 2 different rows in medication
-    dosage = Column(Integer)
+    dosage = Column(String)
     # quantity here is how many pills we have of this medication
     quantity = Column(Integer)
     prescription_required = Column(Boolean)
@@ -104,7 +104,7 @@ class InventoryUpdate(Base):
     # transaction_id = Column(Integer, ForeignKey('transactions.id')) # don't think we need this
     # user_id = Column(Integer, ForeignKey('users.id')) # don't think we need this
     # don't need dosage, that's stored in medication
-    # dosage = Column(Integer)
+    # dosage = Column(String)
     # quantity changed by
     # TODO: are we doing this so it could be positive or negative?
     quantity_changed_by = Column(Integer)

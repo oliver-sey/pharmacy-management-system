@@ -212,6 +212,7 @@ function ViewOfUsers() {
 		  <h2>Users Table</h2>
 			<Button
 			  variant="contained"
+			  style={{ width: '200px', marginBottom: '16px' }} 
 			  onClick={() => {
 				if (openAddUserModal.current) {
 				  openAddUserModal.current(); // Trigger modal to open for adding a user

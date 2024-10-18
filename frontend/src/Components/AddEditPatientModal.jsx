@@ -71,9 +71,19 @@ const AddEditPatientModal = ({ open, onClose, row, onSave }) => {
 
 	
 	// Handle saving of the updated data
-	const handleSave = () => {
-		onSave(formData, row?.id); // Pass updated form data to parent component
-		onClose(); // Close the modal
+	const handleSave = async () => {
+		try {
+			console.log("Saving data:", formData);
+			let success = await onSave(formData, row?.id); // Pass updated form data to parent component
+			console.log("Save success:", success);
+			if (success) {
+				onClose(); // Close the modal
+			}
+		} catch (error) {
+
+			console.error("Save failed", error);
+		}
+
 	};
 
 	// **************new stuff
@@ -197,8 +207,11 @@ const AddEditPatientModal = ({ open, onClose, row, onSave }) => {
 		validateFieldsDirectly(fieldName, fieldValue);
 	};
 
-	
-	const handleSaveWithValidation = () => {
+	/**
+	 * This is an async functuion because we need to wait for the server
+	 * to validate the input before we can close the modal.
+	 */
+	const handleSaveWithValidation = async () => {
 		// Flag to check if all fields are valid
 		let allValid = true;
 	
@@ -215,7 +228,7 @@ const AddEditPatientModal = ({ open, onClose, row, onSave }) => {
 	
 		// If all fields are valid, proceed with saving
 		if (allValid) {
-			handleSave();
+			await handleSave(); // wait for the server
 		}
 	};
 	

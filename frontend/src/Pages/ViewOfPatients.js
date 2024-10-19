@@ -1,5 +1,5 @@
 import { React, useRef, useState, useEffect } from "react";
-import { Snackbar, Alert, Button} from "@mui/material";
+import { useNavigate } from 'react-router-dom';import { Snackbar, Alert, Button} from "@mui/material";
 
 import EditDeleteTable from "../Components/EditDeleteTable";
 import AddEditPatientModal from "../Components/AddEditPatientModal";
@@ -9,7 +9,7 @@ function ViewOfPatients() {
 	const [rows, setRows] = useState([]);
 	const [errorMessage, setErrorMessage] = useState(null);
 	const [openSnackbar, setOpenSnackbar] = useState(false);
-
+	const navigate = useNavigate();
 	// Async function to fetch patients data
 	const fetchPatients = async () => {
 		try {
@@ -42,8 +42,25 @@ function ViewOfPatients() {
 		{ field: 'email', headerName: 'Email' },
 		{ field: 'insurance_name', headerName: 'Insurance Name' },
 		{ field: 'insurance_group_number', headerName: 'Group Number' },
-		{ field: 'insurance_member_id', headerName: 'Member ID' }
-	];
+		{ field: 'insurance_member_id', headerName: 'Member ID' },
+		{field : 'view_prescriptions', headerName: 'View Prescriptions', renderCell: (params) => (
+			<Button 
+			variant='contained' 
+			color="primary" 
+			onClick={() => handleViewPrescriptions(params.row.id)}  // Corrected the typo here
+			>
+				View Prescriptions
+			</Button>
+		)}//d
+	  ];
+
+	  const handleViewPrescriptions = (patientId) => {
+		if (!patientId) {
+			console.error("Patient ID is undefined");
+			return;
+		}
+		navigate(`/viewofpatients/${patientId}/prescriptions`);
+	};
 
 	// all users can edit patients
 	const canEdit = () => {
@@ -75,15 +92,33 @@ function ViewOfPatients() {
 		}
 	}
 
+	/**
+	 * @param {the data about the patient being added or edited that is send to the server} data 
+	 * @param {the id of the patient being edited, should be null if adding a patient} id 
+	 * @returns boolean indicating success or failure
+	 */
 	// this is 'onSave()'
 	const addEditPatient = async (data, id) => {
-		if (id) {
-			editPatient(data, id);
-		} else {
-			addPatient(data);
+		try {
+			if (id) {
+				const result = await editPatient(data, id);
+				console.log("editPatient result:", result);
+				return result;
+			} else {
+				const result = await addPatient(data);
+				console.log("addPatient result:", result);
+				return result;
+			}
+		} catch (error) {
+			console.error("Error in addEditPatient:", error);
+			return false;
 		}
 	}
-
+	/**
+	 * @param {data sent to sever, contains the changes made to the patient} data 
+	 * @param {the id of the patient being edited} id 
+	 * @returns boolean indicating success or failure
+	 */
 	const editPatient = async (data, id) => {
 		try {
 			console.log("row in editPatient", id, data)
@@ -100,12 +135,18 @@ function ViewOfPatients() {
 				throw new Error(responseData.detail[0].msg);
 			}
 			fetchPatients();
+			return true;
 		} catch (error) {
 			setErrorMessage('Failed to update patient');
 			setOpenSnackbar(true);
+			return false;
 		}
 	}
+	/**
 
+	 * @param {the data being sent to the server used to create a new patient} data 
+	 * @returns boolean indicating success or failure
+	 */
 	const addPatient = async (data) => {
 		try {
 			console.log("row in addPatient", data)
@@ -128,9 +169,12 @@ function ViewOfPatients() {
 				throw new Error(errorMessage);
 			}
 			fetchPatients();
+			return true;
+			
 		} catch (error) {
 			setErrorMessage('Failed to add patient: ' + error);
 			setOpenSnackbar(true);
+			return false;
 		}
 	}
 

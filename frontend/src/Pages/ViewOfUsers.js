@@ -17,34 +17,45 @@ import LockOpenIcon from "@mui/icons-material/LockOpen";
 function ViewOfUsers() {
 	const [rows, setUsers] = useState([]);
 
+	// const fetchUsers = async () => {
+	// 	console.log("In fetchUsers");
+	// 	try {
+	// 		const response = await fetch(
+	// 			"http://localhost:8000/userslist/",
+	// 			{
+	// 				method: "GET",
+	// 				// TODO: do we need this??
+	// 				headers: {
+	// 					"Content-Type": "application/json",
+	// 				},
+	// 			}
+	// 		);
+
+	// 		if (!response.ok) {
+	// 			throw new Error("Failed to fetch users");
+
+	// 			// TODO: add a snackbar for an alert?
+	// 		}
+
+	// 		const data = await response.json();
+	// 		console.log(data);
+	// 		// update the state with the fetched users
+	// 		setUsers(data);
+	// 	} catch (error) {
+	// 		console.error("Error fetching users:", error);
+	// 	}
+	// };
+
 	const fetchUsers = async () => {
-		console.log("In fetchUsers");
 		try {
-			const response = await fetch(
-				"http://localhost:8000/userslist/",
-				{
-					method: "GET",
-					// TODO: do we need this??
-					headers: {
-						"Content-Type": "application/json",
-					},
-				}
-			);
-
-			if (!response.ok) {
-				throw new Error("Failed to fetch users");
-
-				// TODO: add a snackbar for an alert?
-			}
-
-			const data = await response.json();
-			console.log(data);
-			// update the state with the fetched users
-			setUsers(data);
+		  const response = await fetch('http://localhost:8000/userslist');
+		  const data = await response.json(); // Convert response to JSON
+		  console.log(data);
+		  setUsers(data); // Update rows state with fetched data
 		} catch (error) {
-			console.error("Error fetching users:", error);
+		  console.error('Error fetching users:', error);
 		}
-	};
+	}; 
 
 	useEffect(() => {
 		fetchUsers();
@@ -55,8 +66,8 @@ function ViewOfUsers() {
 	// width is the default width of the column, user can adjust it
 	const columns = [
 		{ field: "id", headerName: "ID", width: 70 },
-		{ field: "firstName", headerName: "First name", width: 130 },
-		{ field: "lastName", headerName: "Last name", width: 130 },
+		{ field: "first_name", headerName: "First name", width: 130 },
+		{ field: "last_name", headerName: "Last name", width: 130 },
 		{
 			field: "user_type",
 			headerName: "User Type",
@@ -78,7 +89,7 @@ function ViewOfUsers() {
 			},
 		},
 		{ field: "email", headerName: "Email", width: 220 },
-		{ field: "password", headerName: "Password", width: 220 }
+		{ field: "password", headerName: "Password", width: 220, renderCell: (params) => '•••••••' }
 
 
 		
@@ -110,7 +121,7 @@ function ViewOfUsers() {
 	// 	},
 	// ];
 
-	// all users can edit patients
+	// all users can edit users
 	const canEdit = () => {
 		// const userType = localStorage.getItem('userType');
 		// TODO: should we do this with no checks?
@@ -201,6 +212,7 @@ function ViewOfUsers() {
 		  <h2>Users Table</h2>
 			<Button
 			  variant="contained"
+			  style={{ width: '200px', marginBottom: '16px' }} 
 			  onClick={() => {
 				if (openAddUserModal.current) {
 				  openAddUserModal.current(); // Trigger modal to open for adding a user

@@ -92,14 +92,32 @@ function ViewOfPatients() {
 		}
 	}
 
+	/**
+	 * @param {the data about the patient being added or edited that is send to the server} data 
+	 * @param {the id of the patient being edited, should be null if adding a patient} id 
+	 * @returns boolean indicating success or failure
+	 */
 	const addEditPatient = async (data, id) => {
-		if (id) {
-			editPatient(data, id);
-		} else {
-			addPatient(data);
+		try {
+			if (id) {
+				const result = await editPatient(data, id);
+				console.log("editPatient result:", result);
+				return result;
+			} else {
+				const result = await addPatient(data);
+				console.log("addPatient result:", result);
+				return result;
+			}
+		} catch (error) {
+			console.error("Error in addEditPatient:", error);
+			return false;
 		}
 	}
-
+	/**
+	 * @param {data sent to sever, contains the changes made to the patient} data 
+	 * @param {the id of the patient being edited} id 
+	 * @returns boolean indicating success or failure
+	 */
 	const editPatient = async (data, id) => {
 		try {
 			console.log("row in editPatient", id, data)
@@ -116,12 +134,18 @@ function ViewOfPatients() {
 				throw new Error(responseData.detail[0].msg);
 			}
 			fetchPatients();
+			return true;
 		} catch (error) {
 			setErrorMessage('Failed to update patient');
 			setOpenSnackbar(true);
+			return false;
 		}
 	}
+	/**
 
+	 * @param {the data being sent to the server used to create a new patient} data 
+	 * @returns boolean indicating success or failure
+	 */
 	const addPatient = async (data) => {
 		try {
 			console.log("row in addPatient", data)
@@ -144,9 +168,12 @@ function ViewOfPatients() {
 				throw new Error(errorMessage);
 			}
 			fetchPatients();
+			return true;
+			
 		} catch (error) {
 			setErrorMessage('Failed to add patient: ' + error);
 			setOpenSnackbar(true);
+			return false;
 		}
 	}
 

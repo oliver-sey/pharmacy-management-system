@@ -53,7 +53,7 @@ function ViewOfMedications() {
 		{
 			field: "alerts",
 			headerName: "Alerts",
-			width: 100,
+			width: 200,
 			// calculate time between now and the expiration date, to see what alert icons we should show
 			renderCell: (params) => {
 				// TODO: fix some weird stuff with time zones??? dates still print weird

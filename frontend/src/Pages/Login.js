@@ -3,7 +3,7 @@ import "../Styles/Login.css"; // import the specific stylesheet for this page;
 import { useNavigate } from "react-router-dom";
 import "../Styles/Login.css";
 
-function Login() {
+function Login({ updateUserRole }) {
 	// username is actually an email
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
@@ -159,7 +159,11 @@ function Login() {
           //TO DO: put user info in local storage?
           const userData = await userResponse.json();
           localStorage.setItem('role', userData.user_type)
-          
+		  
+
+		  // Update the user role immediately
+		  updateUserRole(userData.user_type); // update the header
+          console.log("User role:", userData.user_type); // Log the user role
 
           //redirects user to homepage for their role
           //more can be added as needed

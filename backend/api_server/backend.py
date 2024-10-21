@@ -16,6 +16,8 @@ from . import models  # Ensure this is the SQLAlchemy model
 from sqlalchemy.orm import Session
 from typing import List
 from . import schema
+from sqlalchemy.exc import IntegrityError
+from pydantic import ValidationError
 
 # Create the database tables
 Base.metadata.create_all(bind=engine)
@@ -67,7 +69,8 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
     
     return db_user
 
-@app.delete("/users/{user_id}", response_model=SimpleResponse)
+
+@app.delete("/users/{user_id}")
 def delete_user(user_id: int, db: Session = Depends(get_db)):
     db_user = db.query(models.User).filter(models.User.id == user_id).first()
     if db_user is None:
@@ -96,6 +99,8 @@ def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db)):
     # Update only provided fields
     if user.first_name is not None:
         db_user.first_name = user.first_name
+    if user.last_name is not None:
+        db_user.last_name = user.last_name
     if user.user_type is not None:
         db_user.user_type = user.user_type
     if user.email is not None:
@@ -157,6 +162,8 @@ class TokenData(BaseModel):
 
 
 class UserToReturn(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
     id: Optional[int] = None
     email: Optional[str] = None
     user_type: Optional[str] = None
@@ -294,14 +301,28 @@ def get_patients(db: Session = Depends(get_db)):
 def create_patient(patient: PatientCreate, db: Session = Depends(get_db)):
     patient_data = patient.model_dump()
     email = patient_data['email']
+    # check if the email is already registered
     if db.query(models.Patient).filter(models.Patient.email == email).first():
         raise HTTPException(status_code=400, detail="Email already registered")
     else:
-        db_patient = models.Patient(**patient_data)
-        db.add(db_patient)
-        db.commit()
-        db.refresh(db_patient)
-        return db_patient
+        # try to add patient to the database
+        try:
+            db_patient = models.Patient(**patient_data)
+            db.add(db_patient)
+            db.commit()
+            db.refresh(db_patient)
+            return db_patient
+        # if there is an error, raise an error
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        except IntegrityError as e:
+            db.rollback()
+            raise HTTPException(status_code=400, detail=str(e.orig))
+        except ValidationError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(status_code=400, detail=str(e))
 
 @app.put("/patient/{patient_id}")
 def put_patient(patient_id: int, patient: PatientUpdate, db: Session = Depends(get_db)):
@@ -312,14 +333,17 @@ def put_patient(patient_id: int, patient: PatientUpdate, db: Session = Depends(g
         raise HTTPException(status_code=404, detail="Patient not found")
     # get the data stored in the body of the put request
     patient_data = patient.model_dump()
-    # update the fields of the existing patient
-    for key, value in patient_data.items():
-        setattr(db_patient, key, value)
-    # commit and refresh
-    db.commit()
-    db.refresh(db_patient)
 
-    return db_patient
+    try:
+        # update the fields of the existing patient
+        for key, value in patient_data.items():
+            setattr(db_patient, key, value)
+        # commit and refresh
+        db.commit()
+        db.refresh(db_patient)
+        return db_patient
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))    
 
 @app.delete("/patient/{pid}")
 def delete_patient(pid: int, db: Session = Depends(get_db)):
@@ -467,6 +491,24 @@ def create_prescription(prescription: schema.PrescriptionCreate, db: Session = D
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+    # Check prescription amount with medication inventory, if none or not enough, return 400, otherwise, decrease inventory dosage
+    db_medication = db.query(models.Medication).filter(models.Medication.id == db_prescription.medication_id).first()
+    if db_medication is None or db_medication.dosage < db_prescription.dosage:
+        return HTTPException(status_code=400, detail="Without sufficient inventory for such medication")
+    else:
+         db_medication.dosage -= db_prescription.dosage
+
+    # if successfully deduct medication from inventory, create a inventory instance in InventoryUpdate table
+    inventory_update = models.InventoryUpdate(
+        medication_id=db_medication.id,
+        user_activity_id=db_prescription.user_filled_id,    # user who filled the prescription
+        dosage=db_prescription.dosage                  # The quantity deducted
+    )
+
+    # Add the inventory update to the session
+    db.add(inventory_update)
+
+    # after update medication in inventory and create an inventory update, finally add the prescription
     db.add(db_prescription)
     db.commit()
     db.refresh(db_prescription)
@@ -500,3 +542,28 @@ def delete_prescription(prescription_id: int, db: Session = Depends(get_db)):
     db.delete(db_prescription)
     db.commit()
     return {"message": "Prescription deleted successfully", "prescription_id": prescription_id}
+
+
+#Filters prescription using patienmt ID
+@app.get("/prescription/patient/{patient_id}", response_model=List[schema.PrescriptionResponse])
+def get_prescriptions_for_patient(patient_id: int, db: Session = Depends(get_db)):
+    try:
+        # Fetch the patient by ID
+        patient = db.query(models.Patient).filter(models.Patient.id == patient_id).first()
+        if not patient:
+            raise HTTPException(status_code=404, detail="Patient not found")
+
+        # Fetch prescriptions for the patient
+        prescriptions = db.query(models.Prescription).filter(models.Prescription.patient_id == patient_id).all()
+
+        # If no prescriptions found, return an empty list
+        if not prescriptions:
+            return []
+
+        return [schema.PrescriptionResponse.from_orm(prescription) for prescription in prescriptions]
+    
+    except Exception as e:
+        print(f"Error fetching prescriptions for patient ID {patient_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
+

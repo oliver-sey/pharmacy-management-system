@@ -12,11 +12,8 @@ logs/
 frontend/node_modules/
 
 # Build directories
-# frontend/frontend/build/
-# frontend/dist/
-
-**/build
-**/dist
+frontend/build/
+frontend/dist/
 
 # Temporary files
 *.tmp

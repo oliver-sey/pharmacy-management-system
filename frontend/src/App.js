@@ -5,6 +5,8 @@ import Login from './Pages/Login';
 import ManagerHome from './Pages/ManagerHome';
 import PharmacistHome from './Pages/PharmacistHome';
 import ViewOfPatients from './Pages/ViewOfPatients';
+import ViewOfPrescriptions from './Pages/ViewOfPrescriptions';
+import PrescriptionsToFill from './Pages/PrescriptionsToFill';
 import ViewOfUsers from './Pages/ViewOfUsers';
 import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
 import ViewOfMedications from './Pages/ViewOfMedications';
@@ -41,6 +43,8 @@ function App() {
           <Route path='/viewofpatients' element={<ViewOfPatients/>}/>
           <Route path='/viewofmedications' element={<ViewOfMedications/>}/>
           <Route path='/viewofusers' element={<ViewOfUsers/>}/>
+          <Route path='/viewofprescriptions' element={<ViewOfPrescriptions/>}/>
+          <Route path='/prescriptionstofill' element={<PrescriptionsToFill/>}/>
           <Route path='/resetpassword' element ={<ResetPassword/>}/>
           <Route path='/viewofemployees' element ={<ViewOfEmployees/>}/>
           <Route path='/fill' element ={<FillPrescriptionForm/>}/>

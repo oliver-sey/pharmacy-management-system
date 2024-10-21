@@ -76,7 +76,7 @@ function PharmTechHome() {
   const navigate = useNavigate();
 
   //Change this variable based on what type of user the page is for
-  const role = "pharmacy_tech"
+  const role = ["pharmacy_tech"]
 
   useEffect(() => {
       CheckUserType(role, navigate);

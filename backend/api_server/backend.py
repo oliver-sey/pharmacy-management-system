@@ -114,7 +114,7 @@ def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db)):
     db.refresh(db_user)
     return db_user
 
-@app.get("/userslist/", response_model=List[UserResponse])
+@app.get("/userslist", response_model=List[UserResponse])
 def list_users(db: Session = Depends(get_db)):
     # Query all users from the database
     users = db.query(models.User).all()

@@ -21,7 +21,7 @@ const Item = styled(Paper)(({ theme }) => ({
 }));
 
 function ManagerHome() {
-  const role = "pharmacy_manager"
+  const role = ["pharmacy-manager"]
   const navigate = useNavigate();
   const [curr_user_id, set_curr_user_id] = useState("");
 
@@ -97,24 +97,6 @@ function ManagerHome() {
         dosage: formData.dosage
       }))
 
-      // CheckUserType(role, navigate)
-      // .then((curr_user_data) => console.log(JSON.stringify(curr_user_data)))
-      
-      // console.log(curr_user_id)
-
-      // const prescription_object = {
-      //   patient_id: formData.patient,
-      //   user_entered_id: curr_user_id, 
-      //   user_filled_id: null,
-      //   filled_timestamp: null,
-      //   date_prescribed: formData.date_prescribed,
-      //   medication_id: formData.medication,
-      //   doctor_name: formData.prescribing_doctor,
-      //   dosage: formData.dosage
-      // };
-
-      // console.log("Prescription saved:", prescription_object);
-      // addPrescription(prescription_object);
       closeEditModal(); // Close modal after saving
     };
   

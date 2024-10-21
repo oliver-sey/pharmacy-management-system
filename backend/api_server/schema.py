@@ -6,6 +6,8 @@ from datetime import date, datetime
 
 class SimpleResponse(BaseModel):
     message: str
+
+# region Users
 class UserCreate(BaseModel):
     first_name: str
     last_name: str
@@ -94,7 +96,11 @@ class UserLogin(BaseModel):
     
 class MedicationCreate(BaseModel):
     name: str
-    dosage: int
+    # the strength of the medication per pill
+    # if we have multiple different strengths for the same medicine (e.g. tylenol), 
+    # those need to be multiple different rows in the medication table
+    dosage: str
+    # the total number of pills of this medication we have
     quantity: int
     prescription_required: bool
     expiration_date: date
@@ -108,7 +114,11 @@ class MedicationResponse(MedicationCreate):
 
 class MedicationUpdate(BaseModel):
     name: Optional[str] = None
-    dosage: Optional[int] = None
+    # the strength of the medication per pill
+    # if we have multiple different strengths for the same medicine (e.g. tylenol), 
+    # those need to be multiple different rows in the medication table
+    dosage: Optional[str] = None
+    # the total number of pills of this medication we have
     quantity: Optional[int] = None
     prescription_required: Optional[bool] = None
     expiration_date: Optional[date] = None
@@ -123,7 +133,8 @@ class PrescriptionResponse(BaseModel):
     filled_timestamp: Optional[datetime]
     medication_id: int
     doctor_name: str
-    dosage: int
+    # the number of pills the patient is allowed to have of this medication with this prescription
+    quantity: int
 
     class Config:  
         from_attributes = True 
@@ -131,11 +142,14 @@ class PrescriptionResponse(BaseModel):
 class PrescriptionCreate(BaseModel):
     patient_id: int
     user_entered_id: int
-    user_filled_id: Optional[int] = None
-    filled_timestamp: Optional[datetime] = None
+    # TODO: i don't think you should be allowed to create an already filled prescription right away
+    # it makes more sense to make them call the fill prescription route after creating the prescription
+    # user_filled_id: Optional[int] = None
+    # filled_timestamp: Optional[datetime] = None
     medication_id: int
     doctor_name: str
-    dosage: int
+    # the number of pills the patient is allowed to have of this medication with this prescription
+    quantity: int
 
     class Config:
         orm_mode = True
@@ -143,9 +157,19 @@ class PrescriptionCreate(BaseModel):
 class PrescriptionUpdate(BaseModel):
     patient_id: Optional[int] = None
     user_entered_id: Optional[int] = None
-    user_filled_id: Optional[int] = None
+    # I think you should have to call the fill prescription route to edit these
+    # so we can have control over checking if we're able to fill the prescription
+    # user_filled_id: Optional[int] = None
+    # filled_timestamp: Optional[date] = None
     date_prescribed: Optional[date] = None
-    filled_timestamp: Optional[date] = None
     medication_id: Optional[int] = None
     doctor_name: Optional[str] = None
-    dosage: Optional[int] = None
+    # the number of pills the patient is allowed to have of this medication with this prescription
+    quantity: Optional[int] = None
+
+
+class PrescriptionFillRequest(BaseModel):
+    user_filled_id: int
+    # token: str
+    class Config:
+        orm_mode = True

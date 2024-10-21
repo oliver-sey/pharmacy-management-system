@@ -14,7 +14,7 @@ function ViewOfPrescriptions() {
 	const [errorMessage, setErrorMessage] = useState(null);
 	const [openSnackbar, setOpenSnackbar] = useState(false);
 	const navigate = useNavigate();
-    const role = ['pharmacist', 'pharmacy-manager']
+    const role = ['pharmacist', 'pharmacy_manager']
 	// Async function to fetch presciptions data
 	const fetchPrescriptions = async () => {
 		try {
@@ -99,7 +99,7 @@ function ViewOfPrescriptions() {
               // Replace patient_id with patient_name
               patient_name: patient ? patient.first_name + ' ' + patient.last_name : 'Unknown Patient',
               // Replace medication_id with medication_name
-              medication_name: medication ? medication.name : 'Unknown Medication',
+              medication_name: medication ? medication.name + ", " + medication.dosage : 'Unknown Medication',
 
               user_filled_name: filled_user ? filled_user.first_name + ' ' + filled_user.last_name : null,
 
@@ -128,7 +128,7 @@ function ViewOfPrescriptions() {
 	  const columns = [
 		{ field: 'id', headerName: 'ID' },
 		{ field: 'medication_name', headerName: 'Medication' },
-		{ field: 'dosage', headerName: 'Dosage' },
+		{ field: 'quantity', headerName: 'Quantity'},
 		{ field: 'patient_name', headerName: 'Patient' },
 		{ field: 'date_prescribed', headerName: 'Date Prescribed' },
         { field: 'user_entered_name', headerName: 'Entered By' },
@@ -147,7 +147,7 @@ function ViewOfPrescriptions() {
 	// only pharmacists or pharmacy managers can delete
 	const canDelete = () => {
 		const role = localStorage.getItem('role');
-		return role === 'pharmacist' || role === 'pharmacymanager';
+		return role === 'pharmacist' || role === 'pharmacy_manager';
 	};
 
 	const deletePrescription = async (id) => {
@@ -159,7 +159,7 @@ function ViewOfPrescriptions() {
 			if (!response.ok) {
 				throw new Error('Failed to delete prescription');
 			}
-			fetchPrescriptions();
+			loadRows();
 		} catch (error) {
 			console.error('Error deleting prescription:', error);
 			setErrorMessage('Failed to delete prescription' + error);
@@ -173,19 +173,15 @@ function ViewOfPrescriptions() {
 	 * @returns boolean indicating success or failure
 	 */
 	const addEditPrescription = async (data, id) => {
-		console.log("adding prescription: ", data, id);
-		try {
-			if (id) {
-				const result = await editPrescription(data, id);
-				console.log("editPrescription result:", result);
-				return result;
-			} else {
-				handleSavePrescription(data)
-			}
-		} catch (error) {
-			console.error("Error in addEditPrescription:", error);
-			return false;
+		if (id) {
+			editPrescription(data, id)
+		} else {
+			console.log("adding prescription: ", data, id);
+			
+					handleSavePrescription(data)
+				
 		}
+		
 	}
 	/**
 	 * @param {data sent to sever, contains the changes made to the prescription} data 
@@ -207,7 +203,7 @@ function ViewOfPrescriptions() {
 				console.log("Error detail from response:", responseData.detail[0].msg);
 				throw new Error(responseData.detail[0].msg);
 			}
-			fetchPrescriptions();
+			loadRows();
 			return true;
 		} catch (error) {
 			setErrorMessage('Failed to update prescription');
@@ -241,7 +237,7 @@ function ViewOfPrescriptions() {
 				}
 				throw new Error(errorMessage);
 			}
-			fetchPrescriptions();
+			loadRows();
 			return true;
 			
 		} catch (error) {
@@ -258,10 +254,9 @@ function ViewOfPrescriptions() {
           user_entered_id: curr_user_data.id, 
           user_filled_id: null,
           filled_timestamp: null,
-          //date_prescribed: datetime.datetime.now(),
           medication_id: formData.medication,
           doctor_name: formData.prescribing_doctor,
-          dosage: formData.dosage
+          quantity: formData.quantity
         }))
   
       };

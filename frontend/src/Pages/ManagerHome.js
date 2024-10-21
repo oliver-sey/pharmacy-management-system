@@ -21,7 +21,7 @@ const Item = styled(Paper)(({ theme }) => ({
 }));
 
 function ManagerHome() {
-  const role = ["pharmacy-manager"]
+  const role = ["pharmacy_manager"]
   const navigate = useNavigate();
   const [curr_user_id, set_curr_user_id] = useState("");
 
@@ -39,7 +39,7 @@ function ManagerHome() {
       filled_timestamp: "",
       medication_id: "",
       doctor_name: "",
-      dosage: ""
+      quantity: ""
     });
   
      // Function to open the Add/Edit modal
@@ -85,7 +85,7 @@ function ManagerHome() {
         //date_prescribed: datetime.datetime.now(),
         medication_id: formData.medication,
         doctor_name: formData.prescribing_doctor,
-        dosage: formData.dosage
+        quantity: formData.quantity
       }))
 
       closeEditModal(); // Close modal after saving

@@ -20,6 +20,7 @@ function PrescriptionsToFill() {
 	const navigate = useNavigate();
 	const role = ["pharmacist"]
 	const token = localStorage.getItem('token');
+	const [updated, setUpdated] = useState(false);
 	
 	// Async function to fetch presciptions data
 const fetchPrescriptions = async () => {
@@ -134,7 +135,7 @@ const deletePrescription = async (id) => {
 		if (!response.ok) {
 			throw new Error('Failed to delete prescription');
 		}
-		//loadRows();
+		loadRows()
 	} catch (error) {
 		console.error('Error deleting prescription:', error);
 		setErrorMessage('Failed to delete prescription' + error);
@@ -152,7 +153,7 @@ const deletePrescription = async (id) => {
 			if (!response.ok) {
 				throw new Error('Failed to fill prescription');
 			}
-			//loadRows();
+			loadRows()
 		} catch (error) {
 			console.error('Error filling prescription:', error);
 			setErrorMessage('Failed to fill prescription' + error);
@@ -171,7 +172,7 @@ const deletePrescription = async (id) => {
 	useEffect(() => {
 		loadRows()
 		
-	  }, [HandleDelete, FillPrescription]);
+	  }, []);
 
 	  // useEffect to fetch data when the component mounts
 	useEffect(() => {

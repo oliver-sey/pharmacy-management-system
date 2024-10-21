@@ -21,9 +21,8 @@ const AddEditPrescriptionModal = ({ open, onClose, row, onSave }) => {
 	const [formData, setFormData] = useState({
 		medication: "",
 		patient: "",
-		date_prescribed: "",
-		dosage: "",
-		prescribing_doctor: ""
+		quantity: "",
+		doctor_name: ""
 	});
 
 	const [medication_data, set_medication_data] = useState([]);
@@ -48,7 +47,7 @@ const AddEditPrescriptionModal = ({ open, onClose, row, onSave }) => {
 		  const response = await fetch('http://localhost:8000/medicationlist');
 		  const data = await response.json(); // Convert response to JSON
 		  const list = []
-		  data.map((info) => { list.push({id: info.id, name:info.name}) })
+		  data.map((info) => { list.push({id: info.id, name: info.name + ", " + info.dosage}) })
 		  
 		  set_medication_data(list)
 		} catch (error) {
@@ -82,21 +81,20 @@ const AddEditPrescriptionModal = ({ open, onClose, row, onSave }) => {
 	// Update form data when the row prop changes
 	useEffect(() => {
 		if (row) {
+			
 			setFormData({
-				medication: row?.medication || "",
-				patient: row?.patient || "",
-				date_prescribed: row?.date_prescribed || "",
-				dosage: row?.dosage || "",
-				prescribing_doctor: row?.prescribing_doctor || ""
+				medication: row?.medication_name || "",
+				patient: row?.patient_name || "",
+				quantity: row?.quantity || "",
+				doctor_name: row?.doctor_name || ""
 			});
 		} else {
 			// Reset to empty fields when adding a new patient
 			setFormData({
 				medication: "",
 				patient: "",
-				date_prescribed: "",
-				dosage: "",
-				prescribing_doctor: ""
+				quantity: "",
+				doctor_name: ""
 			});
 		}
 	}, [row]);
@@ -149,9 +147,9 @@ const AddEditPrescriptionModal = ({ open, onClose, row, onSave }) => {
 			const data_to_return = {...formData, medication: medication_id, patient: patient_id}
 
 			setFormData((prev) => ({medication: medication_id, patient: patient_id, ...prev}));
-
 			
-			onSave(data_to_return); // Pass updated form data to parent component
+			onSave(data_to_return, row?.id); // Pass updated form data to parent component
+			onClose()
 		}
 	};
 
@@ -179,6 +177,7 @@ const AddEditPrescriptionModal = ({ open, onClose, row, onSave }) => {
 							
 							const searchTerm = formData.medication.toLowerCase();
 							const medication_name = item.name.toLowerCase();
+							
 						
 
 							return searchTerm && medication_name.startsWith(searchTerm) && medication_name !== searchTerm;
@@ -216,25 +215,17 @@ const AddEditPrescriptionModal = ({ open, onClose, row, onSave }) => {
 				</div>
 				</DialogContentText>
 				<TextField
-					label="Date Prescribed"
-					name="date_prescribed"
-					value={formData.date_prescribed}
-					onChange={handleChange}
-					fullWidth
-					margin="dense"
-				/>
-				<TextField
-					label="Dosage"
-					name="dosage"
-					value={formData.dosage}
+					label="quantity"
+					name="quantity"
+					value={formData.quantity}
 					onChange={handleChange}
 					fullWidth
 					margin="dense"
 				/>
 				<TextField
 					label="Prescribing Doctor"
-					name="prescribing_doctor"
-					value={formData.prescribing_doctor}
+					name="doctor_name"
+					value={formData.doctor_name}
 					onChange={handleChange}
 					fullWidth
 					margin="dense"

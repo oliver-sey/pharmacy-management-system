@@ -561,7 +561,7 @@ def delete_prescription(prescription_id: int, db: Session = Depends(get_db)):
 
 # fill a prescription
 @app.put("/prescription/{prescription_id}/fill", response_model=schema.PrescriptionResponse)
-def fill_prescription(prescription_id: int, fill_request: PrescriptionFillRequest, db: Session = Depends(get_db)):
+def fill_prescription(prescription_id: int, current_user: Annotated[UserToReturn, Depends(get_current_user)], db: Session = Depends(get_db)):
     # # check permissions first
     # current_user = get_current_user(token=fill_request.token)
     
@@ -608,7 +608,7 @@ def fill_prescription(prescription_id: int, fill_request: PrescriptionFillReques
         # set the timestamp of filling to the current time
         db_prescription.filled_timestamp = datetime.now()
         # get the user who filled the prescription from PrescriptionFillRequest
-        db_prescription.user_filled_id = fill_request.user_filled_id
+        db_prescription.user_filled_id = current_user.id
 
     db.commit()
     db.refresh(db_prescription)

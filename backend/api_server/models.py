@@ -57,7 +57,10 @@ class Prescription(Base):
     filled_timestamp = Column(DateTime, default=None, nullable=True)
     medication_id = Column(Integer, ForeignKey('medications.id'))  # Correct table reference
     doctor_name = Column(String)
-    dosage = Column(Integer)
+    # not putting dosage here, since dosage is stored in the medication (which we can access through medication_id)
+    # but we do need to know the quantity, i.e. how many pills the patient is allowed to have
+    # quantity is the amount of pills the patient is allowed to have with this prescription
+    quantity = Column(Integer)
 
     patient = relationship("Patient", back_populates="prescriptions")
     user_entered = relationship("User", back_populates="entered_prescriptions", foreign_keys="[Prescription.user_entered_id]")
@@ -69,7 +72,10 @@ class Medication(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
-    dosage = Column(Integer)
+    # dosage is the strength of each pill, i.e. how much of the medicine is actually in it
+    # if we have a medicine with 2 different dosage values, that needs to be stored as 2 different rows in medication
+    dosage = Column(String)
+    # quantity here is how many pills we have of this medication
     quantity = Column(Integer)
     prescription_required = Column(Boolean)
     expiration_date = Column(Date)
@@ -97,8 +103,11 @@ class InventoryUpdate(Base):
     user_activity_id = Column(Integer, ForeignKey('user_activities.id'))
     # transaction_id = Column(Integer, ForeignKey('transactions.id')) # don't think we need this
     # user_id = Column(Integer, ForeignKey('users.id')) # don't think we need this
-    dosage = Column(Integer)
-    # quantity = Column(Integer) # just keep dosage for now
+    # don't need dosage, that's stored in medication
+    # dosage = Column(String)
+    # quantity changed by
+    # TODO: are we doing this so it could be positive or negative?
+    quantity_changed_by = Column(Integer)
     timestamp = Column(DateTime, default=func.now())
     
     medication = relationship("Medication", back_populates="inventory_updates")

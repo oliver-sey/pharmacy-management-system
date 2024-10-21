@@ -11,7 +11,7 @@ from pydantic import BaseModel
 from passlib.context import CryptContext
 from typing import Optional
 from .database import SessionLocal, engine, Base
-from .schema import UserCreate, UserResponse, UserLogin, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate, SimpleResponse
+from .schema import UserCreate, UserResponse, UserLogin, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, PrescriptionFillRequest
 from . import models  # Ensure this is the SQLAlchemy model
 from sqlalchemy.orm import Session
 from typing import List
@@ -48,6 +48,7 @@ def get_db():
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
+# region User CRUD
 # POST endpoint to create a user
 @app.post("/users/", response_model=UserResponse)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
@@ -128,6 +129,9 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 # pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+
+# endregion
+# region Auth classes
 #------authentication classes------
 
 #temporary users
@@ -172,6 +176,8 @@ class UserToReturn(BaseModel):
 class UserInDB(BaseModel):
      hashed_password: str
 
+# endregion
+# region Auth functions
 #-------authentication functions---------
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
@@ -279,11 +285,10 @@ async def read_own_items(
 def read_root():
     return "this is an epic gamer moment!"
 
-#-------USER CRUD OPERATIONS---------
 
-
-
-##--------PATIENT CRUD OPERATIONS--------
+# endregion
+# region Patient CRUD
+#--------PATIENT CRUD OPERATIONS--------
 
 @app.get("/get/patient/{patient_id}")
 def get_patient(patient_id: int):
@@ -358,12 +363,20 @@ def delete_patient(pid: int, db: Session = Depends(get_db)):
     db.commit()
     return {"patient_id": pid}
 
+
+
+
+
+# endregion
+# region Logging config
 #--------Logging configurations---------
 log_config = uvicorn.config.LOGGING_CONFIG
 log_config["formatters"]["access"]["fmt"] = "%(asctime)s - %(levelname)s - %(message)s"
 
 
 
+# endregion
+# region Reset password
  #--------- Reset Password ---------
 @app.post("/resetpassword")
 async def reset_password(
@@ -393,7 +406,8 @@ async def reset_password(
 
     return {"message": "Password has been successfully reset."}
 
-
+# endregion
+# region Medication CRUD
 #-----Medication CRUD
 # create medication
 @app.post("/medication/", response_model=schema.MedicationResponse)
@@ -456,7 +470,12 @@ def list_medication(db: Session = Depends(get_db)):
     
     return medications
 
+# endregion
+# region Prescription CRUD
+#--------PRESCRIPTION CRUD OPERATIONS--------
 ### Prescription CRUD ###
+
+# get all prescriptions (**optional patient_id param lets you filter by one patient)
 @app.get("/prescriptions", response_model=List[schema.PrescriptionResponse])
 def get_prescriptions(patient_id: Optional[int] = Query(None), db: Session = Depends(get_db)):
     '''
@@ -470,6 +489,8 @@ def get_prescriptions(patient_id: Optional[int] = Query(None), db: Session = Dep
         prescriptions = db.query(models.Prescription).all()
     return prescriptions
 
+
+# get prescription
 @app.get("/prescription/{prescription_id}", response_model=schema.PrescriptionResponse)
 def get_prescription(prescription_id: int, db: Session = Depends(get_db)):
     db_prescription = db.query(models.Prescription).filter(models.Prescription.id == prescription_id).first()
@@ -478,6 +499,8 @@ def get_prescription(prescription_id: int, db: Session = Depends(get_db)):
     
     return db_prescription
 
+
+# create prescription
 @app.post("/prescription", response_model=schema.PrescriptionResponse)
 def create_prescription(prescription: schema.PrescriptionCreate, db: Session = Depends(get_db)):
     '''
@@ -491,35 +514,20 @@ def create_prescription(prescription: schema.PrescriptionCreate, db: Session = D
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    # Check prescription amount with medication inventory, if none or not enough, return 400, otherwise, decrease inventory dosage
-    db_medication = db.query(models.Medication).filter(models.Medication.id == db_prescription.medication_id).first()
-    if db_medication is None or db_medication.dosage < db_prescription.dosage:
-        return HTTPException(status_code=400, detail="Without sufficient inventory for such medication")
-    else:
-         db_medication.dosage -= db_prescription.dosage
+    # moved code for checking if we have enough inventory, subtracting from the inventory, etc.
+    # to the fill prescription route, since that's when that happens, not right when a prescription is made
 
-    # if successfully deduct medication from inventory, create a inventory instance in InventoryUpdate table
-    inventory_update = models.InventoryUpdate(
-        medication_id=db_medication.id,
-        user_activity_id=db_prescription.user_filled_id,    # user who filled the prescription
-        dosage=db_prescription.dosage                  # The quantity deducted
-    )
-
-    # Add the inventory update to the session
-    db.add(inventory_update)
-
-    # after update medication in inventory and create an inventory update, finally add the prescription
+    # add the prescription
     db.add(db_prescription)
     db.commit()
     db.refresh(db_prescription)
     return db_prescription
 
+
+# update prescription
 @app.put("/prescription/{prescription_id}", response_model=schema.PrescriptionUpdate)
 def update_prescription(prescription_id: int, prescription: schema.PrescriptionUpdate, db: Session = Depends(get_db)):
-    '''
-    deletes prescriptions
-    not sure if this should be allowed tho... we should talk ab it
-    '''
+    
     db_prescription = db.query(models.Prescription).filter(models.Prescription.id == prescription_id).first()
     if db_prescription is None:
         raise HTTPException(status_code=404, detail="Prescription not found")
@@ -533,8 +541,14 @@ def update_prescription(prescription_id: int, prescription: schema.PrescriptionU
     db.refresh(db_prescription)
     return db_prescription
 
+
+# delete prescription
 @app.delete("/prescription/{prescription_id}")
 def delete_prescription(prescription_id: int, db: Session = Depends(get_db)):
+    '''
+    deletes prescriptions
+    not sure if this should be allowed tho... we should talk ab it
+    '''
     db_prescription = db.query(models.Prescription).filter(models.Prescription.id == prescription_id).first()
     if db_prescription is None:
         raise HTTPException(status_code=404, detail="Prescription not found")
@@ -544,26 +558,58 @@ def delete_prescription(prescription_id: int, db: Session = Depends(get_db)):
     return {"message": "Prescription deleted successfully", "prescription_id": prescription_id}
 
 
-#Filters prescription using patienmt ID
-@app.get("/prescription/patient/{patient_id}", response_model=List[schema.PrescriptionResponse])
-def get_prescriptions_for_patient(patient_id: int, db: Session = Depends(get_db)):
-    try:
-        # Fetch the patient by ID
-        patient = db.query(models.Patient).filter(models.Patient.id == patient_id).first()
-        if not patient:
-            raise HTTPException(status_code=404, detail="Patient not found")
 
-        # Fetch prescriptions for the patient
-        prescriptions = db.query(models.Prescription).filter(models.Prescription.patient_id == patient_id).all()
-
-        # If no prescriptions found, return an empty list
-        if not prescriptions:
-            return []
-
-        return [schema.PrescriptionResponse.from_orm(prescription) for prescription in prescriptions]
+# fill a prescription
+@app.put("/prescription/{prescription_id}/fill", response_model=schema.PrescriptionResponse)
+def fill_prescription(prescription_id: int, fill_request: PrescriptionFillRequest, db: Session = Depends(get_db)):
+    # # check permissions first
+    # current_user = get_current_user(token=fill_request.token)
     
-    except Exception as e:
-        print(f"Error fetching prescriptions for patient ID {patient_id}: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+    # # TODO: not 100% sure on this
+    # # only pharmacists, pharmacy managers, and pharmacy techs can view medication inventory
+    # if current_user.user_type not in ["pharmacist", "pharmacy_manager", "pharmacy_tech"]:
+    #     raise HTTPException(
+    #         status_code=401,
+    #         detail=f"User of type '{current_user}' is not authorized to fill a prescription",
+    #     )
 
+    # the medication has the dosage, so if the IDs match up then it's the same dosage we wanted
+    db_prescription = db.query(models.Prescription).filter(models.Prescription.id == prescription_id).first()
+    if db_prescription is None:
+        raise HTTPException(status_code=404, detail="Prescription not found")
 
+    # if there is a value in the timestamp
+    # (if the timestamp is not null/None)
+    if not db_prescription.filled_timestamp is None:
+        # 409 conflict. The request conflicts with the current state of the resource (has already been filled)
+        raise HTTPException(status_code=409, detail="Prescription has already been filled")
+    else:
+        # Check prescription amount with medication inventory
+        # there will only be one medication with the matching id (since the id is unique), so using first() is fine
+        db_medication = db.query(models.Medication).filter(models.Medication.id == db_prescription.medication_id).first()
+        # if none or not enough inventory, return 400, otherwise, decrease inventory quantity
+        if db_medication is None or db_medication.quantity < db_prescription.quantity:
+            raise HTTPException(status_code=400, detail="There is no or insufficient inventory of this medication to fill the prescription")
+        else:
+            db_medication.quantity -= db_prescription.quantity
+
+        # if we successfully deduct medication from inventory, create an inventory update instance in InventoryUpdate table
+        # TODO: ******is this sufficient to update the inventory?????
+        # inventory_update = models.InventoryUpdate(
+        #     medication_id=db_medication.id,
+        #     user_activity_id=db_prescription.user_filled_id,    # user who filled the prescription
+        #     quantity_changed=db_prescription.quantity                  # The quantity deducted
+        # )
+
+        # Add the inventory update to the session
+        # db.add(inventory_update)
+
+        # after update medication in inventory and create an inventory update, finally fill the prescription
+        # set the timestamp of filling to the current time
+        db_prescription.filled_timestamp = datetime.now()
+        # get the user who filled the prescription from PrescriptionFillRequest
+        db_prescription.user_filled_id = fill_request.user_filled_id
+
+    db.commit()
+    db.refresh(db_prescription)
+    return db_prescription

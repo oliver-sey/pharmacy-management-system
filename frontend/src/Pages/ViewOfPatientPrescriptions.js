@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Alert, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 
@@ -12,9 +12,12 @@ const ViewOfPatientPrescriptions = () => {
     const [openModal, setOpenModal] = useState(false);  
 
     // Fetch prescriptions for the patient from the API
-    const fetchPrescriptions = async () => {
+    const fetchPrescriptions = useCallback(async () => {
         try {
-            const response = await fetch(`http://localhost:8000/prescription/patient/${patientId}`);
+            // replacing this call with the updated API that we have
+            // const response = await fetch(`http://localhost:8000/prescription/patient/${patientId}`);
+            const response = await fetch(`http://localhost:8000/prescriptions/?patient_id=${patientId}`);
+
             if (!response.ok) {
                 throw new Error('Failed to fetch prescriptions');
             }
@@ -31,12 +34,12 @@ const ViewOfPatientPrescriptions = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [patientId]);
 
     // Fetch prescriptions when the component mounts
     useEffect(() => {
         fetchPrescriptions();
-    }, [patientId]);
+    }, [fetchPrescriptions, patientId]);
 
     // Function to show detailed prescription history
     const viewPrescriptionHistory = (medicationId) => {

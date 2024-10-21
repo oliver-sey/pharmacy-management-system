@@ -98,6 +98,7 @@ function ViewOfPatients() {
 	 * @returns boolean indicating success or failure
 	 */
 	const addEditPatient = async (data, id) => {
+		console.log("adding patient: ", data, id);
 		try {
 			if (id) {
 				const result = await editPatient(data, id);

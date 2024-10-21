@@ -25,16 +25,7 @@ function ManagerHome() {
   const navigate = useNavigate();
   const [curr_user_id, set_curr_user_id] = useState("");
 
-    useEffect(() => {
-      
-      
 
-      
-        // const curr_user_data = CheckUserType(role, navigate);
-        // console.log(curr_user_data);
-        //set_curr_user_id(curr_user_data.id)
-
-    }, [role, navigate]);
 
     const [isEditOpen, setIsEditOpen] = useState(false); // Tracks if the modal is open
     const [selectedRow, setSelectedRow] = useState(null); // Tracks the selected row for editing
@@ -103,7 +94,7 @@ function ManagerHome() {
     useEffect(() => {
         CheckUserType(role, navigate);
   
-    }, [role, navigate]);
+    }, []);
   
   
     return (

@@ -4,7 +4,7 @@
 -- to delete all the rows out of the table
 -- TRUNCATE TABLE users;
 
-INSERT INTO users (id, user_type, email, password, is_locked_out) VALUES (1, 'pharmacist', 'alice.pharm@example.com', 'passAlice1', FALSE);
+INSERT INTO users (id, first_name, last_name, user_type, email, password, is_locked_out) VALUES (1, 'pharmacist', 'alice.pharm@example.com', 'passAlice1', FALSE);
 INSERT INTO users (id, user_type, email, password, is_locked_out) VALUES (2, 'pharmacymanager', 'oliver@cool.com', 'cool123', TRUE);
 INSERT INTO users (id, user_type, email, password, is_locked_out) VALUES (3, 'pharmacytech', 'carol.tech@example.com', 'passCarol3', TRUE);
 INSERT INTO users (id, user_type, email, password, is_locked_out) VALUES (4, 'cashier', 'dave.cashier@example.com', 'passDave4', FALSE);

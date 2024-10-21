@@ -33,6 +33,8 @@ async function CheckUserType (role, navigate)  {
             console.log("From CheckUser: " + JSON.stringify(userData))
             return userData
           }
+        } else {
+          throw new Error("Could not authenticate")
         }
 
     } catch (error) {

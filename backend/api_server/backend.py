@@ -567,3 +567,59 @@ def get_prescriptions_for_patient(patient_id: int, db: Session = Depends(get_db)
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
+# fill a prescription
+@app.put("/prescription/{prescription_id}/fill", response_model=schema.PrescriptionResponse)
+def fill_prescription(prescription_id: int, current_user:  Annotated[UserToReturn ,Depends(get_current_user)], db: Session = Depends(get_db)):
+    # # check permissions first
+    # current_user = get_current_user(token=fill_request.token)
+    
+    # # TODO: not 100% sure on this
+    # # only pharmacists, pharmacy managers, and pharmacy techs can view medication inventory
+    # if current_user.user_type not in ["pharmacist", "pharmacy_manager", "pharmacy_tech"]:
+    #     raise HTTPException(
+    #         status_code=401,
+    #         detail=f"User of type '{current_user}' is not authorized to fill a prescription",
+    #     )
+
+    # the medication has the dosage, so if the IDs match up then it's the same dosage we wanted
+    db_prescription = db.query(models.Prescription).filter(models.Prescription.id == prescription_id).first()
+    if db_prescription is None:
+        raise HTTPException(status_code=404, detail="Prescription not found")
+
+    # if there is a value in the timestamp
+    # (if the timestamp is not null/None)
+    if not db_prescription.filled_timestamp is None:
+        # 409 conflict. The request conflicts with the current state of the resource (has already been filled)
+        raise HTTPException(status_code=409, detail="Prescription has already been filled")
+    else:
+        # Check prescription amount with medication inventory
+        # there will only be one medication with the matching id (since the id is unique), so using first() is fine
+        db_medication = db.query(models.Medication).filter(models.Medication.id == db_prescription.medication_id).first()
+        # if none or not enough inventory, return 400, otherwise, decrease inventory quantity
+        # if db_medication is None or db_medication.quantity < db_prescription.quantity:
+        #     raise HTTPException(status_code=400, detail="There is no or insufficient inventory of this medication to fill the prescription")
+        # else:
+        #     db_medication.quantity -= db_prescription.quantity
+
+        # if we successfully deduct medication from inventory, create an inventory update instance in InventoryUpdate table
+        # TODO: ******is this sufficient to update the inventory?????
+        # inventory_update = models.InventoryUpdate(
+        #     medication_id=db_medication.id,
+        #     user_activity_id=db_prescription.user_filled_id,    # user who filled the prescription
+        #     quantity_changed=db_prescription.quantity                  # The quantity deducted
+        # )
+
+        # Add the inventory update to the session
+        # db.add(inventory_update)
+
+        # after update medication in inventory and create an inventory update, finally fill the prescription
+        # set the timestamp of filling to the current time
+        db_prescription.filled_timestamp = datetime.now()
+        # get the user who filled the prescription from PrescriptionFillRequest
+        db_prescription.user_filled_id = current_user.id
+
+    db.commit()
+    db.refresh(db_prescription)
+    return db_prescription
+
+

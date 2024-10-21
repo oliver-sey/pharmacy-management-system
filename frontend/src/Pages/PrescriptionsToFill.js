@@ -4,8 +4,11 @@ import { Snackbar, Alert, Button} from "@mui/material";
 import { IconButton, Tooltip } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import CheckUserType from "../Functions/CheckUserType";
 
 import BaseTable from "../Components/BaseTable";
+
+
 
 function PrescriptionsToFill() {
 	// the columns for the table
@@ -16,112 +19,164 @@ function PrescriptionsToFill() {
 	const [openSnackbar, setOpenSnackbar] = useState(false);
 	const navigate = useNavigate();
 	const role = ["pharmacist"]
+	const token = localStorage.getItem('token');
+	
 	// Async function to fetch presciptions data
-	const fetchPrescriptions = async () => {
-		try {
-		  const response = await fetch('http://localhost:8000/prescriptions');
-		  const data = await response.json(); // Convert response to JSON
+const fetchPrescriptions = async () => {
+	try {
+	  const response = await fetch('http://localhost:8000/prescriptions');
+	  const data = await response.json(); // Convert response to JSON
 
-		  return data
-		} catch (error) {
-		  console.error('Error fetching prescriptions:', error);
-		  // error handling
-		  setErrorMessage('Failed to fetch prescriptions');
-      	  setOpenSnackbar(true); // Show Snackbar when error occurs
+	  return data
+	} catch (error) {
+	  console.error('Error fetching prescriptions:', error);
+	  // error handling
+	  setErrorMessage('Failed to fetch prescriptions');
+		setOpenSnackbar(true); // Show Snackbar when error occurs
+	}
+}; 
+
+const fetchPatients = async () => {
+	try {
+		const response = await fetch('http://localhost:8000/patients')
+		const data = await response.json()
+
+		console.log("patient data: " + JSON.stringify(data))
+		return data
+	} catch (error) {
+		console.error('Error fetching patient:', error);
+		// error handling
+		setErrorMessage('Failed to fetch patient');
+		  setOpenSnackbar(true); // Show Snackbar when error occurs
+	  }
+}
+
+const fetchMedications = async () => {
+	try {
+		const response = await fetch('http://localhost:8000/medicationlist')
+		const data = await response.json()
+
+		console.log("medication data: " + JSON.stringify(data))
+		
+		return data
+	} catch (error) {
+		console.error('Error fetching medication:', error);
+		// error handling
+		setErrorMessage('Failed to fetch medication');
+		  setOpenSnackbar(true); // Show Snackbar when error occurs
+	  }
+}
+
+const fetchUsers = async () => {
+	try {
+		const response = await fetch('http://localhost:8000/userslist')
+		const data = await response.json()
+
+		console.log("users data: " + JSON.stringify(data))
+		
+		return data
+	} catch (error) {
+		console.error('Error fetching users:', error);
+		// error handling
+		setErrorMessage('Failed to fetch users');
+		  setOpenSnackbar(true); // Show Snackbar when error occurs
+	  }
+}
+
+const loadRows = async () =>{
+	const patients = await fetchPatients();
+	const medications = await fetchMedications();
+	const prescriptions = await fetchPrescriptions();
+	const users = await fetchUsers();
+
+	const updatedPrescriptions = prescriptions.map(prescription => {
+		// Find the patient object that matches the patient_id in the prescription
+		const patient = patients.find(p => p.id === prescription.patient_id);
+	  
+		// Find the medication object that matches the medication_id in the prescription
+		const medication = medications.find(m => m.id === prescription.medication_id);
+
+		const entered_user = users.find(u => u.id === prescription.user_entered_id);
+	  
+		return {
+		  ...prescription,
+		  // Replace patient_id with patient_name
+		  patient_name: patient ? patient.first_name + ' ' + patient.last_name : 'Unknown Patient',
+		  // Replace medication_id with medication_name
+		  medication_name: medication ? medication.name : 'Unknown Medication',
+
+		  user_entered_name: entered_user ? entered_user.first_name + ' ' + entered_user.last_name : null
+		
+		  
+		};
+	  })
+
+	  updatedPrescriptions.forEach(prescription => {
+		delete prescription.patient_id;
+		delete prescription.medication_id;
+		delete prescription.user_entered_id;
+		
+	  });
+
+	const filteredPrescriptions = updatedPrescriptions.filter(prescription => prescription.user_filled_id === null);
+
+	console.log(updatedPrescriptions)
+	setRows(filteredPrescriptions)
+}
+
+	
+const deletePrescription = async (id) => {
+	try {
+		console.log("row", id);
+		const response = await fetch(`http://localhost:8000/prescription/${id}`, {
+			method: 'DELETE',
+		});
+		if (!response.ok) {
+			throw new Error('Failed to delete prescription');
 		}
-	}; 
+		//loadRows();
+	} catch (error) {
+		console.error('Error deleting prescription:', error);
+		setErrorMessage('Failed to delete prescription' + error);
+		setOpenSnackbar(true);
+	}
+}
 
-    const fetchPatients = async () => {
-        try {
-            const response = await fetch('http://localhost:8000/patients')
-            const data = await response.json()
-
-            console.log("patient data: " + JSON.stringify(data))
-            return data
-        } catch (error) {
-            console.error('Error fetching patient:', error);
-            // error handling
-            setErrorMessage('Failed to fetch patient');
-              setOpenSnackbar(true); // Show Snackbar when error occurs
-          }
-    }
-
-    const fetchMedications = async () => {
-        try {
-            const response = await fetch('http://localhost:8000/medicationlist')
-            const data = await response.json()
-
-            console.log("medication data: " + JSON.stringify(data))
-            
-            return data
-        } catch (error) {
-            console.error('Error fetching medication:', error);
-            // error handling
-            setErrorMessage('Failed to fetch medication');
-              setOpenSnackbar(true); // Show Snackbar when error occurs
-          }
-    }
-
-    const fetchUsers = async () => {
-        try {
-            const response = await fetch('http://localhost:8000/userslist')
-            const data = await response.json()
-
-            console.log("users data: " + JSON.stringify(data))
-            
-            return data
-        } catch (error) {
-            console.error('Error fetching users:', error);
-            // error handling
-            setErrorMessage('Failed to fetch users');
-              setOpenSnackbar(true); // Show Snackbar when error occurs
-          }
-    }
-
-    const loadRows = async () =>{
-        const patients = await fetchPatients();
-        const medications = await fetchMedications();
-        const prescriptions = await fetchPrescriptions();
-        const users = await fetchUsers();
-
-        const updatedPrescriptions = prescriptions.map(prescription => {
-            // Find the patient object that matches the patient_id in the prescription
-            const patient = patients.find(p => p.id === prescription.patient_id);
-          
-            // Find the medication object that matches the medication_id in the prescription
-            const medication = medications.find(m => m.id === prescription.medication_id);
-
-            const entered_user = users.find(u => u.id === prescription.user_entered_id);
-          
-            return {
-              ...prescription,
-              // Replace patient_id with patient_name
-              patient_name: patient ? patient.first_name + ' ' + patient.last_name : 'Unknown Patient',
-              // Replace medication_id with medication_name
-              medication_name: medication ? medication.name : 'Unknown Medication',
-
-              user_entered_name: entered_user ? entered_user.first_name + ' ' + entered_user.last_name : null
-            
-              
-            };
-          })
-
-          updatedPrescriptions.forEach(prescription => {
-            delete prescription.patient_id;
-            delete prescription.medication_id;
-            delete prescription.user_entered_id;
+	const FillPrescription = async (row) => {
+		try {
 			
-          });
+			const response = await fetch(`http://localhost:8000/prescription/${row.id}/fill`, {
+				method: 'PUT',
+				headers: {'Authorization': 'Bearer ' + token}
+			});
+			if (!response.ok) {
+				throw new Error('Failed to fill prescription');
+			}
+			//loadRows();
+		} catch (error) {
+			console.error('Error filling prescription:', error);
+			setErrorMessage('Failed to fill prescription' + error);
+			setOpenSnackbar(true);
+		}
+	}
 
-		const filteredPrescriptions = updatedPrescriptions.filter(prescription => prescription.user_filled_id === null);
+	const HandleDelete = async (row) => {
+		//TO DO: confirmation message
+		deletePrescription(row.id)
 
-        console.log(updatedPrescriptions)
-        setRows(filteredPrescriptions)
-    }
+	}
+   
 
 	// useEffect to fetch data when the component mounts
 	useEffect(() => {
-		loadRows(); 
+		loadRows()
+		
+	  }, [HandleDelete, FillPrescription]);
+
+	  // useEffect to fetch data when the component mounts
+	useEffect(() => {
+		
+		CheckUserType(role, navigate);
 	  }, []);
 
 	  const columns = [
@@ -142,32 +197,6 @@ function PrescriptionsToFill() {
 		return role === 'pharmacist' || role === 'pharmacymanager';
 	};
 
-	const deletePrescription = async (id) => {
-		try {
-			console.log("row", id);
-			const response = await fetch(`http://localhost:8000/prescription/${id}`, {
-				method: 'DELETE',
-			});
-			if (!response.ok) {
-				throw new Error('Failed to delete prescription');
-			}
-			fetchPrescriptions();
-		} catch (error) {
-			console.error('Error deleting prescription:', error);
-			setErrorMessage('Failed to delete prescription' + error);
-			setOpenSnackbar(true);
-		}
-	}
-
-	const FillPrescription = async (row) => {
-
-	}
-
-	const HandleDelete = async (row) => {
-		//TO DO: confirmation message
-		deletePrescription(row.id)
-
-	}
 
 	
 	/**

@@ -6,9 +6,6 @@ import AddEditPatientModal from "../Components/AddEditPatientModal";
 import DeleteModal from "../Components/DeleteModal";
 
 function ViewOfPatients() {
-	// the columns for the table
-	// headerName is what shows up on the website
-	// width is the default width of the column, user can adjust it
 	const [rows, setRows] = useState([]);
 	const [errorMessage, setErrorMessage] = useState(null);
 	const [openSnackbar, setOpenSnackbar] = useState(false);
@@ -32,7 +29,10 @@ function ViewOfPatients() {
 		fetchPatients(); // Call the async function
 	  }, []); // Empty array means this effect runs once when the component mounts
 
-	  const columns = [
+	// the columns for the table
+	// headerName is what shows up on the website
+	// width is the default width of the column, user can adjust it
+	const columns = [
 		{ field: 'id', headerName: 'ID' },
 		{ field: 'first_name', headerName: 'First Name' },
 		{ field: 'last_name', headerName: 'Last Name' },
@@ -97,6 +97,7 @@ function ViewOfPatients() {
 	 * @param {the id of the patient being edited, should be null if adding a patient} id 
 	 * @returns boolean indicating success or failure
 	 */
+	// this is 'onSave()'
 	const addEditPatient = async (data, id) => {
 		console.log("adding patient: ", data, id);
 		try {

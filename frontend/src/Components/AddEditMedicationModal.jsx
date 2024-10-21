@@ -44,7 +44,8 @@ const AddEditMedicationModal = ({ open, onClose, row, onSave }) => {
 				name: row?.name || "",
 				dosage: row?.dosage || "",
 				quantity: row?.quantity || "",
-				prescription_required: row?.prescription_required || "",
+				// Ensure boolean is converted to string
+				prescription_required: typeof row?.prescription_required === 'boolean' ? String(row.prescription_required) : "",  
 				expiration_date: row?.expiration_date || "",
 				dollars_per_unit: row?.dollars_per_unit || "",
 			});
@@ -89,16 +90,31 @@ const AddEditMedicationModal = ({ open, onClose, row, onSave }) => {
 					}
 					break;
 				case 'prescription_required':
-					errors.prescription_required = !value ? 'Prescription required field is required' : '';
+					if (!value) {
+						errors.prescription_required = 'Prescription required field is required';
+					} else if (String(value) !== "true" && String(value) !== "false") {
+						errors.prescription_required = 'Prescription required must be either "true" or "false", lowercase';
+					} else {
+						errors.prescription_required = '';
+					}
 					break;
 				case 'expiration_date':
-					errors.expiration_date = !value ? 'Expiration date is required' : '';
+					if (!value) {
+						errors.expiration_date ='Expiration date is required';
+					}
+					// expect a ####-##-## format 
+					else if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+						errors.expiration_date = 'Expiration date must be in the format YYYY-MM-DD';
+					}
+					else {
+						errors.expiration_date = '';
+					}
 					break;
 				case 'dollars_per_unit':
 					if (!value) {
-						errors.dollars_per_unit = 'Price is required';
+						errors.dollars_per_unit = 'Dollars per unit is required';
 					} else if (!/^\d+(\.\d+)?$/.test(value) || parseFloat(value) < 0) {
-						errors.dollars_per_unit = 'Price must be a positive number';
+						errors.dollars_per_unit = 'Dollars per unit must be a positive number';
 					} else {
 						errors.dollars_per_unit = '';
 					}
@@ -154,9 +170,16 @@ const AddEditMedicationModal = ({ open, onClose, row, onSave }) => {
 		});
 
 		if (allValid) {
-			onSave(formData); // Call onSave function passed as prop with valid form data
-			onClose();        // Close the modal
+			// onSave(formData); // Call onSave function passed as prop with valid form data
+			// onClose();        // Close the modal
+			handleSave();
 		}
+	};
+
+	// Handle saving of the updated data
+	const handleSave = () => {
+		onSave(formData, row?.id); // Pass updated form data to parent component
+		onClose(); // Close the modal
 	};
 
 	return (
@@ -186,7 +209,7 @@ const AddEditMedicationModal = ({ open, onClose, row, onSave }) => {
 					margin="dense"
 				/>
 				<TextField
-					label="Quantity"
+					label="Quantity (e.g. 120)"
 					name="quantity"
 					value={formData.quantity}
 					onChange={handleFieldChange}
@@ -197,7 +220,7 @@ const AddEditMedicationModal = ({ open, onClose, row, onSave }) => {
 					margin="dense"
 				/>
 				<TextField
-					label="Prescription Required"
+					label="Prescription Required (true/false)"
 					name="prescription_required"
 					value={formData.prescription_required}
 					onChange={handleFieldChange}
@@ -208,7 +231,7 @@ const AddEditMedicationModal = ({ open, onClose, row, onSave }) => {
 					margin="dense"
 				/>
 				<TextField
-					label="Expiration Date"
+					label="Expiration Date (YYYY-MM-DD)"
 					name="expiration_date"
 					value={formData.expiration_date}
 					onChange={handleFieldChange}
@@ -219,7 +242,7 @@ const AddEditMedicationModal = ({ open, onClose, row, onSave }) => {
 					margin="dense"
 				/>
 				<TextField
-					label="Dollars per Unit"
+					label="Dollars per Unit (e.g. 0.13)"
 					name="dollars_per_unit"
 					value={formData.dollars_per_unit}
 					onChange={handleFieldChange}

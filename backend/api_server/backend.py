@@ -368,7 +368,8 @@ log_config["formatters"]["access"]["fmt"] = "%(asctime)s - %(levelname)s - %(mes
 @app.post("/resetpassword")
 async def reset_password(
     newPassword: Annotated[str, Body(..., embed=True)],
-    currentUser: Annotated[UserToReturn, Depends(get_current_user)]
+    currentUser: Annotated[UserToReturn, Depends(get_current_user)],
+    db: Session = Depends(get_db)
 ):
     if not newPassword:
         raise HTTPException(status_code=400, detail="Password is required")
@@ -389,7 +390,13 @@ async def reset_password(
     hashedPassword = get_password_hash(newPassword)
 
     # Update the user's password in the fake database (in-memory)
-    fake_users_db[currentUser.email]["hashed_password"] = hashedPassword
+     # Find the current user in the database
+    db_user = db.query(models.User).filter(models.User.id == currentUser.id).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    db_user.password = hashedPassword
+    db.commit()
+    db.refresh(db_user)
 
     return {"message": "Password has been successfully reset."}
 

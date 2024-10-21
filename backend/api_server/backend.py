@@ -372,7 +372,7 @@ async def reset_password(
 
 #-----Medication CRUD
 # create medication
-@app.post("/medication/", response_model=schema.MedicationResponse)
+@app.post("/medication", response_model=schema.MedicationResponse)
 def create_medication(medication: schema.MedicationCreate, db: Session = Depends(get_db)):
     db_medication = models.Medication(**medication.dict())
     db.add(db_medication)
@@ -425,7 +425,7 @@ def delete_medication(medication_id: int, db: Session = Depends(get_db)):
     return {"message": "Medication deleted successfully", "medication_id": medication_id}
 
 # get all medication
-@app.get("/medicationlist/")
+@app.get("/medicationlist")
 def list_medication(db: Session = Depends(get_db)):
     # Query the database for all medications
     medications = db.query(models.Medication).all()

@@ -29,7 +29,10 @@ async function CheckUserType (role, navigate)  {
           //TO DO: should they be redirected back to their own home page?
           if (userData.user_type !== role) {
             navigate('../', {replace: true})
-          } 
+          } else {
+            console.log("From CheckUser: " + JSON.stringify(userData))
+            return userData
+          }
         }
 
     } catch (error) {

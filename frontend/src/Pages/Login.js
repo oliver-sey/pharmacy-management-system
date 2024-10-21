@@ -163,7 +163,7 @@ function Login() {
 
           //redirects user to homepage for their role
           //more can be added as needed
-          if (userData.user_type === 'manager') {
+          if (userData.user_type === 'pharmacy_manager') {
             navigate('../managerhome', {replace: true})
           } else if (userData.user_type === 'pharmacist') {
             navigate('../pharmacisthome', {replace: true})

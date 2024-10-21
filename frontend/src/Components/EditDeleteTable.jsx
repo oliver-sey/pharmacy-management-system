@@ -90,12 +90,7 @@ const EditDeleteTable = ({
 				open={isEditOpen}
 				onClose={closeEditModal}
 				row={selectedRow}
-				// idk if this needs to be async,
-				// but it works now... so I'm not touching it
-				// it makes sense tho
-				onSave={async () => {
-					await onEdit();
-				}}
+				onSave={onEdit}
 			/>
 			{/* Delete Modal */}
 			<DeleteModal

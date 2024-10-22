@@ -4,28 +4,31 @@
 -- to delete all the rows out of the table
 -- TRUNCATE TABLE users;
 
-INSERT INTO users (id, first_name, last_name, user_type, email, password, is_locked_out) VALUES (1, 'Alice', 'Stevenson', 'pharmacist', 'alice.pharm@example.com', 'passAlice1', FALSE);
-INSERT INTO users (id, first_name, last_name, user_type, email, password, is_locked_out) VALUES (2, 'Oliver', 'Seemorebutts', 'pharmacymanager', 'oliver@cool.com', 'cool123', TRUE);
-INSERT INTO users (id, first_name, last_name, user_type, email, password, is_locked_out) VALUES (3, 'Carol', 'Davies', 'pharmacytech', 'carol.tech@example.com', 'passCarol3', TRUE);
-INSERT INTO users (id, first_name, last_name, user_type, email, password, is_locked_out) VALUES (4, 'Dave', 'Frank', 'cashier', 'dave.cashier@example.com', 'passDave4', FALSE);
-INSERT INTO users (id, first_name, last_name, user_type, email, password, is_locked_out) VALUES (5, 'Eve', 'Barrancato', 'pharmacist', 'eve.pharm@example.com', 'passEve5', FALSE);
-INSERT INTO users (id, first_name, last_name, user_type, email, password, is_locked_out) VALUES (6, 'Frank', 'Wright', 'pharmacytech', 'frank.tech@example.com', 'passFrank6', FALSE);
-INSERT INTO users (id, first_name, last_name, user_type, email, password, is_locked_out) VALUES (7, 'Gina', 'Cler', 'cashier', 'gina.cashier@example.com', 'password1', FALSE);
-INSERT INTO users (id, first_name, last_name, user_type, email, password, is_locked_out) VALUES (8, 'Hank', 'Oldman', 'pharmacymanager', 'hank.manager@example.com', 'passHank8', FALSE);
-INSERT INTO users (id, first_name, last_name, user_type, email, password, is_locked_out) VALUES (9, 'Isabel', 'Raudies', 'pharmacytech', 'isabel.tech@example.com', 'passIsabel9', FALSE);
-INSERT INTO users (id, first_name, last_name, user_type, email, password, is_locked_out) VALUES (10, 'James', 'Delp', 'pharmacist', 'james.pharm@example.com', 'passJames10', TRUE);
-INSERT INTO users (id, first_name, last_name, user_type, email, password, is_locked_out) VALUES (11, 'Kelly', 'Clarkson', 'cashier', 'kelly.cashier@example.com', 'passKelly11', FALSE);
-INSERT INTO users (id, first_name, last_name, user_type, email, password, is_locked_out) VALUES (12, 'Leo', 'Girolami', 'pharmacymanager', 'leo.manager@example.com', 'passLeo12', FALSE);
-INSERT INTO users (id, first_name, last_name, user_type, email, password, is_locked_out) VALUES (13, 'Mary', 'Olsen', 'pharmacytech', 'mary.tech@example.com', 'passMary13', FALSE);
-INSERT INTO users (id, first_name, last_name, user_type, email, password, is_locked_out) VALUES (14, 'Nora', 'Newman', 'pharmacist', 'nora.pharm@example.com', 'passNora14', TRUE);
-INSERT INTO users (id, first_name, last_name, user_type, email, password, is_locked_out) VALUES (15, 'Oscar', 'Piastri', 'cashier', 'oscar.cashier@example.com', 'passOscar15', FALSE);
-INSERT INTO users (id, first_name, last_name, user_type, email, password, is_locked_out) VALUES (16, 'Paul', 'Downs', 'pharmacytech', 'paul.tech@example.com', 'passPaul16', FALSE);
-INSERT INTO users (id, first_name, last_name, user_type, email, password, is_locked_out) VALUES (17, 'Quinn', 'Cooney', 'pharmacist', 'quinn.pharm@example.com', 'passQuinn17', TRUE);
-INSERT INTO users (id, first_name, last_name, user_type, email, password, is_locked_out) VALUES (18, 'Rachel', 'Davidson', 'cashier', 'rachel.cashier@example.com', 'passRachel18', FALSE);
-INSERT INTO users (id, first_name, last_name, user_type, email, password, is_locked_out) VALUES (19, 'Steve', 'Madden', 'pharmacymanager', 'steve.manager@example.com', 'passSteve19', FALSE);
-INSERT INTO users (id, first_name, last_name, user_type, email, password, is_locked_out) VALUES (20, 'Tony', 'Hawk', 'pharmacytech', 'tony.tech@example.com', 'passTony20', TRUE);
-INSERT INTO users (id, first_name, last_name, user_type, email, password, is_locked_out) VALUES (21, 'Ursula', 'Van Schothorst', 'pharmacist', 'ursula.pharm@example.com', 'passUrsula21', FALSE);
-INSERT INTO users (id, first_name, last_name, user_type, email, password, is_locked_out) VALUES (22, 'Victor', 'Franks', 'cashier', 'victor.cashier@example.com', 'passVictor22', FALSE);
-INSERT INTO users (id, first_name, last_name, user_type, email, password, is_locked_out) VALUES (23, 'Wanda', 'Notlost', 'pharmacytech', 'wanda.tech@example.com', 'passWanda23', FALSE);
-INSERT INTO users (id, first_name, last_name, user_type, email, password, is_locked_out) VALUES (24, 'Xander', 'Didrickson', 'pharmacist', 'xander.pharm@example.com', 'passXander24', TRUE);
-INSERT INTO users (id, first_name, last_name, user_type, email, password, is_locked_out) VALUES (25, 'Yvette', 'Cooms', 'pharmacymanager', 'yvette.manager@example.com', 'passYvette25', FALSE);
+-- users table
+-- *******NOTE: all passwords are 'password'
+    
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Alice', 'Stevenson', 'pharmacist', 'alice.pharm@example.com', '"$2b$12$XKDWZkY0V0My9d/EBIawCOqRE283Jzt8d6m5Jc.kUdVhW8ZouhNfG"', FALSE); -- id #1
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Oliver', 'Seemorebutts', 'pharmacymanager', 'oliver@cool.com', '$2b$12$Uc9QHInwXBCdOzp4KxscK.63TuCusz2Ax7RariEJhi1LOv53wR.0e', FALSE); -- id #2
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Carol', 'Davies', 'pharmacytech', 'carol.tech@example.com', '$2b$12$tT7e.YEtU6eoxCYH3LUGqO.0kLWehKA80D/hMEtH/lv3zZvO4m.Qy', FALSE); -- id #3
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Dave', 'Frank', 'cashier', 'dave.cashier@example.com', '$2b$12$wjGUxF0.1fMW6KI3CAk9k.HHqs0rLTMnnLSAAChEfFdG5HzthAeAa', FALSE); -- id #4
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Eve', 'Barrancato', 'pharmacist', 'eve.pharm@example.com', '$2b$12$XvdHJgssaYJeiFYqAUxrUeYdJxouAUwmLrWv2G8OWn1AUeuUhvILW', FALSE); -- id #5
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Frank', 'Wright', 'pharmacytech', 'frank.tech@example.com', '$2b$12$7CjTRY.PQgUKvNMdq5vro.WncpDTfJ20rv5mog14ZZS92gpJkPGna', FALSE); -- id #6
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Gina', 'Cler', 'cashier', 'gina.cashier@example.com', '$2b$12$3KOSxmCBEj7fdL/TOhTVCeoiii1BrEvnPakKudbN5Zw5ft3QYbZCK', FALSE); -- id #7
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Hank', 'Oldman', 'pharmacymanager', 'hank.manager@example.com', '$2b$12$.YR6KLtrv9ixoyrT6ZYHWOoO./Z2nofz6FslK37YHQwTjWhdYxwA.', FALSE); -- id #8
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Isabel', 'Raudies', 'pharmacytech', 'isabel.tech@example.com', '$2b$12$Og054nBFVNBk1Z/.DCFXbuVoVqXsSMH73drcCJSCo92pNV4pOa2Ua', FALSE); -- id #9
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('James', 'Delp', 'pharmacist', 'james.pharm@example.com', '$2b$12$QWeyx9Xd4LUaZfBSO2gzb.m4WRtxqByVmoTa7FETf3VsCHadOdLlu', FALSE); -- id #10
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Kelly', 'Clarkson', 'cashier', 'kelly.cashier@example.com', '$2b$12$SOYO9rO.C11Vi/YjLZO0BeXKREjzlQtgOT8nz6QLLc8m6hmP8M3U6', FALSE); -- id #11
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Leo', 'Girolami', 'pharmacymanager', 'leo.manager@example.com', '$2b$12$xSoMrbLG.Jmph0gZffwlx.VDgu3BaTg55b3tDUrP4fuK5Pl21PPi.', FALSE); -- id #12
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Mary', 'Olsen', 'pharmacytech', 'mary.tech@example.com', '$2b$12$o0QFdyhJ3APZ.n86Qnz0yeFLM8gC0iFnuj5UCoktEROhwT1Kj/.jW', FALSE); -- id #13
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Nora', 'Newman', 'pharmacist', 'nora.pharm@example.com', '$2b$12$OqhWdhVXGMFsJGwrrzlnhefrC7tvkBavYaTLVTihOmfTIdUA9nVTm', FALSE); -- id #14
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Oscar', 'Piastri', 'cashier', 'oscar.cashier@example.com', '$2b$12$3jjuQ46cDX9V.CrtVImCKObqlJtZTGChvfvVuIx41R1q/uUDBw.vO', FALSE); -- id #15
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Paul', 'Downs', 'pharmacytech', 'paul.tech@example.com', '$2b$12$Q8T7tbeI3pqoVAt8RBbP9.U4/QIZyHYwhV7ngBPO/F/QRv0FuaCvS', FALSE); -- id #16
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Quinn', 'Cooney', 'pharmacist', 'quinn.pharm@example.com', '$2b$12$Ka7Xrs2V6Pe8p26Z2w/72u135/EDZ/kkdGx6AjPfCAMo5nZ3AMJPu', TRUE); -- id #17
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Rachel', 'Davidson', 'cashier', 'rachel.cashier@example.com', '$2b$12$C9BgHch0jB08.S.Fi56A9uJvQcjl.QGeCsClcEfE9S2JorfB99bTS', FALSE); -- id #18
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Steve', 'Madden', 'pharmacymanager', 'steve.manager@example.com', '$2b$12$ObhfnA0QrGimKzb8EJ6G8OMUDj0JeeZxUZU7LdebIoEreTc7arOh6', FALSE); -- id #19
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Tony', 'Hawk', 'pharmacytech', 'tony.tech@example.com', '$2b$12$GM0mN.jf3aI2oEFsP7EMYOQLHugNoucUJvFzimIcW8Y/pShUviG4W', TRUE); -- id #20
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Ursula', 'Van Schothorst', 'pharmacist', 'ursula.pharm@example.com', '$2b$12$gYMWcFOnIBwMxQjNkWblF.wUel9fnB6gBzVXulLnD4jNLLP1OP7ca', FALSE); -- id #21
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Victor', 'Franks', 'cashier', 'victor.cashier@example.com', '$2b$12$CGWK9XeQAr5HneYf4nIf0evXaNBJ058oGOfB45.rEke//g8ruKSUi', FALSE); -- id #22
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Wanda', 'Notlost', 'pharmacytech', 'wanda.tech@example.com', '$2b$12$xnrmNLHgSjjfECF5IueZEO8LatXlwiBEqeFSKdnXAnsJepODU9ckC', FALSE); -- id #23
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Xander', 'Didrickson', 'pharmacist', 'xander.pharm@example.com', '$2b$12$TcQ10ZsnubBJuJPp/bZU0ON/sqwQHkRbbxC09hcCFJj.rWCVC/YfO', TRUE); -- id #24
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Yvette', 'Cooms', 'pharmacymanager', 'yvette.manager@example.com', '$2b$12$uC8NOm5OgKuzD6be9MMvX.Ik6FnvL81Fgq6Tgsha3e3zpul6F21lK', FALSE); -- id #25

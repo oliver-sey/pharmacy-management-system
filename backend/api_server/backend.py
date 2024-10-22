@@ -1,17 +1,16 @@
 from datetime import datetime, timedelta, timezone
 from jose import JWTError
-from typing import Annotated, Union # for definding the types that our functions take in and return, could be useful... or not idk
+from typing import Annotated # for defining the types that our functions take in and return, could be useful... or not idk
 import uvicorn
 import jwt
 from jwt.exceptions import InvalidTokenError
 from fastapi import Depends, FastAPI, HTTPException, Query, status, Body
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 from passlib.context import CryptContext
 from typing import Optional
 from .database import SessionLocal, engine, Base
-from .schema import UserCreate, UserResponse, UserLogin, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, PrescriptionFillRequest
+from .schema import Token, TokenData, UserCreate, UserResponse, UserLogin, UserToReturn, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, PrescriptionFillRequest
 from . import models  # Ensure this is the SQLAlchemy model
 from sqlalchemy.orm import Session
 from typing import List
@@ -19,10 +18,18 @@ from . import schema
 from sqlalchemy.exc import IntegrityError
 from pydantic import ValidationError
 
+app = FastAPI()
+
+# test endpoint
+@app.get("/test") # this is a decorator that tells fastapi to run the function below when a GET request is made to http://localhost:8000/test
+def read_root():
+    return "this is an epic gamer moment!"
+
+
+
 # Create the database tables
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI()
 
 # this is to allow our react app to make requests to our fastapi app
 origins = [
@@ -48,79 +55,15 @@ def get_db():
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-# region User CRUD
-# POST endpoint to create a user
-@app.post("/users/", response_model=UserResponse)
-def create_user(user: UserCreate, db: Session = Depends(get_db)):
-    hashed_password = pwd_context.hash(user.password)
-    user_data = user.model_dump()  # Get user data as dict
-    user_data['password'] = hashed_password  # Set the hashed password
-    db_user = models.User(**user_data)  # Now unpack user_data
-
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    return db_user
-
-@app.get("/users/{user_id}", response_model=UserResponse)
-def get_user(user_id: int, db: Session = Depends(get_db)):
-    db_user = db.query(models.User).filter(models.User.id == user_id).first()
-    if db_user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    return db_user
+# region Logging config
+#--------Logging configurations---------
+log_config = uvicorn.config.LOGGING_CONFIG
+log_config["formatters"]["access"]["fmt"] = "%(asctime)s - %(levelname)s - %(message)s"
 
 
-@app.delete("/users/{user_id}")
-def delete_user(user_id: int, db: Session = Depends(get_db)):
-    db_user = db.query(models.User).filter(models.User.id == user_id).first()
-    if db_user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    # Check for associated prescriptions
-    prescriptions_count = db.query(models.Prescription).filter(
-        (models.Prescription.user_entered_id == user_id) | 
-        (models.Prescription.user_filled_id == user_id)
-    ).count()
-
-    if prescriptions_count > 0:
-        raise HTTPException(status_code=400, detail="User cannot be deleted while having prescriptions")
-
-
-    db.delete(db_user)
-    db.commit()
-    return SimpleResponse(message="User deleted successfully")
-
-@app.put("/users/{user_id}", response_model=UserResponse)
-def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db)):
-    db_user = db.query(models.User).filter(models.User.id == user_id).first()
-    if db_user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    # Update only provided fields
-    if user.first_name is not None:
-        db_user.first_name = user.first_name
-    if user.last_name is not None:
-        db_user.last_name = user.last_name
-    if user.user_type is not None:
-        db_user.user_type = user.user_type
-    if user.email is not None:
-        db_user.email = user.email
-    if user.password is not None:
-        db_user.password = pwd_context.hash(user.password)  # Hashing the password if provided
-    if user.is_locked_out is not None:
-        db_user.is_locked_out = user.is_locked_out
-
-    db.commit()
-    db.refresh(db_user)
-    return db_user
-
-@app.get("/userslist/", response_model=List[UserResponse])
-def list_users(db: Session = Depends(get_db)):
-    # Query all users from the database
-    users = db.query(models.User).all()
-    
-    return users
+# endregion
+# region Authentication
+#-------authentication functions---------
 
 #-----authentication values-------
 SECRET_KEY = "90FA9871DC0E001369671A27F90A0213"
@@ -130,55 +73,6 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 # pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-# endregion
-# region Auth classes
-#------authentication classes------
-
-#temporary users
-#Hashed password needs to be generated by the get_password_hash function (incase you want to add a new example person)
-#These can be deleted when we connect the database
-#Manager password: password
-#Pharmacist password: password123
-fake_users_db = {
-    "manager@example.com": {
-        "full_name": "John Doe",
-        "username": "manager@example.com",
-        "hashed_password": "$2b$12$RZ40hSEXI8BuUqOCe1Gj/exWkH3pPFlPNtsahkWLIV2XiTzw8d4ym",
-        "role": "manager",
-        "disabled": False,
-    },
-    "pharmacist@example.com": {
-        "full_name": "Oliver",
-        "username": "pharmacist@example.com",
-        "hashed_password": "$2b$12$9N86kINZys6.SpJ9C/IRWudLqbWks80Z2BBcn/3Fsk7ZHsRCfa4HK",
-        "role": "pharmacist",
-        "disabled": False,
-    }
-}
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-
-class TokenData(BaseModel):
-    username: Optional[str] = None
-
-
-class UserToReturn(BaseModel):
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
-    id: Optional[int] = None
-    email: Optional[str] = None
-    user_type: Optional[str] = None
-
-
-class UserInDB(BaseModel):
-     hashed_password: str
-
-# endregion
-# region Auth functions
-#-------authentication functions---------
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
@@ -235,7 +129,6 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)],
     return current_user
 
 
-
 @app.post("/token")
 async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
@@ -261,10 +154,12 @@ async def login_for_access_token(
     )
     return Token(access_token=access_token, token_type="bearer")
 
+
 @app.get("/verify-token/{token}")
 async def verify_user_token(token: str):
     verify_token(token=token)
     return {'message': 'Token is valid.'}
+
 
 @app.get("/currentuser/me/", response_model=UserToReturn)
 async def read_users_me(
@@ -280,11 +175,138 @@ async def read_own_items(
     return [{"item_id": "Foo", "owner": current_user.email}]
 
 
-# test endpoint
-@app.get("/test") # this is a decorator that tells fastapi to run the function below when a GET request is made to http://localhost:8000/test
-def read_root():
-    return "this is an epic gamer moment!"
 
+#--------- Reset Password ---------
+@app.post("/resetpassword")
+async def reset_password(
+    newPassword: Annotated[str, Body(..., embed=True)],
+    currentUser: Annotated[UserToReturn, Depends(get_current_user)]
+):
+    if not newPassword:
+        raise HTTPException(status_code=400, detail="Password is required")
+    
+    # Checks that password is valid
+    if len(newPassword) < 8:
+        raise HTTPException(status_code=400, detail="Password must be at least 8 characters long.")
+    if not any(char.isdigit() for char in newPassword):
+        raise HTTPException(status_code=400, detail="Password must contain at least one number.")
+    if not any(char.isupper() for char in newPassword):
+        raise HTTPException(status_code=400, detail="Password must contain at least one uppercase letter.")
+    if not any(char.islower() for char in newPassword):
+        raise HTTPException(status_code=400, detail="Password must contain at least one lowercase letter.")
+    if not any(char in "!@#$%^&*()_+" for char in newPassword):
+        raise HTTPException(status_code=400, detail="Password must contain at least one special character.")
+
+    # Hash the new password
+    hashedPassword = get_password_hash(newPassword)
+
+    # Update the user's password in the fake database (in-memory)
+    fake_users_db[currentUser.email]["hashed_password"] = hashedPassword
+
+    return {"message": "Password has been successfully reset."}
+
+
+
+
+# endregion
+# region User CRUD
+# POST endpoint to create a user
+@app.post("/users/", response_model=UserResponse)
+def create_user(user: UserCreate, db: Session = Depends(get_db)):
+    hashed_password = pwd_context.hash(user.password)
+    user_data = user.model_dump()  # Get user data as dict
+    user_data['password'] = hashed_password  # Set the hashed password
+    db_user = models.User(**user_data)  # Now unpack user_data
+
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+@app.get("/users/{user_id}", response_model=UserResponse)
+def get_user(user_id: int, db: Session = Depends(get_db)):
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return db_user
+
+
+@app.delete("/users/{user_id}")
+def delete_user(user_id: int, db: Session = Depends(get_db)):
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Check for associated prescriptions
+    prescriptions_count = db.query(models.Prescription).filter(
+        (models.Prescription.user_entered_id == user_id) | 
+        (models.Prescription.user_filled_id == user_id)
+    ).count()
+
+    if prescriptions_count > 0:
+        raise HTTPException(status_code=400, detail="User cannot be deleted while having prescriptions")
+
+
+    db.delete(db_user)
+    db.commit()
+    return SimpleResponse(message="User deleted successfully")
+
+
+@app.put("/users/{user_id}", response_model=UserResponse)
+def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db)):
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Update only provided fields
+    if user.first_name is not None:
+        db_user.first_name = user.first_name
+    if user.last_name is not None:
+        db_user.last_name = user.last_name
+    if user.user_type is not None:
+        db_user.user_type = user.user_type
+    if user.email is not None:
+        db_user.email = user.email
+    if user.password is not None:
+        db_user.password = pwd_context.hash(user.password)  # Hashing the password if provided
+    if user.is_locked_out is not None:
+        db_user.is_locked_out = user.is_locked_out
+
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+
+@app.get("/userslist/", response_model=List[UserResponse])
+def list_users(db: Session = Depends(get_db)):
+    # Query all users from the database
+    users = db.query(models.User).all()
+    
+    return users
+
+
+#temporary users
+#Hashed password needs to be generated by the get_password_hash function (incase you want to add a new example person)
+#These can be deleted when we connect the database
+#Manager password: password
+#Pharmacist password: password123
+fake_users_db = {
+    "manager@example.com": {
+        "full_name": "John Doe",
+        "username": "manager@example.com",
+        "hashed_password": "$2b$12$RZ40hSEXI8BuUqOCe1Gj/exWkH3pPFlPNtsahkWLIV2XiTzw8d4ym",
+        "role": "manager",
+        "disabled": False,
+    },
+    "pharmacist@example.com": {
+        "full_name": "Oliver",
+        "username": "pharmacist@example.com",
+        "hashed_password": "$2b$12$9N86kINZys6.SpJ9C/IRWudLqbWks80Z2BBcn/3Fsk7ZHsRCfa4HK",
+        "role": "pharmacist",
+        "disabled": False,
+    }
+}
 
 # endregion
 # region Patient CRUD
@@ -363,48 +385,6 @@ def delete_patient(pid: int, db: Session = Depends(get_db)):
     db.commit()
     return {"patient_id": pid}
 
-
-
-
-
-# endregion
-# region Logging config
-#--------Logging configurations---------
-log_config = uvicorn.config.LOGGING_CONFIG
-log_config["formatters"]["access"]["fmt"] = "%(asctime)s - %(levelname)s - %(message)s"
-
-
-
-# endregion
-# region Reset password
- #--------- Reset Password ---------
-@app.post("/resetpassword")
-async def reset_password(
-    newPassword: Annotated[str, Body(..., embed=True)],
-    currentUser: Annotated[UserToReturn, Depends(get_current_user)]
-):
-    if not newPassword:
-        raise HTTPException(status_code=400, detail="Password is required")
-    
-    # Checks that password is valid
-    if len(newPassword) < 8:
-        raise HTTPException(status_code=400, detail="Password must be at least 8 characters long.")
-    if not any(char.isdigit() for char in newPassword):
-        raise HTTPException(status_code=400, detail="Password must contain at least one number.")
-    if not any(char.isupper() for char in newPassword):
-        raise HTTPException(status_code=400, detail="Password must contain at least one uppercase letter.")
-    if not any(char.islower() for char in newPassword):
-        raise HTTPException(status_code=400, detail="Password must contain at least one lowercase letter.")
-    if not any(char in "!@#$%^&*()_+" for char in newPassword):
-        raise HTTPException(status_code=400, detail="Password must contain at least one special character.")
-
-    # Hash the new password
-    hashedPassword = get_password_hash(newPassword)
-
-    # Update the user's password in the fake database (in-memory)
-    fake_users_db[currentUser.email]["hashed_password"] = hashedPassword
-
-    return {"message": "Password has been successfully reset."}
 
 # endregion
 # region Medication CRUD
@@ -505,7 +485,7 @@ def get_prescription(prescription_id: int, db: Session = Depends(get_db)):
 def create_prescription(prescription: schema.PrescriptionCreate, db: Session = Depends(get_db)):
     '''
     we may need to edit this in the future depending on how we pass the patient info and medication info
-    currently, this code assumes it gets the id of patient and medication, but if it recieves a name or something
+    currently, this code assumes it gets the id of patient and medication, but if it receives a name or something
     other than the id, we will need to query the DB to get the ids.
     '''
     # Ensure that prescription data is valid

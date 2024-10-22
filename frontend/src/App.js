@@ -31,7 +31,7 @@ function App() {
     <div className="App">
       <Router>
         <Header userRole={userRole} />
-        <p> Hello world </p>
+        
         <Routes>
           <Route path='/' element={<HomePage/>}/>
           <Route exact path='/managerhome' element={<ManagerHome/>}/>

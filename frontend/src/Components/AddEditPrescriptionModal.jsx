@@ -29,13 +29,13 @@ const AddEditPrescriptionModal = ({ open, onClose, row, onSave }) => {
 	const [patient_data, set_patient_data] = useState([])
 	const [valid_patient, set_valid_patient] = useState(true)
 	const [valid_medication, set_valid_medication] = useState(true)
+	const [valid_dosage, set_valid_dosage] = useState(true)
 	
 	// Update form data on input change
 	const onSearchChange = (e) => {
 		const { name, value } = e.target;
 		setFormData((prev) => ({ ...prev, [name]: value }));
-		set_valid_patient(true)
-		set_valid_medication(true)
+		
 	};
 
 	const onSearchSelect = (field, searchTerm) => {
@@ -73,7 +73,8 @@ const AddEditPrescriptionModal = ({ open, onClose, row, onSave }) => {
 		fetchPatients();
 		fetchMedication(); // Call the async function
 		set_valid_medication(true)
-		set_valid_medication(true)
+		set_valid_patient(true)
+		set_valid_dosage(true)
 
 		console.log(valid_medication)
 	  }, [formData]);
@@ -123,12 +124,21 @@ const AddEditPrescriptionModal = ({ open, onClose, row, onSave }) => {
 		return true
 	}
 
+	const checkValidDosage = () => {
+		if (/^\d+$/.test(medication_data.dosage)) {
+			return true
+		}
+		set_valid_dosage(false)
+		return false
+	}
+
 	// Handle saving of the updated data
 	const handleSave = () => {
 		const medication_valid = checkValidMedication()
 		const patient_valid = checkValidPatient()
+		const dosage_valid = checkValidDosage()
 
-		if (medication_valid && patient_valid) {
+		if (medication_valid && patient_valid && dosage_valid) {
 			const patient_id = patient_data.filter(item => {
 				const searchTerm = formData.patient.toLowerCase();
 				const patient_name = item.name.toLowerCase();
@@ -177,9 +187,7 @@ const AddEditPrescriptionModal = ({ open, onClose, row, onSave }) => {
 							
 							const searchTerm = formData.medication.toLowerCase();
 							const medication_name = item.name.toLowerCase();
-							
 						
-
 							return searchTerm && medication_name.startsWith(searchTerm) && medication_name !== searchTerm;
 						
 					})
@@ -235,6 +243,9 @@ const AddEditPrescriptionModal = ({ open, onClose, row, onSave }) => {
 				</DialogContentText>
 				<DialogContentText className="error-text">
 					{!valid_patient && <p>Patient is not found.</p>}
+				</DialogContentText>
+				<DialogContentText className="error-text">
+					{!valid_dosage && <p>Dosage must be a valid number.</p>}
 				</DialogContentText>
 			</DialogContent>
 			<DialogActions>

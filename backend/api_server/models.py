@@ -101,7 +101,7 @@ class InventoryUpdate(Base):
     id = Column(Integer, primary_key=True, index=True)
     medication_id = Column(Integer, ForeignKey('medications.id'))
     user_activity_id = Column(Integer, ForeignKey('user_activities.id'))
-    # transaction_id = Column(Integer, ForeignKey('transactions.id')) # don't think we need this
+    transaction_id = Column(Integer, ForeignKey('transactions.id')) # don't think we need this - Hsinwei
     # user_id = Column(Integer, ForeignKey('users.id')) # don't think we need this
     # don't need dosage, that's stored in medication
     # dosage = Column(String)
@@ -109,7 +109,8 @@ class InventoryUpdate(Base):
     # TODO: are we doing this so it could be positive or negative?
     quantity_changed_by = Column(Integer)
     timestamp = Column(DateTime, default=func.now())
-    
+    # what action type it was, e.g. 'add', 'discard', 'fillpresc', or 'sellnonpresc'
+    type = Column(String)
     medication = relationship("Medication", back_populates="inventory_updates")
     user_activity = relationship("UserActivity", back_populates="inventory_updates")  # Correct the relationship
     # transaction = relationship("Transaction", back_populates="inventory_update")

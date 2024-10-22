@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from passlib.context import CryptContext
 from typing import Optional
 from .database import SessionLocal, engine, Base
-from .schema import Token, TokenData, UserCreate, UserResponse, UserLogin, UserToReturn, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, PrescriptionFillRequest
+from .schema import Token, TokenData, UserCreate, UserResponse, UserLogin, UserToReturn, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, PrescriptionFillRequest, InventoryUpdateCreate,  InventoryUpdateResponse
 from . import models  # Ensure this is the SQLAlchemy model
 from sqlalchemy.orm import Session
 from typing import List
@@ -611,3 +611,49 @@ def fill_prescription(prescription_id: int, fill_request: PrescriptionFillReques
     db.commit()
     db.refresh(db_prescription)
     return db_prescription
+
+
+
+# endregion
+# region Inventory Updates
+#--------INVENTORY UPDATES--------
+
+# TODO: should I just make one endpoint to add an inventory update, and just call that to add a prescription fill history entry??
+# or add another endpoint
+
+# create inventory_update
+# TODO: is this right??
+# just as a function that will get called by other endpoints
+def create_inventory_update(inventory_update: InventoryUpdateCreate, db: Session = Depends(get_db)):
+    # Ensure that inventory_update data is valid
+    try:
+        db_inventory_update = models.Prescription(**inventory_update.model_dump())  # Use .model_dump() for Pydantic V2
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    # add the inventory_update
+    db.add(db_inventory_update)
+    db.commit()
+    db.refresh(db_inventory_update)
+    return db_inventory_update
+
+
+# get one inventory_update
+@app.get("/inventory-updates/{id}", response_model=InventoryUpdateResponse)
+def get_prescription_fill_history(db: Session = Depends(get_db)):
+    # there will only be one inventory_update with the matching id (since the id is unique), so using first() is fine
+    db_inventory_update = db.query(models.InventoryUpdate).filter(models.InventoryUpdate.id == id).first()
+
+    if db_inventory_update is None:
+        raise HTTPException(status_code=404, detail="Inventory update not found")
+    
+    return db_inventory_update
+
+
+# get all prescription fill history
+@app.get("/inventory-updates/fill-history-list", response_model=List[InventoryUpdateResponse])
+def get_prescription_fill_history(db: Session = Depends(get_db)):
+    # query inventory_updates for rows where type is "Fill prescription"
+    fill_history = db.query(models.InventoryUpdate).filter(models.InventoryUpdate.type == "Fill prescription").all()
+
+    return fill_history

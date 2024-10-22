@@ -1,17 +1,16 @@
 from datetime import datetime, timedelta, timezone
 from jose import JWTError
-from typing import Annotated, Union # for definding the types that our functions take in and return, could be useful... or not idk
+from typing import Annotated # for defining the types that our functions take in and return, could be useful... or not idk
 import uvicorn
 import jwt
 from jwt.exceptions import InvalidTokenError
 from fastapi import Depends, FastAPI, HTTPException, Query, status, Body
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 from passlib.context import CryptContext
 from typing import Optional
 from .database import SessionLocal, engine, Base
-from .schema import UserCreate, UserResponse, UserLogin, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, PrescriptionFillRequest
+from .schema import Token, TokenData, UserCreate, UserResponse, UserLogin, UserToReturn, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, PrescriptionFillRequest
 from . import models  # Ensure this is the SQLAlchemy model
 from sqlalchemy.orm import Session
 from typing import List
@@ -486,7 +485,7 @@ def get_prescription(prescription_id: int, db: Session = Depends(get_db)):
 def create_prescription(prescription: schema.PrescriptionCreate, db: Session = Depends(get_db)):
     '''
     we may need to edit this in the future depending on how we pass the patient info and medication info
-    currently, this code assumes it gets the id of patient and medication, but if it recieves a name or something
+    currently, this code assumes it gets the id of patient and medication, but if it receives a name or something
     other than the id, we will need to query the DB to get the ids.
     '''
     # Ensure that prescription data is valid

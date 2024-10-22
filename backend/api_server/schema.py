@@ -202,3 +202,24 @@ class PrescriptionFillRequest(BaseModel):
     # token: str
     class Config:
         orm_mode = True
+
+
+# endregion
+# Region Inventory Updates
+class InventoryUpdateCreate(BaseModel):
+    medication_id: int
+    # get user_id from token
+    # create an entry in user_activities, and then we will put that ID here
+    # optional since some updates will not be associated with a transaction (e.g. add or discard)
+    transaction_id: Optional[int] = None
+    quantity_changed_by: int
+    type: str
+
+class InventoryUpdateResponse(BaseModel):
+    medication_id: int
+    user_activity_id: int
+    transaction_id: Optional[int] = None
+    quantity_changed_by: int
+    type: str
+
+# **NOTE: we will not be allowing updating or deleting inventory_updates

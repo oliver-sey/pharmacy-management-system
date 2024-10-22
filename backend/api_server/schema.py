@@ -7,7 +7,40 @@ from datetime import date, datetime
 class SimpleResponse(BaseModel):
     message: str
 
+
+# region Auth, tokens
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    username: Optional[str] = None
+
+class UserInDB(BaseModel):
+     hashed_password: str
+
+# endregion
 # region Users
+class UserToReturn(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    id: Optional[int] = None
+    email: Optional[str] = None
+    user_type: Optional[str] = None
+
+class UserResponse(BaseModel):
+    id: int
+    first_name: str
+    last_name: str
+    user_type: str
+    email: str
+    password: str
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
+
 class UserCreate(BaseModel):
     first_name: str
     last_name: str
@@ -26,8 +59,11 @@ class UserUpdate(BaseModel):
 
 class UserDeleteResponse(BaseModel):
     message: str
-    user_id: int
+    user_id: int  
 
+
+# endregion
+# region Patients
 class PatientCreate(BaseModel):
     first_name: str
     last_name: str
@@ -82,18 +118,8 @@ class PatientResponse(BaseModel):
             insurance_member_id=patient.insurance_member_id
         )
 
-class UserResponse(BaseModel):
-    id: int
-    first_name: str
-    last_name: str
-    user_type: str
-    email: str
-    password: str
-
-class UserLogin(BaseModel):
-    email: str
-    password: str
-    
+# endregion
+# region Medications
 class MedicationCreate(BaseModel):
     name: str
     # the strength of the medication per pill
@@ -124,6 +150,9 @@ class MedicationUpdate(BaseModel):
     expiration_date: Optional[date] = None
     dollars_per_unit: Optional[float] = None
 
+
+# endregion
+# region Prescriptions
 class PrescriptionResponse(BaseModel):
     id: int
     patient_id: int

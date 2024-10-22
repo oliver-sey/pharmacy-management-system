@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, Date, ForeignKey, Integer, String, Float, Boolean
+from sqlalchemy import Column, DateTime, Date, ForeignKey, Integer, String, Float, Boolean, Enum as SQLAlchemyEnum
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -15,6 +15,10 @@ class UserType(str, Enum):
     PHARMACY_TECHNICIAN = "pharmacy technician"
     CASHIER = "cashier"
     PHARMACIST = "pharmacist"
+
+
+# renaming to clarify difference betweenPython's Enum and SQLAlchemy's Enum
+from enum import Enum as PyEnum
 
 class User(Base):
     __tablename__ = 'users'
@@ -102,13 +106,26 @@ class UserActivity(Base):
     user = relationship("User", back_populates="user_activities")
     inventory_updates = relationship("InventoryUpdate", back_populates="user_activity", uselist=False)
 
+
+
+
+
+# an enum class so we can restrict the set of possible values in the type column in inventory_updates
+class InventoryUpdateType(PyEnum):
+    ADD = "Add medication"
+    DISCARD = "Discard medication"
+    FILLPRESC = "Fill prescription"
+    SELLNONPRESC = "Sell non-prescription item"
+
+
 class InventoryUpdate(Base):
     __tablename__ = 'inventory_updates'
 
     id = Column(Integer, primary_key=True, index=True)
     medication_id = Column(Integer, ForeignKey('medications.id'))
     user_activity_id = Column(Integer, ForeignKey('user_activities.id'))
-    transaction_id = Column(Integer, ForeignKey('transactions.id')) # don't think we need this - Hsinwei
+    # optional since they're not always associated with a transaction, e.g. on 'add' or 'discard'
+    transaction_id = Column(Integer, ForeignKey('transactions.id'), nullable=True) # don't think we need this - Hsinwei
     # user_id = Column(Integer, ForeignKey('users.id')) # don't think we need this
     # don't need dosage, that's stored in medication
     # dosage = Column(String)
@@ -117,7 +134,7 @@ class InventoryUpdate(Base):
     quantity_changed_by = Column(Integer)
     timestamp = Column(DateTime, default=func.now())
     # what action type it was, e.g. 'add', 'discard', 'fillpresc', or 'sellnonpresc'
-    type = Column(String)
+    type = Column(SQLAlchemyEnum(InventoryUpdateType))
     medication = relationship("Medication", back_populates="inventory_updates")
     user_activity = relationship("UserActivity", back_populates="inventory_updates")  # Correct the relationship
     # transaction = relationship("Transaction", back_populates="inventory_update")

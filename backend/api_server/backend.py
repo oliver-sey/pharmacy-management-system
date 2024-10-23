@@ -625,10 +625,13 @@ def fill_prescription(prescription_id: int, fill_request: PrescriptionFillReques
 # create inventory_update
 # TODO: is this right??
 # just as a function that will get called by other endpoints
+
+# TODO: ****************remove the endpoint after testing!!!
+@app.post("/inventory-updates", response_model=InventoryUpdateResponse)
 def create_inventory_update(inventory_update: InventoryUpdateCreate, db: Session = Depends(get_db)):
     # Ensure that inventory_update data is valid
     try:
-        db_inventory_update = models.Prescription(**inventory_update.model_dump())  # Use .model_dump() for Pydantic V2
+        db_inventory_update = models.InventoryUpdate(**inventory_update.model_dump())  # Use .model_dump() for Pydantic V2
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 

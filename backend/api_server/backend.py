@@ -640,7 +640,7 @@ def create_inventory_update(inventory_update: InventoryUpdateCreate, db: Session
 
 # get one inventory_update
 @app.get("/inventory-updates/{id}", response_model=InventoryUpdateResponse)
-def get_prescription_fill_history(db: Session = Depends(get_db)):
+def get_inventory_update(id: int, db: Session = Depends(get_db)):
     # there will only be one inventory_update with the matching id (since the id is unique), so using first() is fine
     db_inventory_update = db.query(models.InventoryUpdate).filter(models.InventoryUpdate.id == id).first()
 

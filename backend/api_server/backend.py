@@ -5,7 +5,7 @@ from typing import Annotated # for defining the types that our functions take in
 import uvicorn
 import jwt
 from jwt.exceptions import InvalidTokenError
-from fastapi import Depends, FastAPI, HTTPException, Query, status, Body
+from fastapi import Depends, FastAPI, HTTPException, Query, status, Body, Request
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 from passlib.context import CryptContext
@@ -628,19 +628,22 @@ def fill_prescription(prescription_id: int, fill_request: PrescriptionFillReques
 
 # TODO: ****************remove the endpoint after testing!!!
 @app.post("/inventory-updates", response_model=InventoryUpdateResponse)
-def create_inventory_update(inventory_update: InventoryUpdateCreate, db: Session = Depends(get_db)):
+def create_inventory_update(inventory_update: InventoryUpdateCreate, request: Request, db: Session = Depends(get_db)):
     # Ensure that inventory_update data is valid
     try:
         db_inventory_update = models.InventoryUpdate(**inventory_update.model_dump())  # Use .model_dump() for Pydantic V2
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+    # get the token from headers
+    token = request.headers.get("Authorization").split(" ")[1]
+
     # create a user_activities entry for this
-    new_user_activity = UserActivityCreate()
-    create_user_activity(new_user_activity)
+    user_activity_create = UserActivityCreate(token=token, activity="inventory_update")
+    create_user_activity(user_activity_create, db)
 
 
-    # add the inventory_update
+    # add the inventory_update to the database
     db.add(db_inventory_update)
     db.commit()
     db.refresh(db_inventory_update)
@@ -690,9 +693,9 @@ def get_inventory_updates(type: Optional[models.InventoryUpdateType] = Query(Non
 
 # endregion
 # region User Activities CRUD
-def create_user_activity(user_activity: UserActivityCreate, db: Session = Depends(get_db)):
+def create_user_activity(user_activity: UserActivityCreate, db: Session):
     # TODO: make db_user_activity from scratch with user_id collected from token 
-
+    
     db_user_activity = models.UserActivity(**user_activity.dict())
     db.add(db_user_activity)
     db.commit()

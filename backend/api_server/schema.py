@@ -223,3 +223,18 @@ class InventoryUpdateResponse(BaseModel):
     type: str
 
 # **NOTE: we will not be allowing updating or deleting inventory_updates
+
+
+# endregion
+# region User Activities
+class UserActivityCreate(BaseModel):
+    # get token from user_id
+    token: str
+    activity: str
+    # TODO: let the database set the timestamp to the current time?
+
+class UserActivityResponse(BaseModel):
+    id: int
+    user_id: int
+    activity: str
+    timestamp: datetime

@@ -1,3 +1,4 @@
+# region Imports and setup
 from datetime import datetime, timedelta, timezone
 from jose import JWTError
 from typing import Annotated # for defining the types that our functions take in and return, could be useful... or not idk
@@ -10,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from passlib.context import CryptContext
 from typing import Optional
 from .database import SessionLocal, engine, Base
-from .schema import Token, TokenData, UserCreate, UserResponse, UserLogin, UserToReturn, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, PrescriptionFillRequest, InventoryUpdateCreate,  InventoryUpdateResponse
+from .schema import Token, TokenData, UserActivityCreate, UserCreate, UserResponse, UserLogin, UserToReturn, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, PrescriptionFillRequest, InventoryUpdateCreate,  InventoryUpdateResponse
 from . import models  # Ensure this is the SQLAlchemy model
 from sqlalchemy.orm import Session
 from typing import List
@@ -631,6 +632,11 @@ def create_inventory_update(inventory_update: InventoryUpdateCreate, db: Session
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+    # create a user_activities entry for this
+    new_user_activity = UserActivityCreate()
+    create_user_activity(new_user_activity)
+
+
     # add the inventory_update
     db.add(db_inventory_update)
     db.commit()
@@ -675,4 +681,17 @@ def get_inventory_updates(type: Optional[models.InventoryUpdateType] = Query(Non
 #     # query inventory_updates for rows where type is "Fill prescription"
 #     fill_history = db.query(models.InventoryUpdate).filter(models.InventoryUpdate.type == "Fill prescription").all()
 
-    return fill_history
+#     return fill_history
+
+
+
+# endregion
+# region User Activities CRUD
+def create_user_activity(user_activity: UserActivityCreate, db: Session = Depends(get_db)):
+    # TODO: make db_user_activity from scratch with user_id collected from token 
+
+    db_user_activity = models.UserActivity(**user_activity.dict())
+    db.add(db_user_activity)
+    db.commit()
+    db.refresh(db_user_activity)
+    return db_user_activity

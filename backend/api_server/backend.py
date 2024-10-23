@@ -650,10 +650,29 @@ def get_prescription_fill_history(db: Session = Depends(get_db)):
     return db_inventory_update
 
 
-# get all prescription fill history
-@app.get("/inventory-updates/fill-history-list", response_model=List[InventoryUpdateResponse])
-def get_prescription_fill_history(db: Session = Depends(get_db)):
-    # query inventory_updates for rows where type is "Fill prescription"
-    fill_history = db.query(models.InventoryUpdate).filter(models.InventoryUpdate.type == "Fill prescription").all()
+# get all inventory_updates - **optional param to filter to one value of 'type'
+@app.get("/inventory-updates", response_model=List[InventoryUpdateResponse])
+# restrict type to the values in InventoryUpdateType
+def get_inventory_updates(type: Optional[models.InventoryUpdateType] = Query(None), db: Session = Depends(get_db)):
+    '''
+    endpoint to get inventory_updates with optional type (e.g. add, discard, fillpresc, sellnonpresc).
+    If type is provided, only inventory_updates for that type are returned.
+    call this endpoint like so: /inventory_updates?type=1 or /inventory_updates to get all inventory_updates
+    '''
+    # if type is provided, return all inventory_updates of that type
+    if type:
+        inventory_updates = db.query(models.InventoryUpdate).filter(models.InventoryUpdate.type == type).all()
+    # else return all inventory_updates
+    else:
+        inventory_updates = db.query(models.InventoryUpdate).all()
+    return inventory_updates
+
+
+# an endpoint that I made but am not sure if we need, we can just filter on type in the get inventory_updates endpoint
+# # get all prescription fill history
+# @app.get("/inventory-updates/fill-history-list", response_model=List[InventoryUpdateResponse])
+# def get_prescription_fill_history(db: Session = Depends(get_db)):
+#     # query inventory_updates for rows where type is "Fill prescription"
+#     fill_history = db.query(models.InventoryUpdate).filter(models.InventoryUpdate.type == "Fill prescription").all()
 
     return fill_history

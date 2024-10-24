@@ -607,16 +607,13 @@ def delete_prescription(prescription_id: int, db: Session = Depends(get_db)):
 # fill a prescription
 @app.put("/prescription/{prescription_id}/fill", response_model=schema.PrescriptionResponse)
 def fill_prescription(prescription_id: int, current_user: Annotated[UserToReturn, Depends(get_current_user)], db: Session = Depends(get_db)):
-    # # check permissions first
-    # current_user = get_current_user(token=fill_request.token)
-    
-    # # TODO: not 100% sure on this
-    # # only pharmacists, pharmacy managers, and pharmacy techs can view medication inventory
-    # if current_user.user_type not in ["pharmacist", "pharmacy_manager", "pharmacy_tech"]:
-    #     raise HTTPException(
-    #         status_code=401,
-    #         detail=f"User of type '{current_user}' is not authorized to fill a prescription",
-    #     )
+    # TODO: are these the correct user types for this?
+    # only pharmacists, pharmacy managers, and pharmacy techs can view medication inventory
+    if current_user.user_type not in ["pharmacist", "pharmacymanager", "pharmacytech"]:
+        raise HTTPException(
+            status_code=401,
+            detail=f"User of type '{current_user}' is not authorized to fill a prescription",
+        )
 
     # the medication has the dosage, so if the IDs match up then it's the same dosage we wanted
     db_prescription = db.query(models.Prescription).filter(models.Prescription.id == prescription_id).first()

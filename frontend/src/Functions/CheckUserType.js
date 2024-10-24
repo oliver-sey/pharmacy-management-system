@@ -27,9 +27,14 @@ async function CheckUserType (role, navigate)  {
           
           //if user's role is one other than the following, they are redirected back to login
           //TO DO: should they be redirected back to their own home page?
-          if (userData.user_type !== role) {
+          if (!role.includes(userData.user_type)) {
             navigate('../', {replace: true})
-          } 
+          } else {
+            console.log("From CheckUser: " + JSON.stringify(userData))
+            return userData
+          }
+        } else {
+          throw new Error("Could not authenticate")
         }
 
     } catch (error) {

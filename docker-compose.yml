@@ -1,0 +1,66 @@
+
+
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydatabase
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  fastapi:
+    build:
+      context: ./backend  # Point to the backend directory
+      dockerfile: Dockerfile  # Ensure this matches the name and location of your Dockerfile
+    volumes:
+      - ./backend/api_server:/app/api_server  # Mount the api_server directory
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+
+  react:
+    build:
+      context: ./frontend  # Point to your frontend directory
+      dockerfile: Dockerfile  # Ensure this matches the name and location of your Dockerfile
+    volumes:
+      - ./frontend:/app  # Mount the frontend directory for live updates
+      - /app/node_modules  # Prevent local node_modules from overwriting container's node_modules
+    ports:
+      - "3000:3000"
+    command: npm start  # Start the React development server
+    
+  
+  postgres_test: # database for testing
+    image: postgres:13
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: test_database  # Separate test database
+    ports:
+      - "5433:5432"  # Optional: expose on a different port if needed
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+
+
+  test:
+    build:
+      context: ./backend  # Adjust as needed
+      dockerfile: Dockerfile
+    command: ["pytest", "tests/"]  # Adjust to your test command
+    working_dir: /app  # Set this to the correct working directory
+    depends_on:
+      - postgres_test
+    environment:
+      DATABASE_URL: postgres://user:password@postgres_test/test_database  # Connection string for the test database
+      PYTHONPATH: /app  # Set PYTHONPATH to help with imports
+
+
+
+volumes:
+  postgres_data:
+  postgres_test_data:  

@@ -55,15 +55,79 @@ def get_db():
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-# region Logging config
-#--------Logging configurations---------
-log_config = uvicorn.config.LOGGING_CONFIG
-log_config["formatters"]["access"]["fmt"] = "%(asctime)s - %(levelname)s - %(message)s"
+# region User CRUD
+# POST endpoint to create a user
+@app.post("/users/", response_model=UserResponse)
+def create_user(user: UserCreate, db: Session = Depends(get_db)):
+    hashed_password = pwd_context.hash(user.password)
+    user_data = user.model_dump()  # Get user data as dict
+    user_data['password'] = hashed_password  # Set the hashed password
+    db_user = models.User(**user_data)  # Now unpack user_data
+
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+@app.get("/users/{user_id}", response_model=UserResponse)
+def get_user(user_id: int, db: Session = Depends(get_db)):
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return db_user
 
 
-# endregion
-# region Authentication
-#-------authentication functions---------
+@app.delete("/users/{user_id}")
+def delete_user(user_id: int, db: Session = Depends(get_db)):
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Check for associated prescriptions
+    prescriptions_count = db.query(models.Prescription).filter(
+        (models.Prescription.user_entered_id == user_id) | 
+        (models.Prescription.user_filled_id == user_id)
+    ).count()
+
+    if prescriptions_count > 0:
+        raise HTTPException(status_code=400, detail="User cannot be deleted while having prescriptions")
+
+
+    db.delete(db_user)
+    db.commit()
+    return SimpleResponse(message="User deleted successfully")
+
+@app.put("/users/{user_id}", response_model=UserResponse)
+def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db)):
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Update only provided fields
+    if user.first_name is not None:
+        db_user.first_name = user.first_name
+    if user.last_name is not None:
+        db_user.last_name = user.last_name
+    if user.user_type is not None:
+        db_user.user_type = user.user_type
+    if user.email is not None:
+        db_user.email = user.email
+    if user.password is not None:
+        db_user.password = pwd_context.hash(user.password)  # Hashing the password if provided
+    if user.is_locked_out is not None:
+        db_user.is_locked_out = user.is_locked_out
+
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+@app.get("/userslist", response_model=List[UserResponse])
+def list_users(db: Session = Depends(get_db)):
+    # Query all users from the database
+    users = db.query(models.User).all()
+    
+    return users
 
 #-----authentication values-------
 SECRET_KEY = "90FA9871DC0E001369671A27F90A0213"
@@ -390,7 +454,7 @@ def delete_patient(pid: int, db: Session = Depends(get_db)):
 # region Medication CRUD
 #-----Medication CRUD
 # create medication
-@app.post("/medication/", response_model=schema.MedicationResponse)
+@app.post("/medication", response_model=schema.MedicationResponse)
 def create_medication(medication: schema.MedicationCreate, db: Session = Depends(get_db)):
     db_medication = models.Medication(**medication.dict())
     db.add(db_medication)
@@ -443,7 +507,7 @@ def delete_medication(medication_id: int, db: Session = Depends(get_db)):
     return {"message": "Medication deleted successfully", "medication_id": medication_id}
 
 # get all medication
-@app.get("/medicationlist/")
+@app.get("/medicationlist")
 def list_medication(db: Session = Depends(get_db)):
     # Query the database for all medications
     medications = db.query(models.Medication).all()
@@ -541,7 +605,7 @@ def delete_prescription(prescription_id: int, db: Session = Depends(get_db)):
 
 # fill a prescription
 @app.put("/prescription/{prescription_id}/fill", response_model=schema.PrescriptionResponse)
-def fill_prescription(prescription_id: int, fill_request: PrescriptionFillRequest, db: Session = Depends(get_db)):
+def fill_prescription(prescription_id: int, current_user: Annotated[UserToReturn, Depends(get_current_user)], db: Session = Depends(get_db)):
     # # check permissions first
     # current_user = get_current_user(token=fill_request.token)
     
@@ -588,7 +652,7 @@ def fill_prescription(prescription_id: int, fill_request: PrescriptionFillReques
         # set the timestamp of filling to the current time
         db_prescription.filled_timestamp = datetime.now()
         # get the user who filled the prescription from PrescriptionFillRequest
-        db_prescription.user_filled_id = fill_request.user_filled_id
+        db_prescription.user_filled_id = current_user.id
 
     db.commit()
     db.refresh(db_prescription)

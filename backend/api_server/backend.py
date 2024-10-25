@@ -70,7 +70,6 @@ SECRET_KEY = "90FA9871DC0E001369671A27F90A0213"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-# pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def verify_password(plain_password, hashed_password):
@@ -103,32 +102,37 @@ def verify_token(token: Annotated[str, Depends(oauth2_scheme)]):
         raise HTTPException(status_code=403, detail="Token is invalid or expired")
 
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)],
+def get_current_user(token: Annotated[str, Depends(oauth2_scheme)],
                             db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
+    # print(f"Received token: {token}")  # Print the token
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
-            
             raise credentials_exception
         token_data = TokenData(username=username)
     except InvalidTokenError:
-        
         raise credentials_exception
     user = db.query(models.User).filter(models.User.email == token_data.username).first()
     current_user = UserToReturn(id=user.id, email=user.email, user_type=user.user_type)
     if user is None:
-        
         raise credentials_exception
     
     return current_user
 
-
+# validate user type
+def validate_user_type(current_user, allowed_user_types: list):
+    if current_user.user_type not in allowed_user_types:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"User of type '{current_user.user_type}' is not authorized to perform this action",
+        )
+    
 @app.post("/token")
 async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
@@ -212,7 +216,17 @@ async def reset_password(
 # region User CRUD
 # POST endpoint to create a user
 @app.post("/users/", response_model=UserResponse)
-def create_user(user: UserCreate, db: Session = Depends(get_db)):
+def create_user(user: UserCreate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+
+    validate_user_type(current_user, ["pharmacy manager"])
+    # Check if the email already exists
+    existing_user = db.query(models.User).filter(models.User.email == user.email).first()
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already registered"
+        )
+    # if not create a new user
     hashed_password = pwd_context.hash(user.password)
     user_data = user.model_dump()  # Get user data as dict
     user_data['password'] = hashed_password  # Set the hashed password
@@ -224,7 +238,10 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     return db_user
 
 @app.get("/users/{user_id}", response_model=UserResponse)
-def get_user(user_id: int, db: Session = Depends(get_db)):
+def get_user(user_id: int, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+
+    validate_user_type(current_user, ["pharmacy manager", "pharmacist"])
+
     db_user = db.query(models.User).filter(models.User.id == user_id).first()
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
@@ -233,7 +250,10 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
 
 
 @app.delete("/users/{user_id}")
-def delete_user(user_id: int, db: Session = Depends(get_db)):
+def delete_user(user_id: int, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+
+    validate_user_type(current_user, ["pharmacy manager"])
+
     db_user = db.query(models.User).filter(models.User.id == user_id).first()
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
@@ -254,7 +274,10 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
 
 
 @app.put("/users/{user_id}", response_model=UserResponse)
-def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db)):
+def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+
+    validate_user_type(current_user, ["pharmacy manager"])
+
     db_user = db.query(models.User).filter(models.User.id == user_id).first()
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
@@ -279,34 +302,14 @@ def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db)):
 
 
 @app.get("/userslist/", response_model=List[UserResponse])
-def list_users(db: Session = Depends(get_db)):
+def list_users(db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+
+    validate_user_type(current_user, ["pharmacy manager", "pharmacist"])
     # Query all users from the database
     users = db.query(models.User).all()
     
     return users
 
-
-#temporary users
-#Hashed password needs to be generated by the get_password_hash function (incase you want to add a new example person)
-#These can be deleted when we connect the database
-#Manager password: password
-#Pharmacist password: password123
-fake_users_db = {
-    "manager@example.com": {
-        "full_name": "John Doe",
-        "username": "manager@example.com",
-        "hashed_password": "$2b$12$RZ40hSEXI8BuUqOCe1Gj/exWkH3pPFlPNtsahkWLIV2XiTzw8d4ym",
-        "role": "manager",
-        "disabled": False,
-    },
-    "pharmacist@example.com": {
-        "full_name": "Oliver",
-        "username": "pharmacist@example.com",
-        "hashed_password": "$2b$12$9N86kINZys6.SpJ9C/IRWudLqbWks80Z2BBcn/3Fsk7ZHsRCfa4HK",
-        "role": "pharmacist",
-        "disabled": False,
-    }
-}
 
 # endregion
 # region Patient CRUD
@@ -391,7 +394,10 @@ def delete_patient(pid: int, db: Session = Depends(get_db)):
 #-----Medication CRUD
 # create medication
 @app.post("/medication/", response_model=schema.MedicationResponse)
-def create_medication(medication: schema.MedicationCreate, db: Session = Depends(get_db)):
+def create_medication(medication: schema.MedicationCreate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+
+    validate_user_type(current_user, ["pharmacy manager"])
+
     db_medication = models.Medication(**medication.dict())
     db.add(db_medication)
     db.commit()
@@ -400,7 +406,10 @@ def create_medication(medication: schema.MedicationCreate, db: Session = Depends
 
 # get medication by id
 @app.get("/medication/{medication_id}", response_model=schema.MedicationResponse)
-def get_medication(medication_id: int, db: Session = Depends(get_db)):
+def get_medication(medication_id: int, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+
+    validate_user_type(current_user, ["pharmacy manager", "pharmacist"])
+
     db_medication = db.query(models.Medication).filter(models.Medication.id == medication_id).first()
     if db_medication is None:
         raise HTTPException(status_code=404, detail="Medication not found")
@@ -409,7 +418,9 @@ def get_medication(medication_id: int, db: Session = Depends(get_db)):
 
 # update medication by id
 @app.put("/medication/{medication_id}", response_model=schema.MedicationResponse)
-def update_medication(medication_id: int, new_medication: schema.MedicationUpdate, db: Session = Depends(get_db)):
+def update_medication(medication_id: int, new_medication: schema.MedicationUpdate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+
+    validate_user_type(current_user, ["pharmacy manager"])
     # Retrieve the existing medication from the database
     db_medication = db.query(models.Medication).filter(models.Medication.id == medication_id).first()
 
@@ -433,7 +444,10 @@ def update_medication(medication_id: int, new_medication: schema.MedicationUpdat
 
 # delete medication
 @app.delete("/medication/{medication_id}")
-def delete_medication(medication_id: int, db: Session = Depends(get_db)):
+def delete_medication(medication_id: int, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+
+    validate_user_type(current_user, ["pharmacy manager"])
+
     db_medication = db.query(models.Medication).filter(models.Medication.id == medication_id).first()
     if db_medication is None:
         raise HTTPException(status_code=404, detail="Medication not found")
@@ -444,7 +458,9 @@ def delete_medication(medication_id: int, db: Session = Depends(get_db)):
 
 # get all medication
 @app.get("/medicationlist/")
-def list_medication(db: Session = Depends(get_db)):
+def list_medication(db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+
+    validate_user_type(current_user, ["pharmacy manager", "pharmacist"])
     # Query the database for all medications
     medications = db.query(models.Medication).all()
     
@@ -483,19 +499,11 @@ def get_prescription(prescription_id: int, db: Session = Depends(get_db)):
 # create prescription
 @app.post("/prescription", response_model=schema.PrescriptionResponse)
 def create_prescription(prescription: schema.PrescriptionCreate, db: Session = Depends(get_db)):
-    '''
-    we may need to edit this in the future depending on how we pass the patient info and medication info
-    currently, this code assumes it gets the id of patient and medication, but if it receives a name or something
-    other than the id, we will need to query the DB to get the ids.
-    '''
     # Ensure that prescription data is valid
     try:
         db_prescription = models.Prescription(**prescription.model_dump())  # Use .model_dump() for Pydantic V2
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-
-    # moved code for checking if we have enough inventory, subtracting from the inventory, etc.
-    # to the fill prescription route, since that's when that happens, not right when a prescription is made
 
     # add the prescription
     db.add(db_prescription)
@@ -524,7 +532,9 @@ def update_prescription(prescription_id: int, prescription: schema.PrescriptionU
 
 # delete prescription
 @app.delete("/prescription/{prescription_id}")
-def delete_prescription(prescription_id: int, db: Session = Depends(get_db)):
+def delete_prescription(prescription_id: int, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+
+    validate_user_type(current_user, ["pharmacy manager"])
     '''
     deletes prescriptions
     not sure if this should be allowed tho... we should talk ab it
@@ -541,17 +551,9 @@ def delete_prescription(prescription_id: int, db: Session = Depends(get_db)):
 
 # fill a prescription
 @app.put("/prescription/{prescription_id}/fill", response_model=schema.PrescriptionResponse)
-def fill_prescription(prescription_id: int, fill_request: PrescriptionFillRequest, db: Session = Depends(get_db)):
-    # # check permissions first
-    # current_user = get_current_user(token=fill_request.token)
-    
-    # # TODO: not 100% sure on this
-    # # only pharmacists, pharmacy managers, and pharmacy techs can view medication inventory
-    # if current_user.user_type not in ["pharmacist", "pharmacy_manager", "pharmacy_tech"]:
-    #     raise HTTPException(
-    #         status_code=401,
-    #         detail=f"User of type '{current_user}' is not authorized to fill a prescription",
-    #     )
+def fill_prescription(prescription_id: int, fill_request: PrescriptionFillRequest, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+
+    validate_user_type(current_user, ["pharmacist"])
 
     # the medication has the dosage, so if the IDs match up then it's the same dosage we wanted
     db_prescription = db.query(models.Prescription).filter(models.Prescription.id == prescription_id).first()
@@ -593,3 +595,4 @@ def fill_prescription(prescription_id: int, fill_request: PrescriptionFillReques
     db.commit()
     db.refresh(db_prescription)
     return db_prescription
+

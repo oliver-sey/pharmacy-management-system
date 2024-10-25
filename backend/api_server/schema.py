@@ -3,6 +3,7 @@
 from typing import Optional
 from pydantic import BaseModel, EmailStr
 from datetime import date, datetime
+from .models import UserType
 
 class SimpleResponse(BaseModel):
     message: str
@@ -26,25 +27,24 @@ class UserToReturn(BaseModel):
     last_name: Optional[str] = None
     id: Optional[int] = None
     email: Optional[str] = None
-    user_type: Optional[str] = None
+    user_type: Optional[UserType] = None
+
 
 class UserResponse(BaseModel):
     id: int
     first_name: str
     last_name: str
-    user_type: str
+    user_type: UserType
     email: str
-    password: str
 
 class UserLogin(BaseModel):
     email: str
     password: str
 
-
 class UserCreate(BaseModel):
     first_name: str
     last_name: str
-    user_type: str
+    user_type: UserType
     email: EmailStr
     password: str
     is_locked_out: bool = True

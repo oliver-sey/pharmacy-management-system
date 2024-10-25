@@ -1,14 +1,2 @@
 fastapi
 uvicorn
-psycopg2 
-sqlalchemy
-python-jose
-pyjwt
-passlib
-python-multipart
-typing
-pydantic[email]
-alembic
-pytest
-pytest-asyncio
-httpx  # For async requests

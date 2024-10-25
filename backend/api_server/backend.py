@@ -37,10 +37,7 @@ origins = [
 ]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Allow your frontend URL
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=origins,
 )
 
 # Dependency to get the database session
@@ -55,15 +52,79 @@ def get_db():
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-# region Logging config
-#--------Logging configurations---------
-log_config = uvicorn.config.LOGGING_CONFIG
-log_config["formatters"]["access"]["fmt"] = "%(asctime)s - %(levelname)s - %(message)s"
+# region User CRUD
+# POST endpoint to create a user
+@app.post("/users/", response_model=UserResponse)
+def create_user(user: UserCreate, db: Session = Depends(get_db)):
+    hashed_password = pwd_context.hash(user.password)
+    user_data = user.model_dump()  # Get user data as dict
+    user_data['password'] = hashed_password  # Set the hashed password
+    db_user = models.User(**user_data)  # Now unpack user_data
+
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+@app.get("/users/{user_id}", response_model=UserResponse)
+def get_user(user_id: int, db: Session = Depends(get_db)):
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return db_user
 
 
-# endregion
-# region Authentication
-#-------authentication functions---------
+@app.delete("/users/{user_id}")
+def delete_user(user_id: int, db: Session = Depends(get_db)):
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Check for associated prescriptions
+    prescriptions_count = db.query(models.Prescription).filter(
+        (models.Prescription.user_entered_id == user_id) | 
+        (models.Prescription.user_filled_id == user_id)
+    ).count()
+
+    if prescriptions_count > 0:
+        raise HTTPException(status_code=400, detail="User cannot be deleted while having prescriptions")
+
+
+    db.delete(db_user)
+    db.commit()
+    return SimpleResponse(message="User deleted successfully")
+
+@app.put("/users/{user_id}", response_model=UserResponse)
+def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db)):
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Update only provided fields
+    if user.first_name is not None:
+        db_user.first_name = user.first_name
+    if user.last_name is not None:
+        db_user.last_name = user.last_name
+    if user.user_type is not None:
+        db_user.user_type = user.user_type
+    if user.email is not None:
+        db_user.email = user.email
+    if user.password is not None:
+        db_user.password = pwd_context.hash(user.password)  # Hashing the password if provided
+    if user.is_locked_out is not None:
+        db_user.is_locked_out = user.is_locked_out
+
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+@app.get("/userslist", response_model=List[UserResponse])
+def list_users(db: Session = Depends(get_db)):
+    # Query all users from the database
+    users = db.query(models.User).all()
+    
+    return users
 
 #-----authentication values-------
 SECRET_KEY = "90FA9871DC0E001369671A27F90A0213"
@@ -310,7 +371,6 @@ def list_users(db: Session = Depends(get_db), current_user: UserToReturn = Depen
     
     return users
 
-
 # endregion
 # region Patient CRUD
 #--------PATIENT CRUD OPERATIONS--------
@@ -318,65 +378,20 @@ def list_users(db: Session = Depends(get_db), current_user: UserToReturn = Depen
 @app.get("/get/patient/{patient_id}")
 def get_patient(patient_id: int):
     # make a call to our future database to get the patient with the given patient_id
-    return {"patient_id":  patient_id}
+    return {"patient_id": patient_id}
 
-@app.get("/patients", response_model=List[PatientResponse])
-def get_patients(db: Session = Depends(get_db)):
-    patients = db.query(models.Patient).all()
-    # fix the date_of_birth to be a string
-    patients = [PatientResponse.from_orm(patient) for patient in patients]
-    return patients
+@app.post("/post/patient")
+def post_patient(patient: dict):
+    # make a call to our future database to add the patient to the database
+    return patient
 
-@app.post("/patient")
-def create_patient(patient: PatientCreate, db: Session = Depends(get_db)):
-    patient_data = patient.model_dump()
-    email = patient_data['email']
-    # check if the email is already registered
-    if db.query(models.Patient).filter(models.Patient.email == email).first():
-        raise HTTPException(status_code=400, detail="Email already registered")
-    else:
-        # try to add patient to the database
-        try:
-            db_patient = models.Patient(**patient_data)
-            db.add(db_patient)
-            db.commit()
-            db.refresh(db_patient)
-            return db_patient
-        # if there is an error, raise an error
-        except ValueError as e:
-            raise HTTPException(status_code=400, detail=str(e))
-        except IntegrityError as e:
-            db.rollback()
-            raise HTTPException(status_code=400, detail=str(e.orig))
-        except ValidationError as e:
-            raise HTTPException(status_code=400, detail=str(e))
-        except Exception as e:
-            db.rollback()
-            raise HTTPException(status_code=400, detail=str(e))
+@app.put("/put/patient/{patient_id}")
+def put_patient(patient_id: int, patient: dict):
+    # make a call to our future database to update the patient with the given patient_id
+    return patient
 
-@app.put("/patient/{patient_id}")
-def put_patient(patient_id: int, patient: PatientUpdate, db: Session = Depends(get_db)):
-    # get the patient
-    db_patient = db.query(models.Patient).filter(models.Patient.id == patient_id).first()
-    # if patient is not found, raise an error
-    if db_patient is None:
-        raise HTTPException(status_code=404, detail="Patient not found")
-    # get the data stored in the body of the put request
-    patient_data = patient.model_dump()
-
-    try:
-        # update the fields of the existing patient
-        for key, value in patient_data.items():
-            setattr(db_patient, key, value)
-        # commit and refresh
-        db.commit()
-        db.refresh(db_patient)
-        return db_patient
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))    
-
-@app.delete("/patient/{pid}")
-def delete_patient(pid: int, db: Session = Depends(get_db)):
+@app.delete("/delete/patient/{patient_id}")
+def delete_patient(patient_id: int):
     # make a call to our future database to delete the patient with the given patient_id
     patient = db.query(models.Patient).filter(models.Patient.id == pid).first()
     print(f"patient: {patient}")
@@ -461,6 +476,7 @@ def delete_medication(medication_id: int, db: Session = Depends(get_db), current
 def list_medication(db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
 
     validate_user_type(current_user, ["pharmacy manager", "pharmacist"])
+
     # Query the database for all medications
     medications = db.query(models.Medication).all()
     
@@ -590,7 +606,7 @@ def fill_prescription(prescription_id: int, fill_request: PrescriptionFillReques
         # set the timestamp of filling to the current time
         db_prescription.filled_timestamp = datetime.now()
         # get the user who filled the prescription from PrescriptionFillRequest
-        db_prescription.user_filled_id = fill_request.user_filled_id
+        db_prescription.user_filled_id = current_user.id
 
     db.commit()
     db.refresh(db_prescription)

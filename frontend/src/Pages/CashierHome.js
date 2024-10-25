@@ -2,11 +2,11 @@ import React, {useEffect, useState} from 'react'
 import CheckUserType from '../Functions/CheckUserType';
 import { useNavigate } from 'react-router-dom';
 
-function PharmacistHome() {
+function CashierHome() {
     const navigate = useNavigate();
 
     //Change this variable based on what type of user the page is for
-    const role = ["pharmacist"]
+    const role = ["cashier"]
 
     useEffect(() => {
         CheckUserType(role, navigate);
@@ -16,9 +16,9 @@ function PharmacistHome() {
 
   return (
     <div>
-      <p>pharmacist home</p>
+      <p>cashier home</p>
     </div>
   )
 }
 
-export default PharmacistHome
+export default CashierHome

@@ -221,8 +221,6 @@ class InventoryUpdateResponse(BaseModel):
 # endregion
 # region User Activities
 class UserActivityCreate(BaseModel):
-    # get token from user_id
-    token: str
     activity: str
     # TODO: let the database set the timestamp to the current time?
 

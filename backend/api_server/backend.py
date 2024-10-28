@@ -635,11 +635,9 @@ def create_inventory_update(inventory_update: InventoryUpdateCreate, request: Re
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    # get the token from headers
-    token = request.headers.get("Authorization").split(" ")[1]
-
     # create a user_activities entry for this
-    user_activity_create = UserActivityCreate(token=token, activity="inventory_update")
+    # any type of updating the inventory (add, discard, filling, selling), the user_activity entry for it will be "Inventory Update"
+    user_activity_create = UserActivityCreate(activity=models.UserActivityType.INVENTORY_UPDATE)
     create_user_activity(user_activity_create, db)
 
 

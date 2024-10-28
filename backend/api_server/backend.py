@@ -680,16 +680,6 @@ def get_inventory_updates(type: Optional[models.InventoryUpdateType] = Query(Non
     return inventory_updates
 
 
-# an endpoint that I made but am not sure if we need, we can just filter on type in the get inventory_updates endpoint
-# # get all prescription fill history
-# @app.get("/inventory-updates/fill-history-list", response_model=List[InventoryUpdateResponse])
-# def get_prescription_fill_history(db: Session = Depends(get_db)):
-#     # query inventory_updates for rows where type is "Fill prescription"
-#     fill_history = db.query(models.InventoryUpdate).filter(models.InventoryUpdate.type == "Fill prescription").all()
-
-#     return fill_history
-
-
 
 # endregion
 # region User Activities CRUD

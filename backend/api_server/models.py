@@ -3,10 +3,18 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from .database import Base
+from sqlalchemy import Enum as SQLAlchemyEnum
 
 from sqlalchemy import Column, Integer, String, Boolean, ARRAY
 from sqlalchemy.orm import relationship
 from .database import Base
+from enum import Enum
+
+class UserType(str, Enum):
+    PHARMACY_MANAGER = "pharmacy manager"
+    PHARMACY_TECHNICIAN = "pharmacy technician"
+    CASHIER = "cashier"
+    PHARMACIST = "pharmacist"
 
 class User(Base):
     __tablename__ = 'users'
@@ -14,7 +22,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     first_name = Column(String, index=True)
     last_name = Column(String, index=True)
-    user_type = Column(String, index=True)
+    user_type = Column(SQLAlchemyEnum(UserType), index=True)
     email = Column(String, unique=True, index=True)
     password = Column(String)
     is_locked_out = Column(Boolean, default=True)
@@ -27,7 +35,6 @@ class User(Base):
     user_activities = relationship("UserActivity", back_populates="user", cascade="all, delete-orphan")
     # A user can have many transactions
     transactions = relationship("Transaction", back_populates="user", cascade="all, delete-orphan")
-
 
 class Patient(Base):
     __tablename__ = 'patients'

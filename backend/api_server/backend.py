@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from passlib.context import CryptContext
 from typing import Optional
 from .database import SessionLocal, engine, Base
-from .schema import Token, TokenData, UserActivityCreate, UserCreate, UserResponse, UserLogin, UserToReturn, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, PrescriptionFillRequest, InventoryUpdateCreate,  InventoryUpdateResponse
+from .schema import Token, TokenData, UserActivityCreate, UserCreate, UserResponse, UserLogin, UserToReturn, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, InventoryUpdateCreate,  InventoryUpdateResponse
 from . import models  # Ensure this is the SQLAlchemy model
 from sqlalchemy.orm import Session
 from typing import List

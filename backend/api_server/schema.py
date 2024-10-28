@@ -197,13 +197,6 @@ class PrescriptionUpdate(BaseModel):
     quantity: Optional[int] = None
 
 
-class PrescriptionFillRequest(BaseModel):
-    user_filled_id: int
-    # token: str
-    class Config:
-        orm_mode = True
-
-
 # endregion
 # Region Inventory Updates
 class InventoryUpdateCreate(BaseModel):

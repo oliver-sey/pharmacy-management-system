@@ -568,7 +568,7 @@ def delete_prescription(prescription_id: int, db: Session = Depends(get_db), cur
 
 # fill a prescription
 @app.put("/prescription/{prescription_id}/fill", response_model=schema.PrescriptionResponse)
-def fill_prescription(prescription_id: int, fill_request: PrescriptionFillRequest, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+def fill_prescription(prescription_id: int, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
 
     validate_user_type(current_user, ["pharmacist"])
 

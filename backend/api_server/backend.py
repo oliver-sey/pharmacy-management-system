@@ -650,7 +650,10 @@ def create_inventory_update(inventory_update: InventoryUpdateCreate, request: Re
 
 # get one inventory_update
 @app.get("/inventory-updates/{id}", response_model=InventoryUpdateResponse)
-def get_inventory_update(id: int, db: Session = Depends(get_db)):
+def get_inventory_update(id: int, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+    # make sure only pharmacy managers or pharmacists can call this endpoint
+    validate_user_type(current_user, ["pharmacy manager", "pharmacist"])
+
     # there will only be one inventory_update with the matching id (since the id is unique), so using first() is fine
     db_inventory_update = db.query(models.InventoryUpdate).filter(models.InventoryUpdate.id == id).first()
 
@@ -663,12 +666,15 @@ def get_inventory_update(id: int, db: Session = Depends(get_db)):
 # get all inventory_updates - **optional param to filter to one value of 'type'
 @app.get("/inventory-updates", response_model=List[InventoryUpdateResponse])
 # restrict type to the values in InventoryUpdateType
-def get_inventory_updates(type: Optional[models.InventoryUpdateType] = Query(None), db: Session = Depends(get_db)):
+def get_inventory_updates(type: Optional[models.InventoryUpdateType] = Query(None), db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
     '''
     endpoint to get inventory_updates with optional type (e.g. add, discard, fillpresc, sellnonpresc).
     If type is provided, only inventory_updates for that type are returned.
     call this endpoint like so: /inventory_updates?type=1 or /inventory_updates to get all inventory_updates
     '''
+    # make sure only pharmacy managers or pharmacists can call this endpoint
+    validate_user_type(current_user, ["pharmacy manager", "pharmacist"])
+
     # if type is provided, return all inventory_updates of that type
     if type:
         inventory_updates = db.query(models.InventoryUpdate).filter(models.InventoryUpdate.type == type).all()

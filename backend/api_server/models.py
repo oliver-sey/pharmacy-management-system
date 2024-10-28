@@ -11,10 +11,10 @@ from .database import Base
 from enum import Enum
 
 class UserType(str, Enum):
-    PHARMACY_MANAGER = "pharmacy manager"
-    PHARMACY_TECHNICIAN = "pharmacy technician"
-    CASHIER = "cashier"
-    PHARMACIST = "pharmacist"
+    PHARMACY_MANAGER = "Pharmacy Manager"
+    PHARMACY_TECHNICIAN = "Pharmacy Technician"
+    CASHIER = "Cashier"
+    PHARMACIST = "Pharmacist"
 
 class User(Base):
     __tablename__ = 'users'

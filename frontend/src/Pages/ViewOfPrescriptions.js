@@ -77,7 +77,7 @@ function ViewOfPrescriptions() {
           }
     }
 
-    const loadRows = async () =>{
+    const loadRows = async () => {
         const patients = await fetchPatients();
         const medications = await fetchMedications();
         const prescriptions = await fetchPrescriptions();

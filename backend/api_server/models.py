@@ -95,18 +95,29 @@ class Medication(Base):
     prescriptions = relationship("Prescription", back_populates="medication")
     inventory_updates = relationship("InventoryUpdate", back_populates="medication")
 
+
+# an enum class so we can restrict the set of possible values in the type column in user_activities
+# TODO: are these all the possible values we might need?
+class UserActivityType(PyEnum):
+    LOGIN = "Login"
+    LOGOUT = "Logout"
+    UNLOCK_ACCOUNT = "Unlock Account"
+    # including all the possible types that we are storing in inventory_updates
+    # (add, discard, fillpresc, and sellnonpresc)
+    INVENTORY_UPDATE = "Inventory Update"
+
+
 class UserActivity(Base):
     __tablename__ = 'user_activities'
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey('users.id'))
-    activity = Column(String)
+    # restrict the set of possible values in the type column
+    type = Column(SQLAlchemyEnum(UserActivityType))
     timestamp = Column(DateTime, default=func.now())
 
     user = relationship("User", back_populates="user_activities")
     inventory_updates = relationship("InventoryUpdate", back_populates="user_activity", uselist=False)
-
-
 
 
 

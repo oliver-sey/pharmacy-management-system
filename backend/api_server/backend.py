@@ -586,27 +586,32 @@ def fill_prescription(prescription_id: int, db: Session = Depends(get_db), curre
         # Check prescription amount with medication inventory
         # there will only be one medication with the matching id (since the id is unique), so using first() is fine
         db_medication = db.query(models.Medication).filter(models.Medication.id == db_prescription.medication_id).first()
-        # if none or not enough inventory, return 400, otherwise, decrease inventory quantity
+        # if none or not enough inventory, return 400, otherwise, decrease inventory quantity (later on)
         if db_medication is None or db_medication.quantity < db_prescription.quantity:
             raise HTTPException(status_code=400, detail="There is no or insufficient inventory of this medication to fill the prescription")
-        else:
-            db_medication.quantity -= db_prescription.quantity
-
+        
         # if we successfully deduct medication from inventory, create an inventory update instance in InventoryUpdate table
-        # TODO: ******is this sufficient to update the inventory?????
-        # inventory_update = models.InventoryUpdate(
-        #     medication_id=db_medication.id,
-        #     user_activity_id=db_prescription.user_filled_id,    # user who filled the prescription
-        #     quantity_changed=db_prescription.quantity                  # The quantity deducted
-        # )
+        inventory_update_request = models.InventoryUpdate(
+            medication_id=db_medication.id,
+            quantity_changed_by=db_prescription.quantity,       # The quantity deducted
+            # no transaction_id since this is not associated with a transaction
+            # TODO: is this right? or should we do "Fill prescription"
+            type=models.InventoryUpdateType.FILL_PRESCRIPTION   # set the type to fill prescription
+        )
 
-        # Add the inventory update to the session
-        # db.add(inventory_update)
+        # send the inventory_update_request to actually be stored in the database
+        # this will add an entry to user_activities (for filling the prescription) for us
+        create_inventory_update(inventory_update=inventory_update_request, db=db)
 
-        # after update medication in inventory and create an inventory update, finally fill the prescription
+
+        # after making sure we have enough inventory and creating an inventory update (which create a user_activities entry for us)
+        # finally fill the prescription
+        # change the quantity of the medication in the inventory
+        db_medication.quantity -= db_prescription.quantity
+        
         # set the timestamp of filling to the current time
         db_prescription.filled_timestamp = datetime.now()
-        # get the user who filled the prescription from PrescriptionFillRequest
+        # get the user who filled the prescription from the current user
         db_prescription.user_filled_id = current_user.id
 
     db.commit()

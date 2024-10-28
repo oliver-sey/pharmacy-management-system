@@ -567,6 +567,7 @@ def delete_prescription(prescription_id: int, db: Session = Depends(get_db), cur
 
 
 # fill a prescription
+# TODO: not sure of the order of some of these steps here, but I think it's good enough
 @app.put("/prescription/{prescription_id}/fill", response_model=schema.PrescriptionResponse)
 def fill_prescription(prescription_id: int, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
 
@@ -634,6 +635,9 @@ def fill_prescription(prescription_id: int, db: Session = Depends(get_db), curre
 # TODO: ****************remove the endpoint after testing!!!
 @app.post("/inventory-updates", response_model=InventoryUpdateResponse)
 def create_inventory_update(inventory_update: InventoryUpdateCreate, request: Request, db: Session = Depends(get_db)):
+    # TODO: validate user token somehow here!
+
+    
     # Ensure that inventory_update data is valid
     try:
         db_inventory_update = models.InventoryUpdate(**inventory_update.model_dump())  # Use .model_dump() for Pydantic V2

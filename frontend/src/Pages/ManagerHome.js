@@ -99,35 +99,90 @@ function ManagerHome() {
   
     return (
       <div>
+        <h1 className='sectionheader'>
+          Profiles
+        </h1>
         <Box sx={{ flexGrow: 1 }}>
-        <Grid container spacing={6}>
-          <Grid size={6}>
-            <Item>
-            Enter new prescription
-            <div/>
-            <IconButton aria-label="addPrescription" size="large" color='primary' onClick={openAddPrescriptionHandler}>
-                <AddCircleOutlinedIcon />
-              </IconButton>
-            </Item>
+          <Grid container spacing={6}>
+            <Grid size={6}>
+              <Item>
+              Enter new prescription
+              <div/>
+              <IconButton aria-label="addPrescription" size="large" color='primary' onClick={openAddPrescriptionHandler}>
+                  <AddCircleOutlinedIcon />
+                </IconButton>
+              </Item>
+            </Grid>
+            <Grid size={6}>
+              <Item>xs=6 md=4</Item>
+            </Grid>
+            <Grid size={6}>
+              <Item>xs=6 md=4</Item>
+            </Grid>
+            <Grid size={6}>
+              <Item>xs=6 md=8</Item>
+            </Grid>
           </Grid>
-          <Grid size={6}>
-            <Item>xs=6 md=4</Item>
+        </Box>
+
+        <h1 className='sectionheader'>
+          Prescriptions
+        </h1>
+        <Box sx={{ flexGrow: 1 }}>
+          <Grid container spacing={6}>
+            <Grid size={6}>
+              <Item>
+              Enter new prescription
+              <div/>
+              <IconButton aria-label="addPrescription" size="large" color='primary' onClick={openAddPrescriptionHandler}>
+                  <AddCircleOutlinedIcon />
+                </IconButton>
+              </Item>
+            </Grid>
+            <Grid size={6}>
+              <Item>xs=6 md=4</Item>
+            </Grid>
+            <Grid size={6}>
+              <Item>xs=6 md=4</Item>
+            </Grid>
+            <Grid size={6}>
+              <Item>xs=6 md=8</Item>
+            </Grid>
           </Grid>
-          <Grid size={6}>
-            <Item>xs=6 md=4</Item>
+        </Box>
+
+        <h1 className='sectionheader'>
+          Profiles
+        </h1>
+        <Box sx={{ flexGrow: 1 }}>
+          <Grid container spacing={6}>
+            <Grid size={6}>
+              <Item>
+              Enter new prescription
+              <div/>
+              <IconButton aria-label="addPrescription" size="large" color='primary' onClick={openAddPrescriptionHandler}>
+                  <AddCircleOutlinedIcon />
+                </IconButton>
+              </Item>
+            </Grid>
+            <Grid size={6}>
+              <Item>xs=6 md=4</Item>
+            </Grid>
+            <Grid size={6}>
+              <Item>xs=6 md=4</Item>
+            </Grid>
+            <Grid size={6}>
+              <Item>xs=6 md=8</Item>
+            </Grid>
           </Grid>
-          <Grid size={6}>
-            <Item>xs=6 md=8</Item>
-          </Grid>
-        </Grid>
-      </Box>
-  
-      <AddEditPrescriptionModal
-      open={isEditOpen}
-      onClose={closeEditModal}
-      row={selectedRow}
-      onSave={handleSavePrescription}
-      />
+        </Box>
+    
+        <AddEditPrescriptionModal
+        open={isEditOpen}
+        onClose={closeEditModal}
+        row={selectedRow}
+        onSave={handleSavePrescription}
+        />
       </div>
     )
 }

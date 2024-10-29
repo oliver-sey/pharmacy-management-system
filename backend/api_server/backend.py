@@ -4,7 +4,7 @@ from typing import Annotated # for defining the types that our functions take in
 import uvicorn
 import jwt
 from jwt.exceptions import InvalidTokenError
-from fastapi import Depends, FastAPI, HTTPException, Query, status, Body
+from fastapi import Depends, FastAPI, HTTPException, Query, status, Body, Request
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 from passlib.context import CryptContext
@@ -15,8 +15,9 @@ from . import models  # Ensure this is the SQLAlchemy model
 from sqlalchemy.orm import Session
 from typing import List
 from . import schema
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import SQLAlchemyError
 from pydantic import ValidationError
+import logging
 
 app = FastAPI()
 
@@ -25,10 +26,70 @@ app = FastAPI()
 def read_root():
     return "this is an epic gamer moment!"
 
+# configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("pharmacy_logger")
+
+# middleware for logging 
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    '''
+    middleware for logging. 
+
+    TODO: add the user stuff. idk how to get that yet.
+    '''
+    db: Session = SessionLocal()
+
+    try:
+        # Log incoming request details
+        logger.info(f"Received request: {request.method} {request.url}")
+
+        response = await call_next(request)
+
+        # Log successful response
+        logger.info(f"Completed request with status code: {response.status_code}")
+
+        # Log this information to the database
+        log_entry = models.UserActivity(
+            activity=f"{request.method} {request.url} completed with status {response.status_code}",
+            user_id=1
+        )
+        db.add(log_entry)
+        await db.commit()
+
+        return response
+    except SQLAlchemyError as e:
+        # if there is an error with the database / ORM
+        logger.error(f"Database error occurred: {str(e)}")
+
+        # Insert log entry to database for DB errors
+        user_activity = models.UserActivity(
+            activity=f"DATABASE ERROR: {str(e)}",
+            user_id=1
+        )
+        db.add(user_activity)
+        await db.commit()
+
+        raise e  # Re-raise after logging
+    except Exception as e:
+        
+        logger.error(f"An error occurred: {str(e)}")
+
+        # Insert log entry to database for other errors
+        user_activity = models.UserActivity(
+            activity=f"ERROR: {str(e)}",
+            user_id=1
+        )
+        db.add(user_activity)
+        await db.commit()
+
+        raise e  # Re-raise after logging
 
 
 # Create the database tables
 Base.metadata.create_all(bind=engine)
+# setup middleware
+app.middleware("http")(log_requests)
 
 
 # this is to allow our react app to make requests to our fastapi app

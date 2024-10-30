@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useRef} from 'react'
 import CheckUserType from '../Functions/CheckUserType';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
@@ -21,7 +21,7 @@ const Item = styled(Paper)(({ theme }) => ({
 }));
 
 function ManagerHome() {
-  const role = ["pharmacy_manager"]
+  const role = ["pharmacy manager"]
   const navigate = useNavigate();
   const [curr_user_id, set_curr_user_id] = useState("");
 
@@ -111,13 +111,28 @@ function ManagerHome() {
             </Item>
           </Grid>
           <Grid size={6}>
-            <Item>xs=6 md=4</Item>
+          <Item>
+              {/* Link to the List of Users page */}
+              <Link to="/viewofusers" style={{ textDecoration: 'none', color: '#007bff' }}>
+                View of Users
+              </Link>
+            </Item>
           </Grid>
           <Grid size={6}>
-            <Item>xs=6 md=4</Item>
+          <Item>
+              {/* Link to the List of Users page */}
+              <Link to="/viewofmedications" style={{ textDecoration: 'none', color: '#007bff' }}>
+                View of Medications
+              </Link>
+            </Item>
           </Grid>
           <Grid size={6}>
-            <Item>xs=6 md=8</Item>
+          <Item>
+              {/* Link to the List of Users page */}
+              <Link to="/viewofpatients" style={{ textDecoration: 'none', color: '#007bff' }}>
+                View of Patients
+              </Link>
+            </Item>
           </Grid>
         </Grid>
       </Box>

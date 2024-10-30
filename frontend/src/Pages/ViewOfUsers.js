@@ -16,6 +16,7 @@ import LockOpenIcon from "@mui/icons-material/LockOpen";
 
 function ViewOfUsers() {
 	const [rows, setUsers] = useState([]);
+	const token = localStorage.getItem('token');
 
 	// const fetchUsers = async () => {
 	// 	console.log("In fetchUsers");
@@ -48,7 +49,11 @@ function ViewOfUsers() {
 
 	const fetchUsers = async () => {
 		try {
-		  const response = await fetch('http://localhost:8000/userslist');
+		  const response = await fetch('http://localhost:8000/userslist', {
+			headers: {
+				'Authorization': 'Bearer ' + token,
+			},
+		  });
 		  const data = await response.json(); // Convert response to JSON
 		  console.log(data);
 		  setUsers(data); // Update rows state with fetched data
@@ -140,6 +145,9 @@ function ViewOfUsers() {
 			console.log("row", id);
 			const response = await fetch(`http://localhost:8000/users/${id}`, {
 				method: 'DELETE',
+				headers: {
+					'Authorization': 'Bearer ' + token,
+				},
 			});
 			if (!response.ok) {
 				throw new Error('Failed to delete user');
@@ -166,6 +174,7 @@ function ViewOfUsers() {
 				method: 'PUT',
 				headers: {
 					'Content-Type': 'application/json',
+					'Authorization': 'Bearer ' + token,
 				},
 				body: JSON.stringify(data),
 			});
@@ -185,6 +194,7 @@ function ViewOfUsers() {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
+					'Authorization': 'Bearer ' + token,
 				},
 				body: JSON.stringify(data),
 			});

@@ -25,7 +25,11 @@ function PrescriptionsToFill() {
 	// Async function to fetch presciptions data
 const fetchPrescriptions = async () => {
 	try {
-	  const response = await fetch('http://localhost:8000/prescriptions');
+	  const response = await fetch('http://localhost:8000/prescriptions', {
+		headers: {
+			'Authorization': 'Bearer ' + token,
+		},
+	  });
 	  const data = await response.json(); // Convert response to JSON
 
 	  return data
@@ -39,7 +43,11 @@ const fetchPrescriptions = async () => {
 
 const fetchPatients = async () => {
 	try {
-		const response = await fetch('http://localhost:8000/patients')
+		const response = await fetch('http://localhost:8000/patients', {
+			headers: {
+				'Authorization': 'Bearer ' + token,
+			},
+		});
 		const data = await response.json()
 
 		console.log("patient data: " + JSON.stringify(data))
@@ -54,7 +62,11 @@ const fetchPatients = async () => {
 
 const fetchMedications = async () => {
 	try {
-		const response = await fetch('http://localhost:8000/medicationlist')
+		const response = await fetch('http://localhost:8000/medicationlist', {
+			headers: {
+				'Authorization': 'Bearer ' + token,
+			},
+		});
 		const data = await response.json()
 
 		console.log("medication data: " + JSON.stringify(data))
@@ -70,7 +82,11 @@ const fetchMedications = async () => {
 
 const fetchUsers = async () => {
 	try {
-		const response = await fetch('http://localhost:8000/userslist')
+		const response = await fetch('http://localhost:8000/userslist', {
+			headers: {
+				'Authorization': 'Bearer ' + token,
+			},
+		  });
 		const data = await response.json()
 
 		console.log("users data: " + JSON.stringify(data))
@@ -131,6 +147,7 @@ const deletePrescription = async (id) => {
 		console.log("row", id);
 		const response = await fetch(`http://localhost:8000/prescription/${id}`, {
 			method: 'DELETE',
+			headers: { 'Authorization': 'Bearer ' + token }
 		});
 		if (!response.ok) {
 			throw new Error('Failed to delete prescription');
@@ -212,6 +229,7 @@ const deletePrescription = async (id) => {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
+					'Authorization': 'Bearer ' + token,
 				},
 				body: JSON.stringify(data),
 			});

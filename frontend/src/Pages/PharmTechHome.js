@@ -34,6 +34,8 @@ function PharmTechHome() {
 		prescribing_doctor: ""
 	});
 
+  const token = localStorage.getItem('token');
+
    // Function to open the Add/Edit modal
   const openAddPrescriptionHandler = () => {
     console.log("Add Prescription button clicked");
@@ -54,6 +56,7 @@ function PharmTechHome() {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token,
 				},
 				body: JSON.stringify(data),
 			});

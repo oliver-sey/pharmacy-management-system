@@ -41,6 +41,9 @@ function ManagerHome() {
       doctor_name: "",
       quantity: ""
     });
+
+    const token = localStorage.getItem('token');
+
   
      // Function to open the Add/Edit modal
     const openAddPrescriptionHandler = () => {
@@ -62,6 +65,7 @@ function ManagerHome() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token,
           },
           body: JSON.stringify(data),
         });

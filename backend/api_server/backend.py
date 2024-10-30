@@ -526,7 +526,7 @@ def delete_prescription(prescription_id: int, db: Session = Depends(get_db), cur
 
 
 # fill a prescription
-# TODO: not sure of the order of some of these steps here, but I think it's good enough
+# Not sure the totally best way to order some of these steps here, but I think it's good enough
 @app.put("/prescription/{prescription_id}/fill", response_model=schema.PrescriptionResponse)
 def fill_prescription(prescription_id: int, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
 
@@ -547,6 +547,7 @@ def fill_prescription(prescription_id: int, db: Session = Depends(get_db), curre
         # there will only be one medication with the matching id (since the id is unique), so using first() is fine
         db_medication = db.query(models.Medication).filter(models.Medication.id == db_prescription.medication_id).first()
         # if none or not enough inventory, return 400, otherwise, decrease inventory quantity (later on)
+        # I only change the inventory amount later on just in case there is an error with creating the inventory update
         if db_medication is None or db_medication.quantity < db_prescription.quantity:
             raise HTTPException(status_code=400, detail="There is no or insufficient inventory of this medication to fill the prescription")
         
@@ -584,19 +585,11 @@ def fill_prescription(prescription_id: int, db: Session = Depends(get_db), curre
 # region Inventory Updates
 #--------INVENTORY UPDATES--------
 
-# TODO: should I just make one endpoint to add an inventory update, and just call that to add a prescription fill history entry??
-# or add another endpoint
-
 # create inventory_update
-# TODO: is this right??
 # just as a function that will get called by other endpoints
-
 # TODO: ****************remove the endpoint after testing!!!
 @app.post("/inventory-updates", response_model=InventoryUpdateResponse)
 def create_inventory_update(inventory_update: InventoryUpdateCreate, request: Request, db: Session = Depends(get_db)):
-    # TODO: validate user token somehow here!
-
-    
     # Ensure that inventory_update data is valid
     try:
         db_inventory_update = models.InventoryUpdate(**inventory_update.model_dump())  # Use .model_dump() for Pydantic V2

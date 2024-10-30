@@ -14,7 +14,7 @@ function ViewOfPrescriptions() {
 	const [errorMessage, setErrorMessage] = useState(null);
 	const [openSnackbar, setOpenSnackbar] = useState(false);
 	const navigate = useNavigate();
-    const role = ['pharmacist', 'pharmacy_manager']
+    const role = ['Pharmacist', 'Pharmacy Manager']
 	// Async function to fetch presciptions data
 	const fetchPrescriptions = async () => {
 		try {
@@ -147,7 +147,7 @@ function ViewOfPrescriptions() {
 	// only pharmacists or pharmacy managers can delete
 	const canDelete = () => {
 		const role = localStorage.getItem('role');
-		return role === 'pharmacist' || role === 'pharmacy_manager';
+		return role === 'Pharmacist' || role === 'Pharmacy Manager';
 	};
 
 	const deletePrescription = async (id) => {

@@ -10,6 +10,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
+      # 5434 (first) is the port on your computer, 5432 (second) is the port in the container
       - "5434:5432"
 
   fastapi:

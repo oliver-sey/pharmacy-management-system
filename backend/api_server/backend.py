@@ -207,7 +207,7 @@ async def reset_password(
 @app.post("/users/", response_model=UserResponse)
 def create_user(user: UserCreate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
 
-    validate_user_type(current_user, ["pharmacy manager"])
+    validate_user_type(current_user, ["Pharmacy Manager"])
     # Check if the email already exists
     existing_user = db.query(models.User).filter(models.User.email == user.email).first()
     if existing_user:
@@ -229,7 +229,7 @@ def create_user(user: UserCreate, db: Session = Depends(get_db), current_user: U
 @app.get("/users/{user_id}", response_model=UserResponse)
 def get_user(user_id: int, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
 
-    validate_user_type(current_user, ["pharmacy manager", "pharmacist"])
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
 
     db_user = db.query(models.User).filter(models.User.id == user_id).first()
     if db_user is None:
@@ -241,7 +241,7 @@ def get_user(user_id: int, db: Session = Depends(get_db), current_user: UserToRe
 @app.delete("/users/{user_id}")
 def delete_user(user_id: int, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
 
-    validate_user_type(current_user, ["pharmacy manager"])
+    validate_user_type(current_user, ["Pharmacy Manager"])
 
     db_user = db.query(models.User).filter(models.User.id == user_id).first()
     if db_user is None:
@@ -265,7 +265,7 @@ def delete_user(user_id: int, db: Session = Depends(get_db), current_user: UserT
 @app.put("/users/{user_id}", response_model=UserResponse)
 def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
 
-    validate_user_type(current_user, ["pharmacy manager"])
+    validate_user_type(current_user, ["Pharmacy Manager"])
 
     db_user = db.query(models.User).filter(models.User.id == user_id).first()
     if db_user is None:
@@ -293,7 +293,7 @@ def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db), c
 @app.get("/userslist/", response_model=List[UserResponse])
 def list_users(db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
 
-    validate_user_type(current_user, ["pharmacy manager", "pharmacist"])
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
     # Query all users from the database
     users = db.query(models.User).all()
     
@@ -370,7 +370,7 @@ def delete_patient(pid: int, db: Session = Depends(get_db)):
 @app.post("/medication/", response_model=schema.MedicationResponse)
 def create_medication(medication: schema.MedicationCreate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
 
-    validate_user_type(current_user, ["pharmacy manager"])
+    validate_user_type(current_user, ["Pharmacy Manager"])
 
     db_medication = models.Medication(**medication.dict())
     db.add(db_medication)
@@ -382,7 +382,7 @@ def create_medication(medication: schema.MedicationCreate, db: Session = Depends
 @app.get("/medication/{medication_id}", response_model=schema.MedicationResponse)
 def get_medication(medication_id: int, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
 
-    validate_user_type(current_user, ["pharmacy manager", "pharmacist"])
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
 
     db_medication = db.query(models.Medication).filter(models.Medication.id == medication_id).first()
     if db_medication is None:
@@ -394,7 +394,7 @@ def get_medication(medication_id: int, db: Session = Depends(get_db), current_us
 @app.put("/medication/{medication_id}", response_model=schema.MedicationResponse)
 def update_medication(medication_id: int, new_medication: schema.MedicationUpdate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
 
-    validate_user_type(current_user, ["pharmacy manager"])
+    validate_user_type(current_user, ["Pharmacy Manager"])
     # Retrieve the existing medication from the database
     db_medication = db.query(models.Medication).filter(models.Medication.id == medication_id).first()
 
@@ -420,7 +420,7 @@ def update_medication(medication_id: int, new_medication: schema.MedicationUpdat
 @app.delete("/medication/{medication_id}")
 def delete_medication(medication_id: int, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
 
-    validate_user_type(current_user, ["pharmacy manager"])
+    validate_user_type(current_user, ["Pharmacy Manager"])
 
     db_medication = db.query(models.Medication).filter(models.Medication.id == medication_id).first()
     if db_medication is None:
@@ -434,7 +434,7 @@ def delete_medication(medication_id: int, db: Session = Depends(get_db), current
 @app.get("/medicationlist/")
 def list_medication(db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
 
-    validate_user_type(current_user, ["pharmacy manager", "pharmacist"])
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
 
     # Query the database for all medications
     medications = db.query(models.Medication).all()
@@ -509,7 +509,7 @@ def update_prescription(prescription_id: int, prescription: schema.PrescriptionU
 @app.delete("/prescription/{prescription_id}")
 def delete_prescription(prescription_id: int, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
 
-    validate_user_type(current_user, ["pharmacy manager"])
+    validate_user_type(current_user, ["Pharmacy Manager"])
     '''
     deletes prescriptions
     not sure if this should be allowed tho... we should talk ab it
@@ -528,7 +528,7 @@ def delete_prescription(prescription_id: int, db: Session = Depends(get_db), cur
 @app.put("/prescription/{prescription_id}/fill", response_model=schema.PrescriptionResponse)
 def fill_prescription(prescription_id: int, fill_request: PrescriptionFillRequest, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
 
-    validate_user_type(current_user, ["pharmacist"])
+    validate_user_type(current_user, ["Pharmacist"])
 
     # the medication has the dosage, so if the IDs match up then it's the same dosage we wanted
     db_prescription = db.query(models.Prescription).filter(models.Prescription.id == prescription_id).first()

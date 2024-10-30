@@ -18,7 +18,7 @@ function PrescriptionsToFill() {
 	const [errorMessage, setErrorMessage] = useState(null);
 	const [openSnackbar, setOpenSnackbar] = useState(false);
 	const navigate = useNavigate();
-	const role = ["pharmacist"]
+	const role = ["Pharmacist"]
 	const token = localStorage.getItem('token');
 	const [updated, setUpdated] = useState(false);
 	
@@ -195,7 +195,7 @@ const deletePrescription = async (id) => {
 	// only pharmacists or pharmacy managers can delete
 	const canDelete = () => {
 		const role = localStorage.getItem('role');
-		return role === 'pharmacist' || role === 'pharmacymanager';
+		return role === 'Pharmacist' || role === 'Pharmacy Manager';
 	};
 
 

@@ -167,9 +167,9 @@ function Login({ updateUserRole }) {
 
           //redirects user to homepage for their role
           //more can be added as needed
-          if (userData.user_type === 'pharmacy_manager') {
+          if (userData.user_type === 'Pharmacy Manager') {
             navigate('../managerhome', {replace: true})
-          } else if (userData.user_type === 'pharmacist') {
+          } else if (userData.user_type === 'Pharmacist') {
             navigate('../pharmacisthome', {replace: true})
           } else {
             navigate('../protected', {replace: true})

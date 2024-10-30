@@ -304,7 +304,7 @@ def list_users(db: Session = Depends(get_db), current_user: UserToReturn = Depen
 #--------PATIENT CRUD OPERATIONS--------
 
 @app.get("/get/patient/{patient_id}", response_model=PatientResponse)
-def get_patient(patient_id: int, db: Session = Depends(get_db)):
+def get_patient(patient_id: int, db: Session = Depends(get_db),current_user: UserToReturn = Depends(get_current_user)):
     patient = db.query(models.Patient).filter(models.Patient.id == patient_id).first()
     if patient is None:
         raise HTTPException(status_code=404, detail="Medication not found")
@@ -312,14 +312,14 @@ def get_patient(patient_id: int, db: Session = Depends(get_db)):
     return patient
 
 @app.get("/patients", response_model=List[PatientResponse])
-def get_patients(db: Session = Depends(get_db)):
+def get_patients(db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
     patients = db.query(models.Patient).all()
     # fix the date_of_birth to be a string
     patients = [PatientResponse.from_orm(patient) for patient in patients]
     return patients
 
 @app.post("/patient")
-def create_patient(patient: PatientCreate, db: Session = Depends(get_db)):
+def create_patient(patient: PatientCreate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
     patient_data = patient.model_dump()
     email = patient_data['email']
     if db.query(models.Patient).filter(models.Patient.email == email).first():
@@ -332,7 +332,7 @@ def create_patient(patient: PatientCreate, db: Session = Depends(get_db)):
         return db_patient
 
 @app.put("/patient/{patient_id}")
-def put_patient(patient_id: int, patient: PatientUpdate, db: Session = Depends(get_db)):
+def put_patient(patient_id: int, patient: PatientUpdate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
     # get the patient
     db_patient = db.query(models.Patient).filter(models.Patient.id == patient_id).first()
     # if patient is not found, raise an error
@@ -350,7 +350,7 @@ def put_patient(patient_id: int, patient: PatientUpdate, db: Session = Depends(g
     return db_patient
 
 @app.delete("/patient/{pid}")
-def delete_patient(pid: int, db: Session = Depends(get_db)):
+def delete_patient(pid: int, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
     # make a call to our future database to delete the patient with the given patient_id
     patient = db.query(models.Patient).filter(models.Patient.id == pid).first()
     print(f"patient: {patient}")
@@ -448,7 +448,7 @@ def list_medication(db: Session = Depends(get_db), current_user: UserToReturn = 
 
 # get all prescriptions (**optional patient_id param lets you filter by one patient)
 @app.get("/prescriptions", response_model=List[schema.PrescriptionResponse])
-def get_prescriptions(patient_id: Optional[int] = Query(None), db: Session = Depends(get_db)):
+def get_prescriptions(patient_id: Optional[int] = Query(None), db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
     '''
     endpoint to get prescriptions with optional patient_id.
     If patient_id is provided, only prescriptions for that patient are returned.
@@ -463,7 +463,7 @@ def get_prescriptions(patient_id: Optional[int] = Query(None), db: Session = Dep
 
 # get prescription
 @app.get("/prescription/{prescription_id}", response_model=schema.PrescriptionResponse)
-def get_prescription(prescription_id: int, db: Session = Depends(get_db)):
+def get_prescription(prescription_id: int, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
     db_prescription = db.query(models.Prescription).filter(models.Prescription.id == prescription_id).first()
     if db_prescription is None:
         raise HTTPException(status_code=404, detail="Prescription not found")
@@ -473,7 +473,7 @@ def get_prescription(prescription_id: int, db: Session = Depends(get_db)):
 
 # create prescription
 @app.post("/prescription", response_model=schema.PrescriptionResponse)
-def create_prescription(prescription: schema.PrescriptionCreate, db: Session = Depends(get_db)):
+def create_prescription(prescription: schema.PrescriptionCreate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
     # Ensure that prescription data is valid
     try:
         db_prescription = models.Prescription(**prescription.model_dump())  # Use .model_dump() for Pydantic V2
@@ -489,7 +489,7 @@ def create_prescription(prescription: schema.PrescriptionCreate, db: Session = D
 
 # update prescription
 @app.put("/prescription/{prescription_id}", response_model=schema.PrescriptionUpdate)
-def update_prescription(prescription_id: int, prescription: schema.PrescriptionUpdate, db: Session = Depends(get_db)):
+def update_prescription(prescription_id: int, prescription: schema.PrescriptionUpdate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
     
     db_prescription = db.query(models.Prescription).filter(models.Prescription.id == prescription_id).first()
     if db_prescription is None:

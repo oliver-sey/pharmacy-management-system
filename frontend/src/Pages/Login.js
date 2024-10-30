@@ -167,11 +167,15 @@ function Login({ updateUserRole }) {
 
           //redirects user to homepage for their role
           //more can be added as needed
-          if (userData.user_type === 'Pharmacy Manager') {
+          if (userData.user_type === 'pharmacy manager') {
             navigate('../managerhome', {replace: true})
-          } else if (userData.user_type === 'Pharmacist') {
+          } else if (userData.user_type === 'pharmacist') {
             navigate('../pharmacisthome', {replace: true})
-          } else {
+          } else if (userData.user_type === 'cashier'){
+			navigate('../cashierhome', {replace: true})
+		  } else if (userData.user_type === 'pharmacy technician'){
+			navigate('../pharmtechhome', {replace: true})
+		  }else {
             navigate('../protected', {replace: true})
           }
       }

@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useRef} from 'react'
 import CheckUserType from '../Functions/CheckUserType';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
@@ -79,7 +79,7 @@ function PharmTechHome() {
   const navigate = useNavigate();
 
   //Change this variable based on what type of user the page is for
-  const role = ["Pharmacy Technician"]
+  const role = ["pharmacy technician"]
 
   useEffect(() => {
       CheckUserType(role, navigate);
@@ -101,7 +101,11 @@ function PharmTechHome() {
           </Item>
         </Grid>
         <Grid size={6}>
-          <Item>xs=6 md=4</Item>
+        <Item>
+              <Link to="/viewofmedications" style={{ textDecoration: 'none', color: '#007bff' }}>
+                View of Medications
+              </Link>
+            </Item>
         </Grid>
         <Grid size={6}>
           <Item>xs=6 md=4</Item>

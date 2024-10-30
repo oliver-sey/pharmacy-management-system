@@ -158,7 +158,7 @@ function ViewOfPrescriptions() {
 	// only pharmacists or pharmacy managers can delete
 	const canDelete = () => {
 		const role = localStorage.getItem('role');
-		return role === 'Pharmacist' || role === 'Pharmacy Manager';
+		return role === 'pharmacist' || role === 'pharmacy_manager';
 	};
 
 	const deletePrescription = async (id) => {

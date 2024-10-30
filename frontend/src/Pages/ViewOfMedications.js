@@ -170,16 +170,16 @@ function ViewOfMedications() {
 	// only pharmacy manager can edit
 	const canEdit = () => {
 		const role = localStorage.getItem('role');
-		// console.log("canEdit:", (role === 'Pharmacy Manager'));
-		return role === 'Pharmacy Manager';
+		// console.log("canEdit:", (role === 'pharmacymanager'));
+		return role === 'pharmacymanager';
 	};
 	  
 	// TODO: is this right?
 	// only pharmacy managers can delete
 	const canDelete = () => {
 		const role = localStorage.getItem('role');
-		// console.log("canDelete:", (role === 'Pharmacy Manager'));
-		return role === 'Pharmacy Manager';
+		// console.log("canDelete:", (role === 'pharmacymanager'));
+		return role === 'pharmacymanager';
 	};
 
 

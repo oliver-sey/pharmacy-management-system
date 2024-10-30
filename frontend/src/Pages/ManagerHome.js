@@ -21,7 +21,7 @@ const Item = styled(Paper)(({ theme }) => ({
 }));
 
 function ManagerHome() {
-  const role = ["Pharmacy Manager"]
+  const role = ["pharmacy_manager"]
   const navigate = useNavigate();
   const [curr_user_id, set_curr_user_id] = useState("");
 

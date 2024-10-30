@@ -100,6 +100,8 @@ const loadRows = async () =>{
         const filled_user = users.find(u => u.id === prescription.user_filled_id);
 
 		const entered_user = users.find(u => u.id === prescription.user_entered_id);
+
+		const createdAt = new Date(prescription.filled_timestamp);
 	  
 		return {
 		  ...prescription,
@@ -110,67 +112,30 @@ const loadRows = async () =>{
 
           user_filled_name: filled_user ? filled_user.first_name + ' ' + filled_user.last_name : null,
 
-		  user_entered_name: entered_user ? entered_user.first_name + ' ' + entered_user.last_name : null
-		
+		  user_entered_name: entered_user ? entered_user.first_name + ' ' + entered_user.last_name : null,
+
+			date_filled: createdAt.toLocaleDateString('en-US'),
+
+			time_filled: createdAt.toLocaleTimeString('en-US'),
+
+			filled_timestamp: createdAt
 		  
 		};
-	  })
+	  }).sort((a, b) => a.filled_timestamp - b.filled_timestamp);
 
 	  updatedPrescriptions.forEach(prescription => {
 		delete prescription.patient_id
 		delete prescription.medication_id
 		delete prescription.user_entered_id
 		delete prescription.user_filled_id
-	  });
+		delete prescription.filled_timestamp
+	  })
 
-	const filteredPrescriptions = updatedPrescriptions.filter(prescription => prescription.user_filled_id !== null);
+	const filteredPrescriptions = updatedPrescriptions.filter(prescription => prescription.user_filled_name !== null);
 
 	console.log(updatedPrescriptions)
 	setRows(filteredPrescriptions)
 }
-
-	
-const deletePrescription = async (id) => {
-	try {
-		console.log("row", id);
-		const response = await fetch(`http://localhost:8000/prescription/${id}`, {
-			method: 'DELETE',
-		});
-		if (!response.ok) {
-			throw new Error('Failed to delete prescription');
-		}
-		loadRows()
-	} catch (error) {
-		console.error('Error deleting prescription:', error);
-		setErrorMessage('Failed to delete prescription' + error);
-		setOpenSnackbar(true);
-	}
-}
-
-	const FillPrescription = async (row) => {
-		try {
-			
-			const response = await fetch(`http://localhost:8000/prescription/${row.id}/fill`, {
-				method: 'PUT',
-				headers: {'Authorization': 'Bearer ' + token}
-			});
-			if (!response.ok) {
-				throw new Error('Failed to fill prescription');
-			}
-			loadRows()
-		} catch (error) {
-			console.error('Error filling prescription:', error);
-			setErrorMessage('Failed to fill prescription' + error);
-			setOpenSnackbar(true);
-		}
-	}
-
-	const HandleDelete = async (row) => {
-		//TO DO: confirmation message
-		deletePrescription(row.id)
-
-	}
-   
 
 	// useEffect to fetch data when the component mounts
 	useEffect(() => {
@@ -185,62 +150,16 @@ const deletePrescription = async (id) => {
 	  }, []);
 
 	  const columns = [
-		{ field: 'id', headerName: 'ID' },
+		{ field: 'date_filled', headerName: 'Date Filled' },
+		{ field: 'time_filled', headerName: 'Time Filled' },
+		{ field: 'user_filled_name', headerName: 'Filled By' },
 		{ field: 'medication_name', headerName: 'Medication' },
 		{ field: 'quantity', headerName: 'Quantity'},
 		{ field: 'patient_name', headerName: 'Patient' },
 		{ field: 'date_prescribed', headerName: 'Date Prescribed' },
         { field: 'user_entered_name', headerName: 'Entered By' },
-		{ field: 'doctor_name', headerName: 'Prescribing Doctor' },
-		{ field: 'user_filled_name', headerName: 'Filled By' },
-		{ field: 'filled_timestamp', headerName: 'Date Filled' }
+		{ field: 'doctor_name', headerName: 'Prescribing Doctor' }
 	  ];
-
-
-	  
-	// only pharmacists or pharmacy managers can delete
-	const canDelete = () => {
-		const role = localStorage.getItem('role');
-		return role === 'pharmacist' || role === 'pharmacymanager';
-	};
-
-
-	
-	/**
-
-	 * @param {the data being sent to the server used to create a new prescription} data 
-	 * @returns boolean indicating success or failure
-	 */
-	const addPrescription = async (data) => {
-		try {
-			console.log("row in addPrescription", data)
-			const response = await fetch(`http://localhost:8000/prescription`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(data),
-			});
-			if (!response.ok) {
-				const responseData = await response.json(); // Wait for the JSON to be parsed
-				var errorMessage;
-				// if responseData.detail is a string, return the strig, else return the first element of the array
-				if (typeof(responseData.detail) == 'string') {// check if response.detail is a string or an array
-					errorMessage = responseData.detail;
-				} else {
-					errorMessage = responseData.detail[0].msg;
-				}
-				throw new Error(errorMessage);
-			}
-			fetchPrescriptions();
-			return true;
-			
-		} catch (error) {
-			setErrorMessage('Failed to add prescription: ' + error);
-			setOpenSnackbar(true);
-			return false;
-		}
-	}
 
 	// Handle closing of the Snackbar
 	const handleCloseSnackbar = () => {
@@ -252,28 +171,10 @@ const deletePrescription = async (id) => {
 		</div>
 	);
 
-	// the message format that should get used in the delete confirmation modal (popup) for this table
-	// need this since we want a different format on other tables that use this same base component
-	const prescriptionConfirmMessage = (row) =>
-		`${row?.first_name || "Unknown First Name"} ${
-			row?.last_name || "Unknown Last Name"
-		}, with DOB ${row?.date_of_birth || "Unknown DOB"}`;
-
-	const openAddPrescriptionModal = useRef(null);
 
 	return (
 		<div>
-		  <h2>Unfilled Prescriptions</h2>
-			<Button
-			  variant="contained"
-			  onClick={() => {
-				if (openAddPrescriptionModal.current) {
-				  openAddPrescriptionModal.current(); // Trigger modal to open for adding a prescription
-				}
-			  }}
-			>
-			  Add Prescription
-			</Button>
+		  <h2>Filled Prescription Log</h2>
 
 			<BaseTable
 				columns={columns}

@@ -507,10 +507,17 @@ def create_prescription(
 # update prescription
 @app.put("/prescription/{prescription_id}", response_model=schema.PrescriptionUpdate)
 def update_prescription(prescription_id: int, prescription: schema.PrescriptionUpdate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
-    
+    # ** don't allow a prescription to be update if it has already been filled
+    # since we rely on the prescription to store important details, and if it is already filled,
+    # it doesn't make sense to change the patient_id, date_prescribed, medication_id, doctor_name, or quantity
+
     db_prescription = db.query(models.Prescription).filter(models.Prescription.id == prescription_id).first()
     if db_prescription is None:
         raise HTTPException(status_code=404, detail="Prescription not found")
+    # don't allow a prescription to be updated if it has already been filled
+    # check both the filled_timestamp and the user_filled_id just in case something weird happens and only one gets updated
+    elif db_prescription.filled_timestamp is not None or db_prescription.user_filled_id is not None:
+        raise HTTPException(status_code=409, detail="Prescriptions cannot be updated after they have already been filled")
     
     # Update only provided fields
     for key, value in prescription.model_dump().items():

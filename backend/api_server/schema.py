@@ -184,6 +184,9 @@ class PrescriptionCreate(BaseModel):
     class Config:
         orm_mode = True
 
+# **NOTE: prescriptions are only able to be edited until they are filled
+# since we rely on the prescription to store important information and it doesn't
+# make sense to edit info after the patients already has the medication
 class PrescriptionUpdate(BaseModel):
     patient_id: Optional[int] = None
     user_entered_id: Optional[int] = None

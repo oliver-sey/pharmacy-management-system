@@ -189,7 +189,10 @@ class PrescriptionCreate(BaseModel):
 # make sense to edit info after the patients already has the medication
 class PrescriptionUpdate(BaseModel):
     patient_id: Optional[int] = None
-    user_entered_id: Optional[int] = None
+    # Not allowing user to change who entered the prescription, this comes from the token anyways
+    # to see who modified a prescription, look at user_activities
+    # user_entered_id: Optional[int] = None
+
     # I think you should have to call the fill prescription route to edit these
     # so we can have control over checking if we're able to fill the prescription
     # user_filled_id: Optional[int] = None

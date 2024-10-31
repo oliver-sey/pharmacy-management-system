@@ -474,10 +474,26 @@ def get_prescription(prescription_id: int, db: Session = Depends(get_db), curren
 
 # create prescription
 @app.post("/prescription", response_model=schema.PrescriptionResponse)
-def create_prescription(prescription: schema.PrescriptionCreate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+def create_prescription(
+    prescription: schema.PrescriptionCreate,
+    db: Session = Depends(get_db),
+    current_user: UserToReturn = Depends(get_current_user),
+):
     # Ensure that prescription data is valid
     try:
-        db_prescription = models.Prescription(**prescription.model_dump())  # Use .model_dump() for Pydantic V2
+        # db_prescription = models.Prescription(**prescription.model_dump())  # Use .model_dump() for Pydantic V2
+
+        # not all the fields needed for the DB come from PrescriptionCreate (user_entered_id)
+        # so we need to add it here
+        db_prescription = models.Prescription(
+            patient_id=prescription.patient_id,
+            # get the user who entered the prescription from the current user
+            user_entered_id=current_user.id,
+            medication_id=prescription.id,
+            doctor_name=prescription.doctor_name,
+            quantity=prescription.quantity,  # The number of units of medication that this prescription allows the patient to get
+        )
+
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 

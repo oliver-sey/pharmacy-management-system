@@ -170,7 +170,8 @@ class PrescriptionResponse(BaseModel):
 
 class PrescriptionCreate(BaseModel):
     patient_id: int
-    user_entered_id: int
+    # user_id comes from the token
+    # user_entered_id: int
     # TODO: i don't think you should be allowed to create an already filled prescription right away
     # it makes more sense to make them call the fill prescription route after creating the prescription
     # user_filled_id: Optional[int] = None

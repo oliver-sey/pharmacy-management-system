@@ -134,14 +134,3 @@ class Transaction(Base):
     patient = relationship("Patient", back_populates="transactions")
     user = relationship("User", back_populates="transactions")
     # inventory_update = relationship("InventoryUpdate", back_populates="transaction")  # This should link to the correct attribute
-
-class Log(Base):
-    __tablename__ = 'logs'
-
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey('users.id'))
-    event = Column(String)
-    timestamp = Column(DateTime, default=func.now())
-    message = Column(String)
-
-    user = relationship("User", back_populates="logs")

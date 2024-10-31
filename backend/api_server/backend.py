@@ -26,6 +26,7 @@ app = FastAPI()
 def read_root():
     return "this is an epic gamer moment!"
 
+
 # configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("pharmacy_logger")
@@ -35,61 +36,87 @@ logger = logging.getLogger("pharmacy_logger")
 async def log_requests(request: Request, call_next):
     '''
     middleware for logging. 
-
-    TODO: add the user stuff. idk how to get that yet.
     '''
-    db: Session = SessionLocal()
 
-    try:
-        # Log incoming request details
-        logger.info(f"Received request: {request.method} {request.url}")
-
+    # these types of requests dont need to be logged. 
+    # only requests that change something should be logged in
+    # as well as login and logout
+    
+    
+   
+    logger.info(f"Request Path: {request.url.path}")
+    logger.info(f'isloggingin: {request.url.path in ("/token", "/currentuser/me/", "/currentuser/me")}')
+    if request.url.path in ("/token", "/currentuser/me/", "/currentuser/me"):
+        # check if a user is loggin in 
+        logger.info(f"logging in: {request.url.path}")
         response = await call_next(request)
-
-        # Log successful response
-        logger.info(f"Completed request with status code: {response.status_code}")
-
-        # Log this information to the database
-        log_entry = models.UserActivity(
-            activity=f"{request.method} {request.url} completed with status {response.status_code}",
-            user_id=1
-        )
-        db.add(log_entry)
-        await db.commit()
-
         return response
-    except SQLAlchemyError as e:
-        # if there is an error with the database / ORM
-        logger.error(f"Database error occurred: {str(e)}")
-
-        # Insert log entry to database for DB errors
-        user_activity = models.UserActivity(
-            activity=f"DATABASE ERROR: {str(e)}",
-            user_id=1
-        )
-        db.add(user_activity)
-        await db.commit()
-
-        raise e  # Re-raise after logging
-    except Exception as e:
+    elif "/verify-token/" in request.url.path:
+        # check if a user is verifying their token
+        logger.info(f"verifying token: {request.url.path}")
+        response = await call_next(request)
+        return response
+    else:
+        db: Session = SessionLocal()
+        logger.info(f"request.headers: {request.headers.keys()}") 
+        current_user = get_current_user(request.headers.get("Authorization"), db)
+        logger.info(f"User: {current_user.email} is making a request to {request.url.path} as a {current_user.user_type}")
         
-        logger.error(f"An error occurred: {str(e)}")
+        if request.method == "GET" :
+            # check if the request is a get. i.e. not changing anything
+            logger.info(f"GET request: {request.url.path}")
+            response = await call_next(request)
+            return response
 
-        # Insert log entry to database for other errors
-        user_activity = models.UserActivity(
-            activity=f"ERROR: {str(e)}",
-            user_id=1
-        )
-        db.add(user_activity)
-        await db.commit()
+        try:
+            # Log incoming request details
+            logger.info(f"Received request: {request.method} {request.url}")
 
-        raise e  # Re-raise after logging
+            response = await call_next(request)
+
+            # Log successful response
+            logger.info(f"Completed request with status code: {response.status_code}")
+            
+            # Log this information to the database
+            log_entry = models.UserActivity(
+                activity=f"{request.method} {request.url} completed with status {response.status_code}",
+                user_id=current_user.id
+            )
+            db.add(log_entry)
+            db.commit()
+
+            return response
+        except SQLAlchemyError as e: # if there is an error with the database / ORM
+            logger.error(f"Database error occurred: {str(e)}")
+
+            # Insert log entry to database for DB errors
+            user_activity = models.UserActivity(
+                activity=f"DATABASE ERROR: {str(e)}",
+                user_id=current_user.id
+            )
+            db.add(user_activity)
+            db.commit()
+            # Re-raise error after logging
+            raise e  
+        except Exception as e: # if there is any other error
+            logger.error(f"An error occurred: {str(e)}")
+
+            # Insert log entry to database for other errors
+            user_activity = models.UserActivity(
+                activity=f"ERROR: {str(e)}",
+                user_id=current_user.id
+            )
+            db.add(user_activity)
+            db.commit()
+
+            # Re-raise error after logging
+            raise e
 
 
 # Create the database tables
 Base.metadata.create_all(bind=engine)
 # setup middleware
-app.middleware("http")(log_requests)
+# app.middleware("http")(log_requests)
 
 
 # this is to allow our react app to make requests to our fastapi app

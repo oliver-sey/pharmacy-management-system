@@ -1,16 +1,17 @@
+# region Imports and setup
 from datetime import datetime, timedelta, timezone
 from jose import JWTError
 from typing import Annotated # for defining the types that our functions take in and return, could be useful... or not idk
 import uvicorn
 import jwt
 from jwt.exceptions import InvalidTokenError
-from fastapi import Depends, FastAPI, HTTPException, Query, status, Body
+from fastapi import Depends, FastAPI, HTTPException, Query, status, Body, Request
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 from passlib.context import CryptContext
 from typing import Optional
 from .database import SessionLocal, engine, Base
-from .schema import Token, TokenData, UserCreate, UserResponse, UserLogin, UserToReturn, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, PrescriptionFillRequest
+from .schema import Token, TokenData, UserActivityCreate, UserCreate, UserResponse, UserLogin, UserToReturn, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, InventoryUpdateCreate,  InventoryUpdateResponse
 from . import models  # Ensure this is the SQLAlchemy model
 from sqlalchemy.orm import Session
 from typing import List
@@ -525,8 +526,9 @@ def delete_prescription(prescription_id: int, db: Session = Depends(get_db), cur
 
 
 # fill a prescription
+# Not sure the totally best way to order some of these steps here, but I think it's good enough
 @app.put("/prescription/{prescription_id}/fill", response_model=schema.PrescriptionResponse)
-def fill_prescription(prescription_id: int, fill_request: PrescriptionFillRequest, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+def fill_prescription(prescription_id: int, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
 
     validate_user_type(current_user, ["pharmacist"])
 
@@ -544,29 +546,120 @@ def fill_prescription(prescription_id: int, fill_request: PrescriptionFillReques
         # Check prescription amount with medication inventory
         # there will only be one medication with the matching id (since the id is unique), so using first() is fine
         db_medication = db.query(models.Medication).filter(models.Medication.id == db_prescription.medication_id).first()
-        # if none or not enough inventory, return 400, otherwise, decrease inventory quantity
+        # if none or not enough inventory, return 400, otherwise, decrease inventory quantity (later on)
+        # I only change the inventory amount later on just in case there is an error with creating the inventory update
         if db_medication is None or db_medication.quantity < db_prescription.quantity:
             raise HTTPException(status_code=400, detail="There is no or insufficient inventory of this medication to fill the prescription")
-        else:
-            db_medication.quantity -= db_prescription.quantity
-
+        
         # if we successfully deduct medication from inventory, create an inventory update instance in InventoryUpdate table
-        # TODO: ******is this sufficient to update the inventory?????
-        # inventory_update = models.InventoryUpdate(
-        #     medication_id=db_medication.id,
-        #     user_activity_id=db_prescription.user_filled_id,    # user who filled the prescription
-        #     quantity_changed=db_prescription.quantity                  # The quantity deducted
-        # )
+        inventory_update_request = models.InventoryUpdate(
+            medication_id=db_medication.id,
+            quantity_changed_by=db_prescription.quantity,       # The quantity deducted
+            # no transaction_id since this is not associated with a transaction
+            # TODO: is this right? or should we do "Fill prescription"
+            type=models.InventoryUpdateType.FILL_PRESCRIPTION   # set the type to fill prescription
+        )
 
-        # Add the inventory update to the session
-        # db.add(inventory_update)
+        # send the inventory_update_request to actually be stored in the database
+        # this will add an entry to user_activities (for filling the prescription) for us
+        create_inventory_update(inventory_update=inventory_update_request, db=db)
 
-        # after update medication in inventory and create an inventory update, finally fill the prescription
+
+        # after making sure we have enough inventory and creating an inventory update (which create a user_activities entry for us)
+        # finally fill the prescription
+        # change the quantity of the medication in the inventory
+        db_medication.quantity -= db_prescription.quantity
+        
         # set the timestamp of filling to the current time
         db_prescription.filled_timestamp = datetime.now()
-        # get the user who filled the prescription from PrescriptionFillRequest
+        # get the user who filled the prescription from the current user
         db_prescription.user_filled_id = current_user.id
 
     db.commit()
     db.refresh(db_prescription)
     return db_prescription
+
+
+
+# endregion
+# region Inventory Updates
+#--------INVENTORY UPDATES--------
+
+# create inventory_update
+# just as a function that will get called by other endpoints
+# @app.post("/inventory-updates", response_model=InventoryUpdateResponse)
+def create_inventory_update(inventory_update: InventoryUpdateCreate, request: Request, db: Session = Depends(get_db)):
+    # Ensure that inventory_update data is valid
+    try:
+        db_inventory_update = models.InventoryUpdate(**inventory_update.model_dump())  # Use .model_dump() for Pydantic V2
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    # create a user_activities entry for this
+    # any type of updating the inventory (add, discard, filling, selling), the user_activity entry for it will be "Inventory Update"
+    user_activity_create = UserActivityCreate(activity=models.UserActivityType.INVENTORY_UPDATE)
+    create_user_activity(user_activity_create, db)
+
+
+    # add the inventory_update to the database
+    db.add(db_inventory_update)
+    db.commit()
+    db.refresh(db_inventory_update)
+    return db_inventory_update
+
+
+# get one inventory_update
+@app.get("/inventory-updates/{id}", response_model=InventoryUpdateResponse)
+def get_inventory_update(id: int, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+    # make sure only pharmacy managers or pharmacists can call this endpoint
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
+
+    # there will only be one inventory_update with the matching id (since the id is unique), so using first() is fine
+    db_inventory_update = db.query(models.InventoryUpdate).filter(models.InventoryUpdate.id == id).first()
+
+    if db_inventory_update is None:
+        raise HTTPException(status_code=404, detail="Inventory update not found")
+    
+    return db_inventory_update
+
+
+# get all inventory_updates - **optional param to filter to one value of 'type'
+@app.get("/inventory-updates", response_model=List[InventoryUpdateResponse])
+# restrict type to the values in InventoryUpdateType
+def get_inventory_updates(type: Optional[models.InventoryUpdateType] = Query(None), db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+    '''
+    endpoint to get inventory_updates with optional type (e.g. add, discard, fillpresc, sellnonpresc).
+    If type is provided, only inventory_updates for that type are returned.
+    call this endpoint like so: /inventory_updates?type=1 or /inventory_updates to get all inventory_updates
+    '''
+    # make sure only pharmacy managers or pharmacists can call this endpoint
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
+
+    # if type is provided, return all inventory_updates of that type
+    if type:
+        inventory_updates = db.query(models.InventoryUpdate).filter(models.InventoryUpdate.type == type).all()
+    # else return all inventory_updates
+    else:
+        inventory_updates = db.query(models.InventoryUpdate).all()
+    return inventory_updates
+
+
+
+# endregion
+# region User Activities CRUD
+def create_user_activity(user_activity: UserActivityCreate, db: Session, current_user: UserToReturn = Depends(get_current_user)):
+    # get user_id from current_user
+    # TODO: should I be explicitly passing current_user here?
+    user_details = read_users_me(current_user=current_user)
+
+    # Create a new UserActivity instance
+    db_user_activity = models.UserActivity(
+        user_id=user_details.id,
+        activity=user_activity.activity,
+        timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
+    )
+
+    db.add(db_user_activity)
+    db.commit()
+    db.refresh(db_user_activity)
+    return db_user_activity

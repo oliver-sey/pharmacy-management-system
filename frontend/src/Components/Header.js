@@ -21,7 +21,7 @@ const Header = () => {
                 {location.pathname !== '/' && <li><Link to="/">Home</Link></li>}
 
                 {/* user-specific links while logged in */}
-                {token && userRole === 'pharmacy manager' && (
+                {token && userRole === 'Pharmacy Manager' && (
                     <>
                         <li><Link to="/managerhome">Manager Dashboard</Link></li>
                         <li><Link to="/viewofusers">View Users</Link></li>
@@ -30,7 +30,7 @@ const Header = () => {
                     </>
                 )}
 
-                {token && userRole === 'pharmacist' && (
+                {token && userRole === 'Pharmacist' && (
                     <>
                         <li><Link to="/pharmacisthome">Pharmacist Dashboard</Link></li>
                         <li><Link to="/viewofpatients">View Patients</Link></li>
@@ -39,14 +39,14 @@ const Header = () => {
                     </>
                 )}
 
-                {token && userRole === 'pharmacy technician' && (
+                {token && userRole === 'Pharmacy Technician' && (
                     <>
                         <li><Link to="/pharmtechhome">Pharmacy Technician Dashboard</Link></li>
                         <li><Link to="/viewofmedications">View Medications</Link></li>
                     </>
                 )}
 
-                {token && userRole === 'cashier' && (
+                {token && userRole === 'Cashier' && (
                     <>
                         <li><Link to="/cashierhome">Cashier Dashboard</Link></li>
                         <li><Link to="/viewofpatients">View Patients</Link></li>

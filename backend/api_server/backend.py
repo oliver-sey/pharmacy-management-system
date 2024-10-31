@@ -587,8 +587,7 @@ def fill_prescription(prescription_id: int, db: Session = Depends(get_db), curre
 
 # create inventory_update
 # just as a function that will get called by other endpoints
-# TODO: ****************remove the endpoint after testing!!!
-@app.post("/inventory-updates", response_model=InventoryUpdateResponse)
+# @app.post("/inventory-updates", response_model=InventoryUpdateResponse)
 def create_inventory_update(inventory_update: InventoryUpdateCreate, request: Request, db: Session = Depends(get_db)):
     # Ensure that inventory_update data is valid
     try:

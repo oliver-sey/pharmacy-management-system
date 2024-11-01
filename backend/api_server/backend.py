@@ -671,13 +671,11 @@ def get_inventory_updates(type: Optional[models.InventoryUpdateType] = Query(Non
 # endregion
 # region User Activities CRUD
 def create_user_activity(user_activity: UserActivityCreate, db: Session, current_user: UserToReturn = Depends(get_current_user)):
-    # get user_id from current_user
-    # TODO: should I be explicitly passing current_user here?
-    user_details = read_users_me(current_user=current_user)
 
     # Create a new UserActivity instance
     db_user_activity = models.UserActivity(
-        user_id=user_details.id,
+        # get user_id from current_user
+        user_id=current_user.id,
         activity=user_activity.activity,
         timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
     )

@@ -79,13 +79,13 @@ function ViewOfUsers() {
 			width: 220,
 			valueGetter: (value, row) => {
 				switch (value) {
-					case "cashier":
+					case "Cashier":
 						return "Cashier";
-					case "pharmacymanager":
+					case "Pharmacy Manager":
 						return "Pharmacy Manager";
-					case "pharmacist":
+					case "Pharmacist":
 						return "Pharmacist";
-					case "pharmacytech":
+					case "Pharmacy Technician":
 						return "Pharmacy Technician";
 
 					default:
@@ -136,7 +136,7 @@ function ViewOfUsers() {
 	// only pharmacists or pharmacy managers can delete
 	const canDelete = () => {
 		//const role = localStorage.getItem('role');
-		//return role === 'pharmacist' || role === 'pharmacymanager';
+		//return role === 'Pharmacist' || role === 'Pharmacy Manager';
 		return true;
 	};
 

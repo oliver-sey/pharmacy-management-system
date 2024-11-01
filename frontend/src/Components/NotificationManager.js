@@ -1,9 +1,12 @@
 import { useEffect, useContext } from "react";
 import { NotificationContext } from "./NotificationProvider";
 import { v4 as uuidv4 } from "uuid";
+import { useLocation } from "react-router-dom";
 
 const NotificationManager = () => {
   const { dispatch } = useContext(NotificationContext);
+  const isLoggedIn = !!localStorage.getItem("token");
+  const location = useLocation();
 
   useEffect(() => {
     const checkLowStock = async () => {
@@ -12,9 +15,12 @@ const NotificationManager = () => {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
         });
         if (!response.ok) throw new Error("Failed to fetch medication list");
-
+        
         const medications = await response.json();
-        const lowStockItems = medications.filter((med) => med.quantity < 10);
+        const lowStockThreshold = 10;
+        const lowStockItems = medications.filter(
+          (med) => med.quantity < lowStockThreshold
+        );
 
         lowStockItems.forEach((item) => {
           dispatch({
@@ -31,8 +37,10 @@ const NotificationManager = () => {
       }
     };
 
-    checkLowStock();
-  }, [dispatch]);
+    if (isLoggedIn && location.pathname !== "/notifications") {
+      checkLowStock();
+    }
+  }, [dispatch, isLoggedIn, location.pathname]);
 
   return null;
 };

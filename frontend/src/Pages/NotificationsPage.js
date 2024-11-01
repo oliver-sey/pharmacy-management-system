@@ -12,19 +12,19 @@ const NotificationsPage = () => {
 
   return (
     <div className="notifications-container">
-      <h2>Notifications</h2>
-      {state.length === 0 ? (
-        <p>No notifications available.</p>
-      ) : (
-        <ul>
-          {state.map((notification) => (
-            <li key={notification.id}>
-              <span>{notification.type}: </span>{notification.message}
-            </li>
-          ))}
-        </ul>
-      )}
+    <h2>Notifications</h2>
+    <div className="notifications-list">
+        {state.length === 0 ? (
+            <p>No notifications available.</p>
+        ) : (
+            state.map((note) => (
+                <div key={note.id} className="notification-item">
+                    <p>{note.message}</p>
+                </div>
+            ))
+        )}
     </div>
+</div>
   );
 };
 

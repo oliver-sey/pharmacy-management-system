@@ -595,7 +595,7 @@ def fill_prescription(prescription_id: int, db: Session = Depends(get_db), curre
         
         # set the timestamp of filling to the current time
         db_prescription.filled_timestamp = datetime.now()
-        # get the user who filled the prescription from the current user
+        # get the user_id of the user who filled the prescription from the current user
         db_prescription.user_filled_id = current_user.id
 
     db.commit()

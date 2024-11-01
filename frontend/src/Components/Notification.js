@@ -1,10 +1,17 @@
-import React from "react";
-import "../Styles/Notification.css";
+import React, { useContext } from "react";
+import { NotificationContext } from "./NotificationProvider";
 
-const Notification = ({ message, type, id, removeNotification }) => {
+const Notification = ({ id, message, type }) => {
+    const { dispatch } = useContext(NotificationContext);
+
+    const handleRemove = () => {
+        dispatch({ type: "REMOVE_NOTIFICATION", id });
+    };
+
     return (
-        <div className={`notification-item ${type.toLowerCase()}`} onClick={() => removeNotification(id)}>
+        <div className={`notification-item ${type.toLowerCase()}`}>
             <p className="notification-message">{message}</p>
+            <button onClick={handleRemove}>Dismiss</button>
         </div>
     );
 };

@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import { useLocation } from "react-router-dom";
 
 const NotificationManager = () => {
-  const { dispatch } = useContext(NotificationContext);
+  const { state: notifications, dispatch } = useContext(NotificationContext);
   const isLoggedIn = !!localStorage.getItem("token");
   const location = useLocation();
 
@@ -15,7 +15,7 @@ const NotificationManager = () => {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
         });
         if (!response.ok) throw new Error("Failed to fetch medication list");
-        
+
         const medications = await response.json();
         const lowStockThreshold = 10;
         const lowStockItems = medications.filter(
@@ -23,14 +23,22 @@ const NotificationManager = () => {
         );
 
         lowStockItems.forEach((item) => {
-          dispatch({
-            type: "ADD_NOTIFICATION",
-            payload: {
-              id: uuidv4(),
-              type: "Warning",
-              message: `Low stock alert for ${item.name}! Only ${item.quantity} left.`,
-            },
-          });
+          // Check if a notification for this item already exists
+          const notificationExists = notifications.some(
+            (notification) => notification.message.includes(item.name) && !notification.read
+          );
+
+          if (!notificationExists) {
+            dispatch({
+              type: "ADD_NOTIFICATION",
+              payload: {
+                id: uuidv4(),
+                type: "Warning",
+                message: `Low stock alert for ${item.name}! Only ${item.quantity} left.`,
+                timestamp: Date.now()
+              },
+            });
+          }
         });
       } catch (error) {
         console.error("Error fetching medication list:", error);
@@ -40,7 +48,7 @@ const NotificationManager = () => {
     if (isLoggedIn && location.pathname !== "/notifications") {
       checkLowStock();
     }
-  }, [dispatch, isLoggedIn, location.pathname]);
+  }, [dispatch, isLoggedIn, location.pathname, notifications]);
 
   return null;
 };

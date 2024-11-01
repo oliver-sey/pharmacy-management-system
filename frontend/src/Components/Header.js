@@ -9,14 +9,18 @@ const Header = () => {
     const location = useLocation(); 
     const token = localStorage.getItem('token'); 
     const userRole = localStorage.getItem('role'); 
-    const { state: notifications } = useContext(NotificationContext); // Get notifications from context
+    const { state: notifications, dispatch } = useContext(NotificationContext); // Get notifications from context
     const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
 
     useEffect(() => {
-        // Check if there are any unread notifications
-        const unread = notifications && notifications.some(notification => !notification.read);
+        const unread = notifications.some(notification => !notification.read);
         setHasUnreadNotifications(unread);
-    }, [notifications]);
+
+       
+        if (location.pathname === "/notifications" && unread) {
+            dispatch({ type: "MARK_ALL_AS_READ" });
+        }
+    }, [notifications, location.pathname, dispatch]);
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -30,39 +34,27 @@ const Header = () => {
                 {location.pathname !== '/' && <li><Link to="/">Home</Link></li>}
 
                 {/* user-specific links while logged in */}
-<<<<<<< HEAD
-                {token && userRole === 'pharmacymanager' && (
-=======
                 {token && userRole === 'Pharmacy Manager' && (
->>>>>>> 87787135591a27f1fc252d7b9d8980a8b988d2c7
                     <>
-                        <li><Link to="/viewofusers">View Users</Link></li>
                         <li><Link to="/managerhome">Manager Dashboard</Link></li>
+                        <li><Link to="/viewofusers">View Users</Link></li>
                         <li><Link to="/viewofmedications">View Medications</Link></li>
-                    </>
-                )}
-
-                {token && userRole === 'Pharmacist' && (
-                    <>
                         <li><Link to="/viewofpatients">View Patients</Link></li>
-                        <li><Link to="/pharmacisthome">Pharmacist Dashboard</Link></li>
-                        <li><Link to="/viewofmedications">View Medications</Link></li>
                     </>
                 )}
 
-<<<<<<< HEAD
-                {token && userRole === 'pharmacytech' && (
-=======
                 {token && userRole === 'Pharmacy Technician' && (
->>>>>>> 87787135591a27f1fc252d7b9d8980a8b988d2c7
                     <>
-                        <li><Link to="/fill">Fill Prescription</Link></li>
+                         <li><Link to="/pharmtechhome">Pharmacy Technician Dashboard</Link></li>
+                         <li><Link to="/viewofmedications">View Medications</Link></li>
                     </>
                 )}
+
 
                 {token && userRole === 'Cashier' && (
                     <>
                         <li><Link to="/cashierhome">Cashier Dashboard</Link></li>
+                        <li><Link to="/viewofpatients">View Patients</Link></li>
                     </>
                 )}
 

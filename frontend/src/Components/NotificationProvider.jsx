@@ -5,16 +5,22 @@ export const NotificationContext = createContext();
 
 const notificationReducer = (state, action) => {
    switch (action.type) {
-      case "ADD_NOTIFICATION":
-         return [...state, { ...action.payload, read: false }];
-      case "MARK_AS_READ":
-         return state.map((notification) =>
-            notification.id === action.id ? { ...notification, read: true } : notification
-         );
-      case "MARK_ALL_AS_READ":
-         return state.map((notification) => ({ ...notification, read: true }));
-      default:
-         return state;
+       case "ADD_NOTIFICATION":
+           return [...state, { ...action.payload, read: false }];
+       case "MARK_AS_READ":
+           return state.map((notification) =>
+               notification.id === action.id ? { ...notification, read: true } : notification
+           );
+       case "MARK_ALL_AS_READ":
+           return state.map((notification) => ({ ...notification, read: true }));
+       case "DELETE_READ_NOTIFICATIONS":
+           return state.filter(notification => !notification.read);
+       case "CLEAR_NOTIFICATIONS":
+           return []; // Clears all notifications
+       case "REMOVE_NOTIFICATION":
+           return state.filter(notification => notification.id !== action.id); // Clears individual notification
+       default:
+           return state;
    }
 };
 

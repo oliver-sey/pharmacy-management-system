@@ -73,17 +73,16 @@ function FillPrescriptionForm() {
 }
 
 const styles = {
-  // This container ensures the form is centered horizontally
   container: {
     display: 'flex',
     justifyContent: 'center',
-    alignItems: 'flex-start',  // Comment this line if you only want horizontal centering
+    alignItems: 'flex-start',  
     paddingTop: '50px',
-    height: '100vh',       // Full height to center vertically as well
+    height: '100vh',      
     backgroundColor: '#f5f5f5' 
   },
   formWrapper: {
-    width: '400px',        // Set a fixed width for the form to control layout
+    width: '400px',       
     padding: '20px',
     backgroundColor: '#fff',
     borderRadius: '10px',
@@ -95,15 +94,15 @@ const styles = {
     marginBottom: '20px'
   },
   label: {
-    width: '150px',        // Fixed width for labels to ensure alignment
+    width: '150px',        
     marginRight: '10px',
-    textAlign: 'right'     // Aligns label text to the right
+    textAlign: 'right'     
   },
   input: {
     padding: '10px',
     borderRadius: '5px',
     border: '1px solid #ccc',
-    width: '100%',         // Ensures inputs take full width inside the form
+    width: '100%',         
     boxSizing: 'border-box'
   },
   button: {

@@ -14,11 +14,16 @@ function ViewOfPrescriptions() {
 	const [errorMessage, setErrorMessage] = useState(null);
 	const [openSnackbar, setOpenSnackbar] = useState(false);
 	const navigate = useNavigate();
-    const role = ['pharmacist', 'pharmacy_manager']
+    const role = ['Pharmacist', 'Pharmacy Manager']
+	const token = localStorage.getItem('token');
+
+
 	// Async function to fetch presciptions data
 	const fetchPrescriptions = async () => {
 		try {
-		  const response = await fetch('http://localhost:8000/prescriptions');
+		  const response = await fetch('http://localhost:8000/prescriptions', {
+			headers: { 'Authorization': 'Bearer ' + token }
+		  });
 		  const data = await response.json(); // Convert response to JSON
 
 		  return data
@@ -32,7 +37,9 @@ function ViewOfPrescriptions() {
 
     const fetchPatients = async () => {
         try {
-            const response = await fetch('http://localhost:8000/patients')
+            const response = await fetch('http://localhost:8000/patients', {
+				headers: { 'Authorization': 'Bearer ' + token }
+			});
             const data = await response.json()
 
             console.log("patient data: " + JSON.stringify(data))
@@ -47,7 +54,9 @@ function ViewOfPrescriptions() {
 
     const fetchMedications = async () => {
         try {
-            const response = await fetch('http://localhost:8000/medicationlist')
+            const response = await fetch('http://localhost:8000/medicationlist', {
+				headers: { 'Authorization': 'Bearer ' + token }
+			});
             const data = await response.json()
 
             console.log("medication data: " + JSON.stringify(data))
@@ -63,7 +72,9 @@ function ViewOfPrescriptions() {
 
     const fetchUsers = async () => {
         try {
-            const response = await fetch('http://localhost:8000/userslist')
+            const response = await fetch('http://localhost:8000/userslist', {
+				headers: { 'Authorization': 'Bearer ' + token }
+			});
             const data = await response.json()
 
             console.log("users data: " + JSON.stringify(data))
@@ -155,6 +166,9 @@ function ViewOfPrescriptions() {
 			console.log("row", id);
 			const response = await fetch(`http://localhost:8000/prescription/${id}`, {
 				method: 'DELETE',
+				headers: {
+					'Authorization': 'Bearer ' + token,
+				},
 			});
 			if (!response.ok) {
 				throw new Error('Failed to delete prescription');
@@ -195,6 +209,7 @@ function ViewOfPrescriptions() {
 				method: 'PUT',
 				headers: {
 					'Content-Type': 'application/json',
+					'Authorization': 'Bearer ' + token,
 				},
 				body: JSON.stringify(data),
 			});
@@ -223,6 +238,7 @@ function ViewOfPrescriptions() {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
+					'Authorization': 'Bearer ' + token,
 				},
 				body: JSON.stringify(data),
 			});

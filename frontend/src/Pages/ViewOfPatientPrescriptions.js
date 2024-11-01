@@ -11,12 +11,16 @@ const ViewOfPatientPrescriptions = () => {
     const [selectedPrescriptionHistory, setSelectedPrescriptionHistory] = useState([]);  
     const [openModal, setOpenModal] = useState(false);  
 
+    const token = localStorage.getItem('token');
+
     // Fetch prescriptions for the patient from the API
     const fetchPrescriptions = useCallback(async () => {
         try {
-            // replacing this call with the updated API that we have
-            // const response = await fetch(`http://localhost:8000/prescription/patient/${patientId}`);
-            const response = await fetch(`http://localhost:8000/prescriptions/?patient_id=${patientId}`);
+            const response = await fetch(`http://localhost:8000/prescriptions/?patient_id=${patientId}`, {
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                },
+              });
 
             if (!response.ok) {
                 throw new Error('Failed to fetch prescriptions');

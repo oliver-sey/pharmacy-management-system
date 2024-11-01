@@ -30,6 +30,8 @@ const AddEditPrescriptionModal = ({ open, onClose, row, onSave }) => {
 	const [valid_patient, set_valid_patient] = useState(true)
 	const [valid_medication, set_valid_medication] = useState(true)
 	const [valid_dosage, set_valid_dosage] = useState(true)
+
+	const token = localStorage.getItem('token');
 	
 	// Update form data on input change
 	const onSearchChange = (e) => {
@@ -44,7 +46,9 @@ const AddEditPrescriptionModal = ({ open, onClose, row, onSave }) => {
 
 	const fetchMedication = async () => {
 		try {
-		  const response = await fetch('http://localhost:8000/medicationlist');
+		  const response = await fetch('http://localhost:8000/medicationlist', {
+			headers: { 'Authorization': 'Bearer ' + token }
+		});
 		  const data = await response.json(); // Convert response to JSON
 		  const list = []
 		  data.map((info) => { list.push({id: info.id, name: info.name + ", " + info.dosage}) })
@@ -57,7 +61,9 @@ const AddEditPrescriptionModal = ({ open, onClose, row, onSave }) => {
 
 	const fetchPatients = async () => {
 		try {
-		  const response = await fetch('http://localhost:8000/patients');
+		  const response = await fetch('http://localhost:8000/patients', {
+			headers: { 'Authorization': 'Bearer ' + token }
+		  });
 		  const data = await response.json(); // Convert response to JSON
 		  const list = []
 		  data.map((info) => { list.push({id: info.id, name: info.first_name + " " + info.last_name}) })

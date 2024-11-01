@@ -18,40 +18,49 @@ import FillPrescriptionForm from './Pages/FillPrescriptionForm';
 import ViewOfPatientPrescriptions from './Pages/ViewOfPatientPrescriptions';
 import HomePage from './Pages/Home';
 import Header from "./Components/Header"; 
+import NotificationProvider from './Components/NotificationProvider';
+import NotificationManager from './Components/NotificationManager';
+import Header from "./Components/Header"; 
+import NotificationsPage from './Pages/NotificationsPage';  
+
+
 function App() {
 
   const [userRole, setUserRole] = useState(localStorage.getItem('role')); // Store user role in state
   // Function to update the role on login
-  const updateUserRole = (role) => {
+    const updateUserRole = (role) => {
       setUserRole(role);
       localStorage.setItem('role', role); 
   };
-  
+
   return (
     <div className="App">
-      <Router>
-        <Header userRole={userRole} />
-        
-        <Routes>
-          <Route path='/' element={<HomePage/>}/>
-          <Route exact path='/managerhome' element={<ManagerHome/>}/>
-          <Route exact path='/pharmacisthome' element={<PharmacistHome/>}/>
-          <Route exact path="/protected" element={<GeneralProtected/>}/>
-          <Route exact path='/PharmTechHome' element={<PharmTechHome/>}/>
-          <Route exact path='/CashierHome' element={<CashierHome/>}/>
-          <Route exact path="/Login" element={<Login updateUserRole={updateUserRole} />} />
-          <Route path='/viewofpatients' element={<ViewOfPatients/>}/>
-          <Route path='/viewofmedications' element={<ViewOfMedications/>}/>
-          <Route path='/viewofusers' element={<ViewOfUsers/>}/>
-          <Route path='/viewofprescriptions' element={<ViewOfPrescriptions/>}/>
-          <Route path='/prescriptionstofill' element={<PrescriptionsToFill/>}/>
-          <Route path='/resetpassword' element ={<ResetPassword/>}/>
-          <Route path='/viewofemployees' element ={<ViewOfEmployees/>}/>
-          <Route path='/fill' element ={<FillPrescriptionForm/>}/>
-          <Route path='/viewofpatients/:patientId/prescriptions' element ={<ViewOfPatientPrescriptions/>}/>
-
-        </Routes>
-      </Router>
+      <NotificationProvider>
+        <Router>
+          <Header userRole={userRole} />
+          <NotificationManager /> 
+          
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route exact path="/managerhome" element={<ManagerHome />} />
+            <Route exact path="/pharmacisthome" element={<PharmacistHome />} />
+            <Route exact path="/protected" element={<GeneralProtected />} />
+            <Route exact path="/PharmTechHome" element={<PharmTechHome />} />
+            <Route exact path="/CashierHome" element={<CashierHome />} />
+            <Route exact path="/Login" element={<Login updateUserRole={updateUserRole} />} />
+            <Route path="/viewofpatients" element={<ViewOfPatients />} />
+            <Route path="/viewofmedications" element={<ViewOfMedications />} />
+            <Route path="/viewofusers" element={<ViewOfUsers />} />
+            <Route path="/viewofprescriptions" element={<ViewOfPrescriptions />} />
+            <Route path="/prescriptionstofill" element={<PrescriptionsToFill />} />
+            <Route path="/resetpassword" element={<ResetPassword />} />
+            <Route path="/viewofemployees" element={<ViewOfEmployees />} />
+            <Route path="/fill" element={<FillPrescriptionForm />} />
+            <Route path="/viewofpatients/:patientId/prescriptions" element={<ViewOfPatientPrescriptions />} />
+            <Route path="/notifications" element={<NotificationsPage />} /> {/* Notifications Page route */}
+          </Routes>
+        </Router>
+      </NotificationProvider>
     </div>
   );
 }

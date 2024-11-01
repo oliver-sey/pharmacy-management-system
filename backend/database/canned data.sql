@@ -32,7 +32,7 @@ TRUNCATE TABLE inventory_updates RESTART IDENTITY CASCADE;
 -- users table
 -- *******NOTE: all passwords are 'password'
     
-INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Alice', 'Stevenson', 'PHARMACIST', 'alice.pharm@example.com', '"$2b$12$XKDWZkY0V0My9d/EBIawCOqRE283Jzt8d6m5Jc.kUdVhW8ZouhNfG"', FALSE); -- id #1
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Alice', 'Stevenson', 'PHARMACIST', 'alice.pharm@example.com', '$2b$12$XKDWZkY0V0My9d/EBIawCOqRE283Jzt8d6m5Jc.kUdVhW8ZouhNfG', FALSE); -- id #1
 INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Oliver', 'Seemorebutts', 'PHARMACY_MANAGER', 'oliver@cool.com', '$2b$12$Uc9QHInwXBCdOzp4KxscK.63TuCusz2Ax7RariEJhi1LOv53wR.0e', FALSE); -- id #2
 INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Carol', 'Davies', 'PHARMACY_TECHNICIAN', 'carol.tech@example.com', '$2b$12$tT7e.YEtU6eoxCYH3LUGqO.0kLWehKA80D/hMEtH/lv3zZvO4m.Qy', FALSE); -- id #3
 INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Dave', 'Frank', 'CASHIER', 'dave.cashier@example.com', '$2b$12$wjGUxF0.1fMW6KI3CAk9k.HHqs0rLTMnnLSAAChEfFdG5HzthAeAa', FALSE); -- id #4

@@ -32,32 +32,32 @@ TRUNCATE TABLE inventory_updates RESTART IDENTITY CASCADE;
 -- users table
 -- *******NOTE: all passwords are 'password'
     
-INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Alice', 'Stevenson', 'pharmacist', 'alice.pharm@example.com', '"$2b$12$XKDWZkY0V0My9d/EBIawCOqRE283Jzt8d6m5Jc.kUdVhW8ZouhNfG"', FALSE); -- id #1
-INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Oliver', 'Seemorebutts', 'pharmacymanager', 'oliver@cool.com', '$2b$12$Uc9QHInwXBCdOzp4KxscK.63TuCusz2Ax7RariEJhi1LOv53wR.0e', FALSE); -- id #2
-INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Carol', 'Davies', 'pharmacytech', 'carol.tech@example.com', '$2b$12$tT7e.YEtU6eoxCYH3LUGqO.0kLWehKA80D/hMEtH/lv3zZvO4m.Qy', FALSE); -- id #3
-INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Dave', 'Frank', 'cashier', 'dave.cashier@example.com', '$2b$12$wjGUxF0.1fMW6KI3CAk9k.HHqs0rLTMnnLSAAChEfFdG5HzthAeAa', FALSE); -- id #4
-INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Eve', 'Barrancato', 'pharmacist', 'eve.pharm@example.com', '$2b$12$XvdHJgssaYJeiFYqAUxrUeYdJxouAUwmLrWv2G8OWn1AUeuUhvILW', FALSE); -- id #5
-INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Frank', 'Wright', 'pharmacytech', 'frank.tech@example.com', '$2b$12$7CjTRY.PQgUKvNMdq5vro.WncpDTfJ20rv5mog14ZZS92gpJkPGna', FALSE); -- id #6
-INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Gina', 'Cler', 'cashier', 'gina.cashier@example.com', '$2b$12$3KOSxmCBEj7fdL/TOhTVCeoiii1BrEvnPakKudbN5Zw5ft3QYbZCK', FALSE); -- id #7
-INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Hank', 'Oldman', 'pharmacymanager', 'hank.manager@example.com', '$2b$12$.YR6KLtrv9ixoyrT6ZYHWOoO./Z2nofz6FslK37YHQwTjWhdYxwA.', FALSE); -- id #8
-INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Isabel', 'Raudies', 'pharmacytech', 'isabel.tech@example.com', '$2b$12$Og054nBFVNBk1Z/.DCFXbuVoVqXsSMH73drcCJSCo92pNV4pOa2Ua', FALSE); -- id #9
-INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('James', 'Delp', 'pharmacist', 'james.pharm@example.com', '$2b$12$QWeyx9Xd4LUaZfBSO2gzb.m4WRtxqByVmoTa7FETf3VsCHadOdLlu', FALSE); -- id #10
-INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Kelly', 'Clarkson', 'cashier', 'kelly.cashier@example.com', '$2b$12$SOYO9rO.C11Vi/YjLZO0BeXKREjzlQtgOT8nz6QLLc8m6hmP8M3U6', FALSE); -- id #11
-INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Leo', 'Girolami', 'pharmacymanager', 'leo.manager@example.com', '$2b$12$xSoMrbLG.Jmph0gZffwlx.VDgu3BaTg55b3tDUrP4fuK5Pl21PPi.', FALSE); -- id #12
-INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Mary', 'Olsen', 'pharmacytech', 'mary.tech@example.com', '$2b$12$o0QFdyhJ3APZ.n86Qnz0yeFLM8gC0iFnuj5UCoktEROhwT1Kj/.jW', FALSE); -- id #13
-INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Nora', 'Newman', 'pharmacist', 'nora.pharm@example.com', '$2b$12$OqhWdhVXGMFsJGwrrzlnhefrC7tvkBavYaTLVTihOmfTIdUA9nVTm', FALSE); -- id #14
-INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Oscar', 'Piastri', 'cashier', 'oscar.cashier@example.com', '$2b$12$3jjuQ46cDX9V.CrtVImCKObqlJtZTGChvfvVuIx41R1q/uUDBw.vO', FALSE); -- id #15
-INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Paul', 'Downs', 'pharmacytech', 'paul.tech@example.com', '$2b$12$Q8T7tbeI3pqoVAt8RBbP9.U4/QIZyHYwhV7ngBPO/F/QRv0FuaCvS', FALSE); -- id #16
-INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Quinn', 'Cooney', 'pharmacist', 'quinn.pharm@example.com', '$2b$12$Ka7Xrs2V6Pe8p26Z2w/72u135/EDZ/kkdGx6AjPfCAMo5nZ3AMJPu', TRUE); -- id #17
-INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Rachel', 'Davidson', 'cashier', 'rachel.cashier@example.com', '$2b$12$C9BgHch0jB08.S.Fi56A9uJvQcjl.QGeCsClcEfE9S2JorfB99bTS', FALSE); -- id #18
-INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Steve', 'Madden', 'pharmacymanager', 'steve.manager@example.com', '$2b$12$ObhfnA0QrGimKzb8EJ6G8OMUDj0JeeZxUZU7LdebIoEreTc7arOh6', FALSE); -- id #19
-INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Tony', 'Hawk', 'pharmacytech', 'tony.tech@example.com', '$2b$12$GM0mN.jf3aI2oEFsP7EMYOQLHugNoucUJvFzimIcW8Y/pShUviG4W', TRUE); -- id #20
-INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Ursula', 'Van Schothorst', 'pharmacist', 'ursula.pharm@example.com', '$2b$12$gYMWcFOnIBwMxQjNkWblF.wUel9fnB6gBzVXulLnD4jNLLP1OP7ca', FALSE); -- id #21
-INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Victor', 'Franks', 'cashier', 'victor.cashier@example.com', '$2b$12$CGWK9XeQAr5HneYf4nIf0evXaNBJ058oGOfB45.rEke//g8ruKSUi', FALSE); -- id #22
-INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Wanda', 'Notlost', 'pharmacytech', 'wanda.tech@example.com', '$2b$12$xnrmNLHgSjjfECF5IueZEO8LatXlwiBEqeFSKdnXAnsJepODU9ckC', FALSE); -- id #23
-INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Xander', 'Didrickson', 'pharmacist', 'xander.pharm@example.com', '$2b$12$TcQ10ZsnubBJuJPp/bZU0ON/sqwQHkRbbxC09hcCFJj.rWCVC/YfO', TRUE); -- id #24
-INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Yvette', 'Cooms', 'pharmacymanager', 'yvette.manager@example.com', '$2b$12$uC8NOm5OgKuzD6be9MMvX.Ik6FnvL81Fgq6Tgsha3e3zpul6F21lK', FALSE); -- id #25
-INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Steve', 'Lastname', 'pharmacymanager', 'user@user.com', '$2b$12$wDmlYBX1ju6tZ8qj8tlo1uh2QtsJlw21CdN18wGf9G8UhseTpIEFq', FALSE); -- id #25
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Alice', 'Stevenson', 'PHARMACIST', 'alice.pharm@example.com', '$2b$12$XKDWZkY0V0My9d/EBIawCOqRE283Jzt8d6m5Jc.kUdVhW8ZouhNfG', FALSE); -- id #1
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Oliver', 'Seemorebutts', 'PHARMACY_MANAGER', 'oliver@cool.com', '$2b$12$Uc9QHInwXBCdOzp4KxscK.63TuCusz2Ax7RariEJhi1LOv53wR.0e', FALSE); -- id #2
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Carol', 'Davies', 'PHARMACY_TECHNICIAN', 'carol.tech@example.com', '$2b$12$tT7e.YEtU6eoxCYH3LUGqO.0kLWehKA80D/hMEtH/lv3zZvO4m.Qy', FALSE); -- id #3
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Dave', 'Frank', 'CASHIER', 'dave.cashier@example.com', '$2b$12$wjGUxF0.1fMW6KI3CAk9k.HHqs0rLTMnnLSAAChEfFdG5HzthAeAa', FALSE); -- id #4
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Eve', 'Barrancato', 'PHARMACIST', 'eve.pharm@example.com', '$2b$12$XvdHJgssaYJeiFYqAUxrUeYdJxouAUwmLrWv2G8OWn1AUeuUhvILW', FALSE); -- id #5
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Frank', 'Wright', 'PHARMACY_TECHNICIAN', 'frank.tech@example.com', '$2b$12$7CjTRY.PQgUKvNMdq5vro.WncpDTfJ20rv5mog14ZZS92gpJkPGna', FALSE); -- id #6
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Gina', 'Cler', 'CASHIER', 'gina.cashier@example.com', '$2b$12$3KOSxmCBEj7fdL/TOhTVCeoiii1BrEvnPakKudbN5Zw5ft3QYbZCK', FALSE); -- id #7
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Hank', 'Oldman', 'PHARMACY_MANAGER', 'hank.manager@example.com', '$2b$12$.YR6KLtrv9ixoyrT6ZYHWOoO./Z2nofz6FslK37YHQwTjWhdYxwA.', FALSE); -- id #8
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Isabel', 'Raudies', 'PHARMACY_TECHNICIAN', 'isabel.tech@example.com', '$2b$12$Og054nBFVNBk1Z/.DCFXbuVoVqXsSMH73drcCJSCo92pNV4pOa2Ua', FALSE); -- id #9
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('James', 'Delp', 'PHARMACIST', 'james.pharm@example.com', '$2b$12$QWeyx9Xd4LUaZfBSO2gzb.m4WRtxqByVmoTa7FETf3VsCHadOdLlu', FALSE); -- id #10
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Kelly', 'Clarkson', 'CASHIER', 'kelly.cashier@example.com', '$2b$12$SOYO9rO.C11Vi/YjLZO0BeXKREjzlQtgOT8nz6QLLc8m6hmP8M3U6', FALSE); -- id #11
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Leo', 'Girolami', 'PHARMACY_MANAGER', 'leo.manager@example.com', '$2b$12$xSoMrbLG.Jmph0gZffwlx.VDgu3BaTg55b3tDUrP4fuK5Pl21PPi.', FALSE); -- id #12
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Mary', 'Olsen', 'PHARMACY_TECHNICIAN', 'mary.tech@example.com', '$2b$12$o0QFdyhJ3APZ.n86Qnz0yeFLM8gC0iFnuj5UCoktEROhwT1Kj/.jW', FALSE); -- id #13
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Nora', 'Newman', 'PHARMACIST', 'nora.pharm@example.com', '$2b$12$OqhWdhVXGMFsJGwrrzlnhefrC7tvkBavYaTLVTihOmfTIdUA9nVTm', FALSE); -- id #14
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Oscar', 'Piastri', 'CASHIER', 'oscar.cashier@example.com', '$2b$12$3jjuQ46cDX9V.CrtVImCKObqlJtZTGChvfvVuIx41R1q/uUDBw.vO', FALSE); -- id #15
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Paul', 'Downs', 'PHARMACY_TECHNICIAN', 'paul.tech@example.com', '$2b$12$Q8T7tbeI3pqoVAt8RBbP9.U4/QIZyHYwhV7ngBPO/F/QRv0FuaCvS', FALSE); -- id #16
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Quinn', 'Cooney', 'PHARMACIST', 'quinn.pharm@example.com', '$2b$12$Ka7Xrs2V6Pe8p26Z2w/72u135/EDZ/kkdGx6AjPfCAMo5nZ3AMJPu', TRUE); -- id #17
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Rachel', 'Davidson', 'CASHIER', 'rachel.cashier@example.com', '$2b$12$C9BgHch0jB08.S.Fi56A9uJvQcjl.QGeCsClcEfE9S2JorfB99bTS', FALSE); -- id #18
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Steve', 'Madden', 'PHARMACY_MANAGER', 'steve.manager@example.com', '$2b$12$ObhfnA0QrGimKzb8EJ6G8OMUDj0JeeZxUZU7LdebIoEreTc7arOh6', FALSE); -- id #19
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Tony', 'Hawk', 'PHARMACY_TECHNICIAN', 'tony.tech@example.com', '$2b$12$GM0mN.jf3aI2oEFsP7EMYOQLHugNoucUJvFzimIcW8Y/pShUviG4W', TRUE); -- id #20
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Ursula', 'Van Schothorst', 'PHARMACIST', 'ursula.pharm@example.com', '$2b$12$gYMWcFOnIBwMxQjNkWblF.wUel9fnB6gBzVXulLnD4jNLLP1OP7ca', FALSE); -- id #21
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Victor', 'Franks', 'CASHIER', 'victor.cashier@example.com', '$2b$12$CGWK9XeQAr5HneYf4nIf0evXaNBJ058oGOfB45.rEke//g8ruKSUi', FALSE); -- id #22
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Wanda', 'Notlost', 'PHARMACY_TECHNICIAN', 'wanda.tech@example.com', '$2b$12$xnrmNLHgSjjfECF5IueZEO8LatXlwiBEqeFSKdnXAnsJepODU9ckC', FALSE); -- id #23
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Xander', 'Didrickson', 'PHARMACIST', 'xander.pharm@example.com', '$2b$12$TcQ10ZsnubBJuJPp/bZU0ON/sqwQHkRbbxC09hcCFJj.rWCVC/YfO', TRUE); -- id #24
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Yvette', 'Cooms', 'PHARMACY_MANAGER', 'yvette.manager@example.com', '$2b$12$uC8NOm5OgKuzD6be9MMvX.Ik6FnvL81Fgq6Tgsha3e3zpul6F21lK', FALSE); -- id #25
+INSERT INTO users (first_name, last_name, user_type, email, password, is_locked_out) VALUES ('Steve', 'Lastname', 'PHARMACY_MANAGER', 'user@user.com', '$2b$12$wDmlYBX1ju6tZ8qj8tlo1uh2QtsJlw21CdN18wGf9G8UhseTpIEFq', FALSE); -- id #25
 
 
 
@@ -170,46 +170,46 @@ VALUES (21, 2, 1, '2024-09-29', '2024-09-30 15:12:15', 17, 'Dr. Carter', 90);
 -- user_activities table
 
 
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (21, 'updateInv', '2024-07-18 10:47:00');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (24, 'login', '2024-08-06 07:55:35');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (5, 'updateInv', '2024-08-07 16:05:00');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (2, 'login', '2024-09-01 11:00:18');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (2, 'unlockaccount', '2024-09-02 09:10:20');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (7, 'updateInv', '2024-09-03 09:15:00');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (13, 'updateInv', '2024-09-03 12:25:00');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (1, 'login', '2024-09-11 08:24:10');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (5, 'login', '2024-09-12 08:20:00');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (8, 'login', '2024-09-12 11:00:20');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (2, 'logout', '2024-09-12 11:45:30');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (8, 'updateinventory', '2024-09-12 12:35:22');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (8, 'logout', '2024-09-12 12:37:50');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (19, 'updateInv', '2024-09-13 12:23:00');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (12, 'login', '2024-09-25 08:13:30');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (12, 'updateinventory', '2024-09-25 08:45:30');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (12, 'logout', '2024-09-25 09:01:30');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (24, 'login', '2024-09-26 09:05:10');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (24, 'login', '2024-09-26 09:05:31');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (1, 'logout', '2024-09-26 10:15:10');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (5, 'logout', '2024-09-26 17:20:55');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (10, 'updateInv', '2024-09-27 11:53:00');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (15, 'updateInv', '2024-09-27 17:14:00');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (14, 'login', '2024-09-29 09:00:05');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (12, 'updateinventory', '2024-09-29 10:12:45');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (19, 'updateInv', '2024-09-29 15:10:00');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (14, 'logout', '2024-09-29 17:45:20');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (20, 'login', '2024-09-30 08:00:12');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (1, 'login', '2024-09-30 08:01:00');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (3, 'updateinventory', '2024-09-30 08:15:40');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (3, 'updateinventory', '2024-09-30 08:20:10');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (14, 'updateInv', '2024-09-30 10:23:00');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (21, 'updateInv', '2024-09-30 14:35:00');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (9, 'updateInv', '2024-09-30 14:40:00');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (8, 'updateInv', '2024-09-30 16:52:00');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (1, 'logout', '2024-09-30 17:05:32');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (20, 'logout', '2024-09-30 18:00:25');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (19, 'updateInv', '2024-10-01 09:32:00');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (16, 'updateInv', '2024-10-01 09:57:00');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (17, 'updateInv', '2024-10-02 14:12:00');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (21, 'INVENTORY_UPDATE', '2024-07-18 10:47:00');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (24, 'LOGIN', '2024-08-06 07:55:35');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (5, 'INVENTORY_UPDATE', '2024-08-07 16:05:00');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (2, 'LOGIN', '2024-09-01 11:00:18');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (2, 'UNLOCK_ACCOUNT', '2024-09-02 09:10:20');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (7, 'INVENTORY_UPDATE', '2024-09-03 09:15:00');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (13, 'INVENTORY_UPDATE', '2024-09-03 12:25:00');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (1, 'LOGIN', '2024-09-11 08:24:10');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (5, 'LOGIN', '2024-09-12 08:20:00');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (8, 'LOGIN', '2024-09-12 11:00:20');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (2, 'LOGOUT', '2024-09-12 11:45:30');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (8, 'INVENTORY_UPDATE', '2024-09-12 12:35:22');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (8, 'LOGOUT', '2024-09-12 12:37:50');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (19, 'INVENTORY_UPDATE', '2024-09-13 12:23:00');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (12, 'LOGIN', '2024-09-25 08:13:30');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (12, 'INVENTORY_UPDATE', '2024-09-25 08:45:30');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (12, 'LOGOUT', '2024-09-25 09:01:30');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (24, 'LOGIN', '2024-09-26 09:05:10');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (24, 'LOGIN', '2024-09-26 09:05:31');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (1, 'LOGOUT', '2024-09-26 10:15:10');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (5, 'LOGOUT', '2024-09-26 17:20:55');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (10, 'INVENTORY_UPDATE', '2024-09-27 11:53:00');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (15, 'INVENTORY_UPDATE', '2024-09-27 17:14:00');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (14, 'LOGIN', '2024-09-29 09:00:05');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (12, 'INVENTORY_UPDATE', '2024-09-29 10:12:45');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (19, 'INVENTORY_UPDATE', '2024-09-29 15:10:00');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (14, 'LOGOUT', '2024-09-29 17:45:20');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (20, 'LOGIN', '2024-09-30 08:00:12');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (1, 'LOGIN', '2024-09-30 08:01:00');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (3, 'INVENTORY_UPDATE', '2024-09-30 08:15:40');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (3, 'INVENTORY_UPDATE', '2024-09-30 08:20:10');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (14, 'INVENTORY_UPDATE', '2024-09-30 10:23:00');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (21, 'INVENTORY_UPDATE', '2024-09-30 14:35:00');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (9, 'INVENTORY_UPDATE', '2024-09-30 14:40:00');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (8, 'INVENTORY_UPDATE', '2024-09-30 16:52:00');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (1, 'LOGOUT', '2024-09-30 17:05:32');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (20, 'LOGOUT', '2024-09-30 18:00:25');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (19, 'INVENTORY_UPDATE', '2024-10-01 09:32:00');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (16, 'INVENTORY_UPDATE', '2024-10-01 09:57:00');
+INSERT INTO user_activities (user_id, type, timestamp) VALUES (17, 'INVENTORY_UPDATE', '2024-10-02 14:12:00');
 
 
 
@@ -233,19 +233,19 @@ INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES
 -- inventory_updates table
 
 
-INSERT INTO inventory_updates(medication_id, user_activity_id, quantity_changed_by, timestamp, transaction_id, type) VALUES (1, 2, 500, '2024-09-01 08:35:00', NULL, 'add');
-INSERT INTO inventory_updates(medication_id, user_activity_id, quantity_changed_by, timestamp, transaction_id, type) VALUES (2, 2, -1000, '2024-09-30 08:42:10', NULL, 'discard');
-INSERT INTO inventory_updates(medication_id, user_activity_id, quantity_changed_by, timestamp, transaction_id, type) VALUES (3, 8, -500, '2024-09-12 11:00:40', NULL, 'discard');
-INSERT INTO inventory_updates(medication_id, user_activity_id, quantity_changed_by, timestamp, transaction_id, type) VALUES (2, 21, -1, '2024-09-30 14:35:00', 1, 'fillpresc');
-INSERT INTO inventory_updates(medication_id, user_activity_id, quantity_changed_by, timestamp, transaction_id, type) VALUES (3, 19, 5, '2024-09-13 12:23:00', 2, 'add');
-INSERT INTO inventory_updates(medication_id, user_activity_id, quantity_changed_by, timestamp, transaction_id, type) VALUES (6, 5, -1, '2024-08-07 16:05:00', 3, 'fillpresc');
-INSERT INTO inventory_updates(medication_id, user_activity_id, quantity_changed_by, timestamp, transaction_id, type) VALUES (8, 8, 10, '2024-09-30 16:52:00', 4, 'add');
-INSERT INTO inventory_updates(medication_id, user_activity_id, quantity_changed_by, timestamp, transaction_id, type) VALUES (11, 7, -3, '2024-09-03 09:15:00', 5, 'sellnonpresc');
-INSERT INTO inventory_updates(medication_id, user_activity_id, quantity_changed_by, timestamp, transaction_id, type) VALUES (2, 21, -1, '2024-07-18 10:47:00', 6, 'fillpresc');
-INSERT INTO inventory_updates(medication_id, user_activity_id, quantity_changed_by, timestamp, transaction_id, type) VALUES (15, 10, -1, '2024-09-27 11:53:00', 7, 'fillpresc');
-INSERT INTO inventory_updates(medication_id, user_activity_id, quantity_changed_by, timestamp, transaction_id, type) VALUES (17, 19, 6, '2024-10-01 09:32:00', 8, 'add');
-INSERT INTO inventory_updates(medication_id, user_activity_id, quantity_changed_by, timestamp, transaction_id, type) VALUES (17, 9, -2, '2024-09-30 14:40:00', 9, 'sellnonpresc');
-INSERT INTO inventory_updates(medication_id, user_activity_id, quantity_changed_by, timestamp, transaction_id, type) VALUES (17, 13, -1, '2024-09-03 12:25:00', 10, 'sellnonpresc');
-INSERT INTO inventory_updates(medication_id, user_activity_id, quantity_changed_by, timestamp, transaction_id, type) VALUES (14, 15, -1, '2024-09-27 17:14:00', 11, 'sellnonpresc');
-INSERT INTO inventory_updates(medication_id, user_activity_id, quantity_changed_by, timestamp, transaction_id, type) VALUES (17, 16, -1, '2024-10-01 09:57:00', 12, 'sellnonpresc');
-INSERT INTO inventory_updates(medication_id, user_activity_id, quantity_changed_by, timestamp, transaction_id, type) VALUES (17, 17, -1, '2024-10-02 14:12:00', 13, 'fillpresc');
+INSERT INTO inventory_updates(medication_id, user_activity_id, quantity_changed_by, timestamp, transaction_id, type) VALUES (1, 2, 500, '2024-09-01 08:35:00', NULL, 'ADD');
+INSERT INTO inventory_updates(medication_id, user_activity_id, quantity_changed_by, timestamp, transaction_id, type) VALUES (2, 2, -1000, '2024-09-30 08:42:10', NULL, 'DISCARD');
+INSERT INTO inventory_updates(medication_id, user_activity_id, quantity_changed_by, timestamp, transaction_id, type) VALUES (3, 8, -500, '2024-09-12 11:00:40', NULL, 'DISCARD');
+INSERT INTO inventory_updates(medication_id, user_activity_id, quantity_changed_by, timestamp, transaction_id, type) VALUES (2, 21, -1, '2024-09-30 14:35:00', 1, 'FILLPRESC');
+INSERT INTO inventory_updates(medication_id, user_activity_id, quantity_changed_by, timestamp, transaction_id, type) VALUES (3, 19, 5, '2024-09-13 12:23:00', 2, 'ADD');
+INSERT INTO inventory_updates(medication_id, user_activity_id, quantity_changed_by, timestamp, transaction_id, type) VALUES (6, 5, -1, '2024-08-07 16:05:00', 3, 'FILLPRESC');
+INSERT INTO inventory_updates(medication_id, user_activity_id, quantity_changed_by, timestamp, transaction_id, type) VALUES (8, 8, 10, '2024-09-30 16:52:00', 4, 'ADD');
+INSERT INTO inventory_updates(medication_id, user_activity_id, quantity_changed_by, timestamp, transaction_id, type) VALUES (11, 7, -3, '2024-09-03 09:15:00', 5, 'SELLNONPRESC');
+INSERT INTO inventory_updates(medication_id, user_activity_id, quantity_changed_by, timestamp, transaction_id, type) VALUES (2, 21, -1, '2024-07-18 10:47:00', 6, 'FILLPRESC');
+INSERT INTO inventory_updates(medication_id, user_activity_id, quantity_changed_by, timestamp, transaction_id, type) VALUES (15, 10, -1, '2024-09-27 11:53:00', 7, 'FILLPRESC');
+INSERT INTO inventory_updates(medication_id, user_activity_id, quantity_changed_by, timestamp, transaction_id, type) VALUES (17, 19, 6, '2024-10-01 09:32:00', 8, 'ADD');
+INSERT INTO inventory_updates(medication_id, user_activity_id, quantity_changed_by, timestamp, transaction_id, type) VALUES (17, 9, -2, '2024-09-30 14:40:00', 9, 'SELLNONPRESC');
+INSERT INTO inventory_updates(medication_id, user_activity_id, quantity_changed_by, timestamp, transaction_id, type) VALUES (17, 13, -1, '2024-09-03 12:25:00', 10, 'SELLNONPRESC');
+INSERT INTO inventory_updates(medication_id, user_activity_id, quantity_changed_by, timestamp, transaction_id, type) VALUES (14, 15, -1, '2024-09-27 17:14:00', 11, 'SELLNONPRESC');
+INSERT INTO inventory_updates(medication_id, user_activity_id, quantity_changed_by, timestamp, transaction_id, type) VALUES (17, 16, -1, '2024-10-01 09:57:00', 12, 'SELLNONPRESC');
+INSERT INTO inventory_updates(medication_id, user_activity_id, quantity_changed_by, timestamp, transaction_id, type) VALUES (17, 17, -1, '2024-10-02 14:12:00', 13, 'FILLPRESC');

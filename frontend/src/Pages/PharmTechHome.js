@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useRef} from 'react'
 import CheckUserType from '../Functions/CheckUserType';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
@@ -34,6 +34,8 @@ function PharmTechHome() {
 		prescribing_doctor: ""
 	});
 
+  const token = localStorage.getItem('token');
+
    // Function to open the Add/Edit modal
   const openAddPrescriptionHandler = () => {
     console.log("Add Prescription button clicked");
@@ -54,6 +56,7 @@ function PharmTechHome() {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token,
 				},
 				body: JSON.stringify(data),
 			});
@@ -76,7 +79,7 @@ function PharmTechHome() {
   const navigate = useNavigate();
 
   //Change this variable based on what type of user the page is for
-  const role = ["pharmacy_tech"]
+  const role = ["Pharmacy Technician"]
 
   useEffect(() => {
       CheckUserType(role, navigate);
@@ -98,7 +101,11 @@ function PharmTechHome() {
           </Item>
         </Grid>
         <Grid size={6}>
-          <Item>xs=6 md=4</Item>
+        <Item>
+              <Link to="/viewofmedications" style={{ textDecoration: 'none', color: '#007bff' }}>
+                View of Medications
+              </Link>
+            </Item>
         </Grid>
         <Grid size={6}>
           <Item>xs=6 md=4</Item>

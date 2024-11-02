@@ -15,10 +15,16 @@ function ViewOfMedications() {
 	const [errorMessage, setErrorMessage] = useState(null);
 	const [openSnackbar, setOpenSnackbar] = useState(false);
 
+	const token = localStorage.getItem('token');
+
 	// Async function to fetch medications data
 	const fetchMedications = async () => {
 		try {
-			const response = await fetch('http://localhost:8000/medicationlist');
+			const response = await fetch('http://localhost:8000/medicationlist', {
+				headers: {
+					'Authorization': 'Bearer ' + token,
+				},
+			  });
 			const data = await response.json(); // Convert response to JSON
 			setRows(data); // Update rows state with fetched data
 		} catch (error) {
@@ -170,16 +176,16 @@ function ViewOfMedications() {
 	// only pharmacy manager can edit
 	const canEdit = () => {
 		const role = localStorage.getItem('role');
-		// console.log("canEdit:", (role === 'pharmacymanager'));
-		return role === 'pharmacymanager';
+		// console.log("canEdit:", (role === 'Pharmacy Manager'));
+		return role === 'Pharmacy Manager';
 	};
 	  
 	// TODO: is this right?
 	// only pharmacy managers can delete
 	const canDelete = () => {
 		const role = localStorage.getItem('role');
-		// console.log("canDelete:", (role === 'pharmacymanager'));
-		return role === 'pharmacymanager';
+		// console.log("canDelete:", (role === 'Pharmacy Manager'));
+		return role === 'Pharmacy Manager';
 	};
 
 
@@ -188,6 +194,9 @@ function ViewOfMedications() {
 			console.log("row", id);
 			const response = await fetch(`http://localhost:8000/medication/${id}`, {
 				method: 'DELETE',
+				headers: {
+					'Authorization': 'Bearer ' + token,
+				},
 			});
 			if (!response.ok) {
 				throw new Error('Failed to delete medication');
@@ -215,6 +224,7 @@ function ViewOfMedications() {
 				method: 'PUT',
 				headers: {
 					'Content-Type': 'application/json',
+					'Authorization': 'Bearer ' + token,
 				},
 				body: JSON.stringify(data),
 			});
@@ -237,6 +247,7 @@ function ViewOfMedications() {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
+					'Authorization': 'Bearer ' + token,
 				},
 				body: JSON.stringify(data),
 			});

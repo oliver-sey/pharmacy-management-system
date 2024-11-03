@@ -8,6 +8,9 @@ import Grid from '@mui/material/Grid2';
 import IconButton from '@mui/material/IconButton';
 import AddCircleOutlinedIcon from '@mui/icons-material/AddCircleOutlined';
 import AddEditPrescriptionModal from '../Components/AddEditPrescriptionModal';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';
+import "../Styles/ManagerHome.css"
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: '#fff',
@@ -90,6 +93,22 @@ function ManagerHome() {
 
       closeEditModal(); // Close modal after saving
     };
+
+    const handleViewPrescriptionsClick = () => {
+      navigate('../viewofprescriptions', {replace: true})
+    }
+
+    const handleViewPrescriptionFillHistoryClick = () => {
+      navigate('../viewofprescriptionfillhistory', {replace: true})
+    }
+
+    const handleViewUsersClick = () => {
+      navigate('../viewofusers', {replace: true})
+    }
+
+    const handleViewPatientsClick = () => {
+      navigate('../viewofpatients', {replace: true})
+    }
   
     useEffect(() => {
         CheckUserType(role, navigate);
@@ -98,12 +117,13 @@ function ManagerHome() {
   
   
     return (
-      <div>
+      <div >
+        <h1 className='section-header'>Prescriptions</h1>
         <Box sx={{ flexGrow: 1 }}>
-        <Grid container spacing={6}>
+        <Grid container spacing={6} margin={4}>
           <Grid size={6}>
             <Item>
-            Enter new prescription
+            Enter New Prescription
             <div/>
             <IconButton aria-label="addPrescription" size="large" color='primary' onClick={openAddPrescriptionHandler}>
                 <AddCircleOutlinedIcon />
@@ -111,16 +131,54 @@ function ManagerHome() {
             </Item>
           </Grid>
           <Grid size={6}>
-            <Item>xs=6 md=4</Item>
+            <Item>
+              View All Prescriptions
+              <div/>
+              <IconButton aria-label="viewPrescriptions" size="large" color='primary' onClick={handleViewPrescriptionsClick}>
+                <VisibilityOutlinedIcon />
+              </IconButton>
+            </Item>
           </Grid>
           <Grid size={6}>
-            <Item>xs=6 md=4</Item>
-          </Grid>
-          <Grid size={6}>
-            <Item>xs=6 md=8</Item>
+            <Item>
+              See Prescription Fill History
+              <div/>
+              <IconButton aria-label="viewPrescriptionFillHistory" size="large" color='primary' onClick={handleViewPrescriptionFillHistoryClick}>
+                <HistoryOutlinedIcon />
+              </IconButton>
+            </Item>
           </Grid>
         </Grid>
       </Box>
+
+      <div/>
+      
+      <Box sx={{ flexGrow: 1 }}>
+        <Grid container spacing={6} margin={4}>
+          <Grid size={6}>
+          <h1 className='section-header'>Patients</h1>
+            <Item>
+            View/Add Patients
+            <div/>
+              <IconButton aria-label="viewPrescriptions" size="large" color='primary' onClick={handleViewPatientsClick}>
+                <VisibilityOutlinedIcon />
+              </IconButton>
+
+            </Item>
+          </Grid>
+          <Grid size={6}>
+          <h1 className='section-header'>Users</h1>
+            <Item>
+              View/Add Users
+              <div/>
+              <IconButton aria-label="addPatient" size="large" color='primary' onClick={handleViewUsersClick}>
+                <VisibilityOutlinedIcon />
+              </IconButton>
+            </Item>
+          </Grid>
+        </Grid>
+      </Box>
+
   
       <AddEditPrescriptionModal
       open={isEditOpen}

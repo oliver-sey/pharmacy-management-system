@@ -5,7 +5,7 @@ import { IconButton, Tooltip } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CheckUserType from "../Functions/CheckUserType";
-
+import LocalPharmacyOutlinedIcon from '@mui/icons-material/LocalPharmacyOutlined';
 import BaseTable from "../Components/BaseTable";
 
 
@@ -268,7 +268,7 @@ const deletePrescription = async (id) => {
 						onClick={() => FillPrescription(row)}
 						style={{ width: "auto" }}
 					>
-						<EditIcon color="primary" />
+						<LocalPharmacyOutlinedIcon color="primary" />
 					</IconButton>
 				</Tooltip>
 			)}

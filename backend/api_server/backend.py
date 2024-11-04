@@ -612,18 +612,30 @@ def fill_prescription(prescription_id: int, db: Session = Depends(get_db), curre
 # create inventory_update
 # just as a function that will get called by other endpoints
 # @app.post("/inventory-updates", response_model=InventoryUpdateResponse)
-def create_inventory_update(inventory_update: InventoryUpdateCreate, request: Request, db: Session = Depends(get_db)):
-    # Ensure that inventory_update data is valid
+def create_inventory_update(inventory_update: InventoryUpdateCreate, db: Session, current_user: UserToReturn):
+    # Catch possible exceptions when creating the DB entries
     try:
-        db_inventory_update = models.InventoryUpdate(**inventory_update.model_dump())  # Use .model_dump() for Pydantic V2
+        # create a user_activities entry for this
+        # need to do this first so we can reference the user_activity_id in the inventory_update
+        # any type of updating the inventory (add, discard, filling, selling), the user_activity entry for it will be "Inventory Update"
+        # **NOTE: need to use the 'key' of the enum ('INVENTORY_UPDATE') instead of the 'value' ('Inventory Update')
+        user_activity_create = UserActivityCreate(type="INVENTORY_UPDATE")
+        new_user_activity = create_user_activity(user_activity_create, db, current_user)
+
+        # populate the fields of the new inventory_update
+        db_inventory_update = models.InventoryUpdate(
+            medication_id=inventory_update.medication_id,
+            user_activity_id=new_user_activity.id,
+            # might be None if there is no transaction associated with this update
+            transaction_id=inventory_update.transaction_id,
+            quantity_changed_by=inventory_update.quantity_changed_by,
+            # set the timestamp in UTC so timezones don't affect it
+            timestamp=datetime.now(timezone.utc),
+            type=inventory_update.type
+        )
+
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-
-    # create a user_activities entry for this
-    # any type of updating the inventory (add, discard, filling, selling), the user_activity entry for it will be "Inventory Update"
-    user_activity_create = UserActivityCreate(activity=models.UserActivityType.INVENTORY_UPDATE)
-    create_user_activity(user_activity_create, db)
-
 
     # add the inventory_update to the database
     db.add(db_inventory_update)

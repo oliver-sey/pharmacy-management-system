@@ -19,6 +19,7 @@ from . import schema
 from sqlalchemy.exc import SQLAlchemyError
 from pydantic import ValidationError
 import logging
+import urllib
 
 app = FastAPI()
 
@@ -32,6 +33,33 @@ def read_root():
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("pharmacy_logger")
 
+def determine_activity_type(request: Request):
+    '''
+    Determines the type of activity based on the endpoint that was called
+    '''
+    if request.url.path == "users":
+        if request.method == "POST":
+            return models.UserActivityType.CREATE_USER
+        elif request.method == "PUT":
+            return models.UserActivityType.UPDATE_USER
+        elif request.method == "DELETE":
+            return models.UserActivityType.DELETE_USER
+        
+    elif request.url.path == "patients":
+        if request.method == "POST":
+            return models.UserActivityType.CREATE_PATIENT
+        elif request.method == "PUT":
+            return models.UserActivityType.UPDATE_PATIENT
+        elif request.method == "DELETE":
+            return models.UserActivityType.DELETE_PATIENT
+    
+    elif request.url.path == "prescriptions":
+        if request.method == "POST":
+            return models.UserActivityType.CREATE_PRESCRIPTION
+        
+    else:
+        return models.UserActivityType.OTHER   
+
 # middleware for logging 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
@@ -44,13 +72,32 @@ async def log_requests(request: Request, call_next):
     # as well as login and logout
     
     
-   
+    db: Session = SessionLocal()
     logger.info(f"Request Path: {request.url.path}")
     logger.info(f'isloggingin: {request.url.path in ("/token", "/currentuser/me/", "/currentuser/me")}')
     if request.url.path in ("/token", "/currentuser/me/", "/currentuser/me"):
         # check if a user is loggin in 
         logger.info(f"logging in: {request.url.path}")
+         # Read the request body only once and store it
+        request_body = await request.body()
+        parsed_data = urllib.parse.parse_qs(request_body.decode())
+        email = parsed_data.get("username", [None])[0]
+        user = db.query(models.User).filter(models.User.email == email).first()
+        logger.info(f"user: {user.id}")
+        request = Request(request.scope, receive=lambda: request_body)
         response = await call_next(request)
+        if request.url.path == "/token" and response.status_code == 200:
+
+            db_user_activity = models.UserActivity(
+                user_id=user.id,
+                type=models.UserActivityType.LOGIN,
+                timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
+            )
+
+            db.add(db_user_activity)
+            db.commit()
+            db.refresh(db_user_activity)
+            
         return response
     elif "/verify-token/" in request.url.path:
         # check if a user is verifying their token
@@ -58,11 +105,14 @@ async def log_requests(request: Request, call_next):
         response = await call_next(request)
         return response
     else:
-        db: Session = SessionLocal()
-        logger.info(f"request.headers: {request.headers.keys()}") 
-        current_user = get_current_user(request.headers.get("Authorization"), db)
-        logger.info(f"User: {current_user.email} is making a request to {request.url.path} as a {current_user.user_type}")
         
+        logger.info(f"request.headers: {request.headers.keys()}") 
+        token = request.headers.get("Authorization")
+        logger.info(f"token: {token}")
+        if token:
+            token = token.split(" ")[1]  # Remove 'Bearer' prefix
+        current_user = get_current_user(token, db)
+        logger.info(f"User (id={current_user.id}): {current_user.email} is making a request to {request.url.path} as a {current_user.user_type} ")
         if request.method == "GET" :
             # check if the request is a get. i.e. not changing anything
             logger.info(f"GET request: {request.url.path}")
@@ -79,10 +129,7 @@ async def log_requests(request: Request, call_next):
             logger.info(f"Completed request with status code: {response.status_code}")
             
             # Log this information to the database
-            log_entry = models.UserActivity(
-                activity=f"{request.method} {request.url} completed with status {response.status_code}",
-                user_id=current_user.id
-            )
+            log_entry = create_user_activity(UserActivityCreate(determine_activity_type(request)), db=db, current_user=current_user)
             db.add(log_entry)
             db.commit()
 
@@ -91,11 +138,11 @@ async def log_requests(request: Request, call_next):
             logger.error(f"Database error occurred: {str(e)}")
 
             # Insert log entry to database for DB errors
-            user_activity = models.UserActivity(
-                activity=f"DATABASE ERROR: {str(e)}",
-                user_id=current_user.id
-            )
-            db.add(user_activity)
+            log_entry = create_user_activity(
+                UserActivityCreate(models.UserActivityType.ERROR),
+                db=db, 
+                current_user=current_user)
+            db.add(log_entry)
             db.commit()
             # Re-raise error after logging
             raise e  
@@ -103,11 +150,8 @@ async def log_requests(request: Request, call_next):
             logger.error(f"An error occurred: {str(e)}")
 
             # Insert log entry to database for other errors
-            user_activity = models.UserActivity(
-                activity=f"ERROR: {str(e)}",
-                user_id=current_user.id
-            )
-            db.add(user_activity)
+            log_entry = create_user_activity(models.UserActivityType.ERROR, db=db, current_user=current_user)
+            db.add(log_entry)
             db.commit()
 
             # Re-raise error after logging
@@ -738,12 +782,11 @@ def get_inventory_updates(type: Optional[models.InventoryUpdateType] = Query(Non
 def create_user_activity(user_activity: UserActivityCreate, db: Session, current_user: UserToReturn = Depends(get_current_user)):
     # get user_id from current_user
     # TODO: should I be explicitly passing current_user here?
-    user_details = read_users_me(current_user=current_user)
 
     # Create a new UserActivity instance
     db_user_activity = models.UserActivity(
-        user_id=user_details.id,
-        activity=user_activity.activity,
+        user_id=current_user.id,
+        type=user_activity.activity,
         timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
     )
 

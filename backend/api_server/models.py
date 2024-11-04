@@ -105,6 +105,15 @@ class UserActivityType(PyEnum):
     # including all the possible types that we are storing in inventory_updates
     # (add, discard, fillpresc, and sellnonpresc)
     INVENTORY_UPDATE = "Inventory Update"
+    CREATE_USER = "Create User"
+    DELETE_USER = "Delete User"
+    UPDATE_USER = "Update User"
+    CREATE_PATIENT = "Create Patient"
+    DELETE_PATIENT = "Delete Patient"
+    UPDATE_PATIENT = "Update Patient"
+    CREATE_PRESCRIPTION = "Create Prescription"
+    OTHER = "Other"
+    ERROR = "Error"
 
 
 class UserActivity(Base):

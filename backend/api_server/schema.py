@@ -205,7 +205,7 @@ class PrescriptionUpdate(BaseModel):
 
 
 # endregion
-# Region Inventory Updates
+# region Inventory Updates
 class InventoryUpdateCreate(BaseModel):
     medication_id: int
     # get user_id from token

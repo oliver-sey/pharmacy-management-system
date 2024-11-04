@@ -577,7 +577,8 @@ def fill_prescription(prescription_id: int, db: Session = Depends(get_db), curre
         # if we successfully deduct medication from inventory, create an inventory update instance in InventoryUpdate table
         inventory_update_request = models.InventoryUpdate(
             medication_id=db_medication.id,
-            quantity_changed_by=db_prescription.quantity,       # The quantity deducted
+            # The quantity deducted - make it negative since we want it to be a delta of e.g. -20, instead of 20
+            quantity_changed_by= - db_prescription.quantity,
             # no transaction_id since this is not associated with a transaction
             # TODO: is this right? or should we do "Fill prescription"
             type=models.InventoryUpdateType.FILL_PRESCRIPTION   # set the type to fill prescription

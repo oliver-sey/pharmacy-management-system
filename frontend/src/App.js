@@ -18,6 +18,7 @@ import FillPrescriptionForm from './Pages/FillPrescriptionForm';
 import ViewOfPatientPrescriptions from './Pages/ViewOfPatientPrescriptions';
 import HomePage from './Pages/Home';
 import Header from "./Components/Header"; 
+import ViewOfPrescriptionFillHistory from './Pages/ViewOfPrescriptionFillHistory';
 function App() {
 
   const [userRole, setUserRole] = useState(localStorage.getItem('role')); // Store user role in state
@@ -44,6 +45,7 @@ function App() {
           <Route path='/viewofmedications' element={<ViewOfMedications/>}/>
           <Route path='/viewofusers' element={<ViewOfUsers/>}/>
           <Route path='/viewofprescriptions' element={<ViewOfPrescriptions/>}/>
+          <Route path='/viewofprescriptionfillhistory' element={<ViewOfPrescriptionFillHistory/>}/>
           <Route path='/prescriptionstofill' element={<PrescriptionsToFill/>}/>
           <Route path='/resetpassword' element ={<ResetPassword/>}/>
           <Route path='/viewofemployees' element ={<ViewOfEmployees/>}/>

@@ -676,7 +676,7 @@ def create_user_activity(user_activity: UserActivityCreate, db: Session, current
     db_user_activity = models.UserActivity(
         # get user_id from current_user
         user_id=current_user.id,
-        activity=user_activity.activity,
+        type=user_activity.type,
         timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
     )
 

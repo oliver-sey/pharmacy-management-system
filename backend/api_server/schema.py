@@ -228,11 +228,11 @@ class InventoryUpdateResponse(BaseModel):
 # endregion
 # region User Activities
 class UserActivityCreate(BaseModel):
-    activity: str
+    type: str # the activity type, an enum which can be "Login", "Logout", "Unlock Account", "Inventory Update"
     # TODO: let the database set the timestamp to the current time?
 
 class UserActivityResponse(BaseModel):
     id: int
     user_id: int
-    activity: str
+    type: str # the activity type, an enum
     timestamp: datetime

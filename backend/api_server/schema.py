@@ -3,6 +3,7 @@
 from typing import Optional
 from pydantic import BaseModel, EmailStr
 from datetime import date, datetime
+from .models import UserType
 
 class SimpleResponse(BaseModel):
     message: str
@@ -26,25 +27,24 @@ class UserToReturn(BaseModel):
     last_name: Optional[str] = None
     id: Optional[int] = None
     email: Optional[str] = None
-    user_type: Optional[str] = None
+    user_type: Optional[UserType] = None
+
 
 class UserResponse(BaseModel):
     id: int
     first_name: str
     last_name: str
-    user_type: str
+    user_type: UserType
     email: str
-    password: str
 
 class UserLogin(BaseModel):
     email: str
     password: str
 
-
 class UserCreate(BaseModel):
     first_name: str
     last_name: str
-    user_type: str
+    user_type: UserType
     email: EmailStr
     password: str
     is_locked_out: bool = True
@@ -197,8 +197,35 @@ class PrescriptionUpdate(BaseModel):
     quantity: Optional[int] = None
 
 
-class PrescriptionFillRequest(BaseModel):
-    user_filled_id: int
-    # token: str
-    class Config:
-        orm_mode = True
+# endregion
+# Region Inventory Updates
+class InventoryUpdateCreate(BaseModel):
+    medication_id: int
+    # get user_id from token
+    # create an entry in user_activities, and then we will put that ID here
+    # optional since some updates will not be associated with a transaction (e.g. add or discard)
+    transaction_id: Optional[int] = None
+    quantity_changed_by: int
+    type: str
+
+class InventoryUpdateResponse(BaseModel):
+    medication_id: int
+    user_activity_id: int
+    transaction_id: Optional[int] = None
+    quantity_changed_by: int
+    type: str
+
+# **NOTE: we will not be allowing updating or deleting inventory_updates
+
+
+# endregion
+# region User Activities
+class UserActivityCreate(BaseModel):
+    activity: str
+    # TODO: let the database set the timestamp to the current time?
+
+class UserActivityResponse(BaseModel):
+    id: int
+    user_id: int
+    activity: str
+    timestamp: datetime

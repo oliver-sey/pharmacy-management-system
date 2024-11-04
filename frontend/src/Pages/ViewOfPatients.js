@@ -10,10 +10,14 @@ function ViewOfPatients() {
 	const [errorMessage, setErrorMessage] = useState(null);
 	const [openSnackbar, setOpenSnackbar] = useState(false);
 	const navigate = useNavigate();
+	const token = localStorage.getItem('token');
+
 	// Async function to fetch patients data
 	const fetchPatients = async () => {
 		try {
-		  const response = await fetch('http://localhost:8000/patients');
+		  const response = await fetch('http://localhost:8000/patients', {
+			headers: {'Authorization': 'Bearer ' + token}
+		  });
 		  const data = await response.json(); // Convert response to JSON
 		  setRows(data); // Update rows state with fetched data
 		} catch (error) {
@@ -72,7 +76,7 @@ function ViewOfPatients() {
 	// only pharmacists or pharmacy managers can delete
 	const canDelete = () => {
 		const role = localStorage.getItem('role');
-		return role === 'pharmacist' || role === 'pharmacymanager';
+		return role === 'Pharmacist' || role === 'Pharmacy Manager';
 	};
 
 	const deletePatient = async (id) => {
@@ -80,6 +84,7 @@ function ViewOfPatients() {
 			console.log("row", id);
 			const response = await fetch(`http://localhost:8000/patient/${id}`, {
 				method: 'DELETE',
+				headers: {'Authorization': 'Bearer ' + token}
 			});
 			if (!response.ok) {
 				throw new Error('Failed to delete patient');
@@ -127,6 +132,7 @@ function ViewOfPatients() {
 				method: 'PUT',
 				headers: {
 					'Content-Type': 'application/json',
+					'Authorization': 'Bearer ' + token,
 				},
 				body: JSON.stringify(data),
 			});
@@ -155,6 +161,7 @@ function ViewOfPatients() {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
+					'Authorization': 'Bearer ' + token,
 				},
 				body: JSON.stringify(data),
 			});

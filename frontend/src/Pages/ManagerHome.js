@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useRef} from 'react'
 import CheckUserType from '../Functions/CheckUserType';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
@@ -24,7 +24,7 @@ const Item = styled(Paper)(({ theme }) => ({
 }));
 
 function ManagerHome() {
-  const role = ["pharmacy_manager"]
+  const role = ["Pharmacy Manager"]
   const navigate = useNavigate();
   const [curr_user_id, set_curr_user_id] = useState("");
 
@@ -44,6 +44,9 @@ function ManagerHome() {
       doctor_name: "",
       quantity: ""
     });
+
+    const token = localStorage.getItem('token');
+
   
      // Function to open the Add/Edit modal
     const openAddPrescriptionHandler = () => {
@@ -65,6 +68,7 @@ function ManagerHome() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token,
           },
           body: JSON.stringify(data),
         });

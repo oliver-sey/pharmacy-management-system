@@ -170,7 +170,8 @@ class PrescriptionResponse(BaseModel):
 
 class PrescriptionCreate(BaseModel):
     patient_id: int
-    user_entered_id: int
+    # user_id comes from the token
+    # user_entered_id: int
     # TODO: i don't think you should be allowed to create an already filled prescription right away
     # it makes more sense to make them call the fill prescription route after creating the prescription
     # user_filled_id: Optional[int] = None
@@ -183,9 +184,15 @@ class PrescriptionCreate(BaseModel):
     class Config:
         orm_mode = True
 
+# **NOTE: prescriptions are only able to be edited until they are filled
+# since we rely on the prescription to store important information and it doesn't
+# make sense to edit info after the patients already has the medication
 class PrescriptionUpdate(BaseModel):
     patient_id: Optional[int] = None
-    user_entered_id: Optional[int] = None
+    # Not allowing user to change who entered the prescription, this comes from the token anyways
+    # to see who modified a prescription, look at user_activities
+    # user_entered_id: Optional[int] = None
+
     # I think you should have to call the fill prescription route to edit these
     # so we can have control over checking if we're able to fill the prescription
     # user_filled_id: Optional[int] = None
@@ -198,7 +205,7 @@ class PrescriptionUpdate(BaseModel):
 
 
 # endregion
-# Region Inventory Updates
+# region Inventory Updates
 class InventoryUpdateCreate(BaseModel):
     medication_id: int
     # get user_id from token
@@ -221,11 +228,11 @@ class InventoryUpdateResponse(BaseModel):
 # endregion
 # region User Activities
 class UserActivityCreate(BaseModel):
-    activity: str
+    type: str # the activity type, an enum which can be "Login", "Logout", "Unlock Account", "Inventory Update"
     # TODO: let the database set the timestamp to the current time?
 
 class UserActivityResponse(BaseModel):
     id: int
     user_id: int
-    activity: str
+    type: str # the activity type, an enum
     timestamp: datetime

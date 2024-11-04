@@ -585,7 +585,7 @@ def fill_prescription(prescription_id: int, db: Session = Depends(get_db), curre
 
         # send the inventory_update_request to actually be stored in the database
         # this will add an entry to user_activities (for filling the prescription) for us
-        create_inventory_update(inventory_update=inventory_update_request, db=db)
+        create_inventory_update(inventory_update=inventory_update_request, db=db, current_user=current_user)
 
 
         # after making sure we have enough inventory and creating an inventory update (which create a user_activities entry for us)
@@ -670,7 +670,7 @@ def get_inventory_updates(type: Optional[models.InventoryUpdateType] = Query(Non
 
 # endregion
 # region User Activities CRUD
-def create_user_activity(user_activity: UserActivityCreate, db: Session, current_user: UserToReturn = Depends(get_current_user)):
+def create_user_activity(user_activity: UserActivityCreate, db: Session, current_user: UserToReturn):
 
     # Create a new UserActivity instance
     db_user_activity = models.UserActivity(

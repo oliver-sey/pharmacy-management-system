@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from passlib.context import CryptContext
 from typing import Optional
 from .database import SessionLocal, engine, Base
-from .schema import Token, TokenData, UserActivityCreate, UserCreate, UserResponse, UserLogin, UserToReturn, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, InventoryUpdateCreate,  InventoryUpdateResponse
+from .schema import Token, TokenData, UserActivityCreate, UserActivityResponse, UserCreate, UserResponse, UserLogin, UserToReturn, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, InventoryUpdateCreate,  InventoryUpdateResponse
 from . import models  # Ensure this is the SQLAlchemy model
 from sqlalchemy.orm import Session
 from typing import List
@@ -697,3 +697,40 @@ def create_user_activity(user_activity: UserActivityCreate, db: Session, current
     db.commit()
     db.refresh(db_user_activity)
     return db_user_activity
+
+
+# get one user_activity
+@app.get("/user-activities/{id}", response_model=UserActivityResponse)
+def get_user_activity(id: int, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+    # make sure only pharmacy managers or pharmacists can call this endpoint
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
+
+    # there will only be one user_activity with the matching id (since the id is unique), so using first() is fine
+    db_user_activity = db.query(models.UserActivity).filter(models.UserActivity.id == id).first()
+
+    if db_user_activity is None:
+        raise HTTPException(status_code=404, detail="User activity not found")
+    
+    return db_user_activity
+
+
+
+# get all user_activities - **optional param to filter to one value of 'type'
+@app.get("/user-activities", response_model=List[UserActivityResponse])
+# restrict type to the values in User
+def get_user_activities(type: Optional[models.UserActivityType] = Query(None), db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+    '''
+    endpoint to get user_activities with optional type (e.g. "Login", "Logout", "Unlock Account", "Inventory Update")
+    If type is provided, only user_activities for that type are returned.
+    call this endpoint like so: /user_activities?type=Unlock Account, or just /user_activities to get all user_activities
+    '''
+    # make sure only pharmacy managers or pharmacists can call this endpoint
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
+
+    # if type is provided, return all user_activities of that type
+    if type:
+        user_activities = db.query(models.UserActivity).filter(models.UserActivity.type == type).all()
+    # else return all user_activities
+    else:
+        user_activities = db.query(models.UserActivity).all()
+    return user_activities

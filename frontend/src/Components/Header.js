@@ -43,6 +43,15 @@ const Header = () => {
                     </>
                 )}
 
+                {token && userRole === 'Pharmacist' && (
+                    <>
+                        <li><Link to="/pharmacisthome">Pharmacist Dashboard</Link></li>
+                        <li><Link to="/viewofpatients">View Patients</Link></li>
+                        <li><Link to="/viewofmedications">View Medications</Link></li>
+                        <li><Link to="/prescriptionstofill">Fill Prescriptions</Link></li>
+                    </>
+                )}
+
                 {token && userRole === 'Pharmacy Technician' && (
                     <>
                          <li><Link to="/pharmtechhome">Pharmacy Technician Dashboard</Link></li>

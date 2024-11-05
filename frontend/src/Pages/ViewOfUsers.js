@@ -109,9 +109,8 @@ function ViewOfUsers() {
 	  
 	// only pharmacists or pharmacy managers can delete
 	const canDelete = () => {
-		//const role = localStorage.getItem('role');
-		//return role === 'Pharmacist' || role === 'Pharmacy Manager';
-		return true;
+		const role = localStorage.getItem('role');
+		return role === 'Pharmacist' || role === 'Pharmacy Manager';
 	};
 
 	const deleteUser = async (id) => {

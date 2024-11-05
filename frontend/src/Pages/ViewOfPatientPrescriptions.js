@@ -6,6 +6,7 @@ const ViewOfPatientPrescriptions = () => {
     const { patientId } = useParams(); 
     const navigate = useNavigate();
     const [prescriptions, setPrescriptions] = useState([]);  
+    const [patientName, setPatientName] = useState("");  // New state for patient's name
     const [loading, setLoading] = useState(true);  
     const [error, setError] = useState(null);  
     const [selectedPrescriptionHistory, setSelectedPrescriptionHistory] = useState([]);  
@@ -27,7 +28,7 @@ const ViewOfPatientPrescriptions = () => {
             }
             const data = await response.json();
             console.log("Fetched data:", data);
-            if (Array.isArray(data)) { //This make sure its in array.
+            if (Array.isArray(data)) { //This make sure it's in an array.
                 setPrescriptions(data);
             } else {
                 throw new Error('Expected an array but got something else');
@@ -40,10 +41,33 @@ const ViewOfPatientPrescriptions = () => {
         }
     }, [patientId]);
 
-    // Fetch prescriptions when the component mounts
+    // Fetch patient name
+    const fetchPatientName = useCallback(async () => {
+        try {
+            const response = await fetch(`http://localhost:8000/get/patient/${patientId}`, {
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                },
+            });
+    
+            if (!response.ok) {
+                throw new Error('Failed to fetch patient details');
+            }
+    
+            const patientData = await response.json();
+            setPatientName(`${patientData.first_name} ${patientData.last_name}`);
+        } catch (err) {
+            console.error(err);
+            setError('Failed to load patient details');
+        }
+    }, [patientId]);
+    
+
+    // Fetch prescriptions and patient name when the component mounts
     useEffect(() => {
         fetchPrescriptions();
-    }, [fetchPrescriptions, patientId]);
+        fetchPatientName();  // Fetch patient name alongside prescriptions
+    }, [fetchPrescriptions, fetchPatientName, patientId]);
 
     // Function to show detailed prescription history
     const viewPrescriptionHistory = (medicationId) => {
@@ -69,7 +93,7 @@ const ViewOfPatientPrescriptions = () => {
 
     return (
         <div>
-            <h2>Prescriptions for Patient {patientId}</h2>
+            <h2>Prescriptions for Patient {patientName}</h2> {/* Display patient name */}
 
             {/* Initial Simplified Table (Unique Medications Only) */}
             <TableContainer component={Paper}>

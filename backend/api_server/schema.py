@@ -1,7 +1,7 @@
 # build a schema using pydantic
 
 from typing import Optional
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, field_validator
 from datetime import date, datetime
 from .models import UserType
 
@@ -98,6 +98,11 @@ class PatientResponse(BaseModel):
     insurance_group_number: str
     insurance_member_id: str
 
+    @field_validator('date_of_birth', pre=True)
+    def convert_date_to_string(cls, value):
+        if isinstance(value, date):
+            return value.strftime('%Y-%m-%d')  # Convert `date` to `string` format
+        return value
     class Config:
         orm_mode = True
 

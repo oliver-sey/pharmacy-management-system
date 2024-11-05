@@ -97,13 +97,12 @@ class Medication(Base):
 
 
 # an enum class so we can restrict the set of possible values in the type column in user_activities
-# TODO: are these all the possible values we might need?
 class UserActivityType(PyEnum):
     LOGIN = "Login"
     LOGOUT = "Logout"
     UNLOCK_ACCOUNT = "Unlock Account"
     # including all the possible types that we are storing in inventory_updates
-    # (add, discard, fillpresc, and sellnonpresc)
+    #  (Add medication, Discard medication, Fill prescription, Sell non-prescription item)
     INVENTORY_UPDATE = "Inventory Update"
 
 

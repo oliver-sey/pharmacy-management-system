@@ -100,32 +100,6 @@ function ViewOfUsers() {
 		
 	];
 
-	// hardcoded values for development, this will come from the backend/database later
-	// TODO: get rid of hardcoded values
-	// const rows = [
-	// 	{
-	// 		id: 1,
-	// 		firstName: "Silly",
-	// 		lastName: "McGiggles",
-	// 		email: "silly.giggles@example.com",
-	// 		isLockedOut: "true",
-	// 	},
-	// 	{
-	// 		id: 2,
-	// 		firstName: "Chuckles",
-	// 		lastName: "VonLaugh",
-	// 		email: "chuckles.von@example.com",
-	// 		isLockedOut: "false",
-	// 	},
-	// 	{
-	// 		id: 3,
-	// 		firstName: "Giggle",
-	// 		lastName: "FitzSnicker",
-	// 		email: "giggle.fitz@example.com",
-	// 		isLockedOut: "false",
-	// 	},
-	// ];
-
 	// all users can edit users
 	const canEdit = () => {
 		// const userType = localStorage.getItem('userType');
@@ -135,9 +109,8 @@ function ViewOfUsers() {
 	  
 	// only pharmacists or pharmacy managers can delete
 	const canDelete = () => {
-		//const role = localStorage.getItem('role');
-		//return role === 'Pharmacist' || role === 'Pharmacy Manager';
-		return true;
+		const role = localStorage.getItem('role');
+		return role === 'Pharmacist' || role === 'Pharmacy Manager';
 	};
 
 	const deleteUser = async (id) => {

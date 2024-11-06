@@ -37,7 +37,10 @@ def determine_activity_type(request: Request):
     '''
     Determines the type of activity based on the endpoint that was called
     '''
-    if request.url.path == "users":
+    logger.info(f"Request Path: {request.url.path}, Request Method: {request.method}")
+    logger.info(f"patients in path {'patients' in request.url.path}")
+    logger.info(f"method == post: {request.method == 'POST'}")
+    if "user" in request.url.path:
         if request.method == "POST":
             return models.UserActivityType.CREATE_USER
         elif request.method == "PUT":
@@ -45,7 +48,7 @@ def determine_activity_type(request: Request):
         elif request.method == "DELETE":
             return models.UserActivityType.DELETE_USER
         
-    elif request.url.path == "patients":
+    elif "patient" in request.url.path:
         if request.method == "POST":
             return models.UserActivityType.CREATE_PATIENT
         elif request.method == "PUT":
@@ -53,7 +56,7 @@ def determine_activity_type(request: Request):
         elif request.method == "DELETE":
             return models.UserActivityType.DELETE_PATIENT
     
-    elif request.url.path == "prescriptions":
+    elif "prescription" in request.url.path:
         if request.method == "POST":
             return models.UserActivityType.CREATE_PRESCRIPTION
         
@@ -66,7 +69,6 @@ async def log_requests(request: Request, call_next):
     '''
     middleware for logging. 
     '''
-
     # these types of requests dont need to be logged. 
     # only requests that change something should be logged in
     # as well as login and logout
@@ -74,19 +76,14 @@ async def log_requests(request: Request, call_next):
     
     db: Session = SessionLocal()
     logger.info(f"Request Path: {request.url.path}")
-    logger.info(f'isloggingin: {request.url.path in ("/token", "/currentuser/me/", "/currentuser/me")}')
     if request.url.path in ("/token"):
         # check if a user is loggin in 
         logger.info(f"logging in: {request.url.path}")
          # Read the request body only once and store it
         request_body = await request.body()
-        logger.info(f"request_body: {request_body}")
         parsed_data = urllib.parse.parse_qs(request_body.decode())
-        logger.info(f"parsed_data: {parsed_data}")  
         email = parsed_data.get("username", [None])[0]
-        logger.info(f"email: {email}")
         user = db.query(models.User).filter(models.User.email == email).first()
-        logger.info(f"user: {user.id}")
         request = Request(request.scope, receive=lambda: request_body)
         response = await call_next(request)
         if request.url.path == "/token" and response.status_code == 200:
@@ -108,7 +105,6 @@ async def log_requests(request: Request, call_next):
         response = await call_next(request)
         return response
     else:
-        
         logger.info(f"request.headers: {request.headers.keys()}") 
         token = request.headers.get("Authorization")
         logger.info(f"token: {token}")
@@ -119,6 +115,9 @@ async def log_requests(request: Request, call_next):
         if request.method == "GET" :
             # check if the request is a get. i.e. not changing anything
             logger.info(f"GET request: {request.url.path}")
+            # rebuild request
+            request = Request(request.scope, receive=request.body)
+
             response = await call_next(request)
             return response
 
@@ -130,11 +129,13 @@ async def log_requests(request: Request, call_next):
 
             # Log successful response
             logger.info(f"Completed request with status code: {response.status_code}")
+            activity_type = determine_activity_type(request)
+            logger.info(f"Activity Type: {activity_type}")
             
             # Log this information to the database
             db_user_activity = models.UserActivity(
-                user_id=user.id,
-                type=determine_activity_type(request),
+                user_id=current_user.id,
+                type=activity_type,
                 timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
             )
 
@@ -148,7 +149,7 @@ async def log_requests(request: Request, call_next):
 
             # Insert log entry to database for DB errors
             db_user_activity = models.UserActivity(
-                user_id=user.id,
+                user_id=current_user.id,
                 type=determine_activity_type(request),
                 timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
             )
@@ -163,7 +164,7 @@ async def log_requests(request: Request, call_next):
 
             # Insert log entry to database for other errors
             db_user_activity = models.UserActivity(
-                user_id=user.id,
+                user_id=current_user.id,
                 type=determine_activity_type(request),
                 timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
             )

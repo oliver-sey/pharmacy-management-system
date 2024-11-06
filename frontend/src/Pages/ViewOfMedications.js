@@ -172,7 +172,6 @@ function ViewOfMedications() {
 	];
 
 
-	// TODO: is this right?
 	// only pharmacy manager can edit
 	const canEdit = () => {
 		const role = localStorage.getItem('role');
@@ -180,7 +179,6 @@ function ViewOfMedications() {
 		return role === 'Pharmacy Manager';
 	};
 	  
-	// TODO: is this right?
 	// only pharmacy managers can delete
 	const canDelete = () => {
 		const role = localStorage.getItem('role');

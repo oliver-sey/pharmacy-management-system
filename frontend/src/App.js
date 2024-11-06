@@ -20,6 +20,7 @@ import ViewOfPatientPrescriptions from './Pages/ViewOfPatientPrescriptions';
 import HomePage from './Pages/Home';
 import NotificationsPage from './Pages/NotificationsPage';
 import Header from "./Components/Header"; 
+import ViewOfPrescriptionFillHistory from './Pages/ViewOfPrescriptionFillHistory';
 import NotificationProvider from './Components/NotificationProvider';
 import NotificationManager from './Components/NotificationManager'; // Import NotificationManager
 
@@ -49,7 +50,8 @@ function App() {
             <Route path='/viewofmedications' element={<ViewOfMedications />} />
             <Route path='/viewofusers' element={<ViewOfUsers />} />
             <Route path='/viewofprescriptions' element={<ViewOfPrescriptions />} />
-            <Route path='/prescriptionstofill' element={<PrescriptionsToFill />} />
+            <Route path='/viewofprescriptionfillhistory' element={<ViewOfPrescriptionFillHistory/>}/>
+          <Route path='/prescriptionstofill' element={<PrescriptionsToFill />} />
             <Route path='/resetpassword' element={<ResetPassword />} />
             <Route path='/viewofemployees' element={<ViewOfEmployees />} />
             <Route path='/fill' element={<FillPrescriptionForm />} />

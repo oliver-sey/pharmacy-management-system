@@ -474,10 +474,26 @@ def get_prescription(prescription_id: int, db: Session = Depends(get_db), curren
 
 # create prescription
 @app.post("/prescription", response_model=schema.PrescriptionResponse)
-def create_prescription(prescription: schema.PrescriptionCreate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+def create_prescription(
+    prescription: schema.PrescriptionCreate,
+    db: Session = Depends(get_db),
+    current_user: UserToReturn = Depends(get_current_user),
+):
     # Ensure that prescription data is valid
     try:
-        db_prescription = models.Prescription(**prescription.model_dump())  # Use .model_dump() for Pydantic V2
+        # db_prescription = models.Prescription(**prescription.model_dump())  # Use .model_dump() for Pydantic V2
+
+        # not all the fields needed for the DB come from PrescriptionCreate (user_entered_id)
+        # so we need to add it here
+        db_prescription = models.Prescription(
+            patient_id=prescription.patient_id,
+            # get the user who entered the prescription from the current user
+            user_entered_id=current_user.id,
+            medication_id=prescription.id,
+            doctor_name=prescription.doctor_name,
+            quantity=prescription.quantity,  # The number of units of medication that this prescription allows the patient to get
+        )
+
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -491,10 +507,17 @@ def create_prescription(prescription: schema.PrescriptionCreate, db: Session = D
 # update prescription
 @app.put("/prescription/{prescription_id}", response_model=schema.PrescriptionUpdate)
 def update_prescription(prescription_id: int, prescription: schema.PrescriptionUpdate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
-    
+    # ** don't allow a prescription to be update if it has already been filled
+    # since we rely on the prescription to store important details, and if it is already filled,
+    # it doesn't make sense to change the patient_id, date_prescribed, medication_id, doctor_name, or quantity
+
     db_prescription = db.query(models.Prescription).filter(models.Prescription.id == prescription_id).first()
     if db_prescription is None:
         raise HTTPException(status_code=404, detail="Prescription not found")
+    # don't allow a prescription to be updated if it has already been filled
+    # check both the filled_timestamp and the user_filled_id just in case something weird happens and only one gets updated
+    elif db_prescription.filled_timestamp is not None or db_prescription.user_filled_id is not None:
+        raise HTTPException(status_code=409, detail="Prescriptions cannot be updated after they have already been filled")
     
     # Update only provided fields
     for key, value in prescription.model_dump().items():
@@ -554,15 +577,16 @@ def fill_prescription(prescription_id: int, db: Session = Depends(get_db), curre
         # if we successfully deduct medication from inventory, create an inventory update instance in InventoryUpdate table
         inventory_update_request = models.InventoryUpdate(
             medication_id=db_medication.id,
-            quantity_changed_by=db_prescription.quantity,       # The quantity deducted
+            # The quantity deducted - make it negative since we want it to be a delta of e.g. -20, instead of 20
+            quantity_changed_by= - db_prescription.quantity,
             # no transaction_id since this is not associated with a transaction
             # TODO: is this right? or should we do "Fill prescription"
-            type=models.InventoryUpdateType.FILL_PRESCRIPTION   # set the type to fill prescription
+            type=models.InventoryUpdateType.FILLPRESC   # set the type to fill prescription
         )
 
         # send the inventory_update_request to actually be stored in the database
         # this will add an entry to user_activities (for filling the prescription) for us
-        create_inventory_update(inventory_update=inventory_update_request, db=db)
+        create_inventory_update(inventory_update=inventory_update_request, db=db, current_user=current_user)
 
 
         # after making sure we have enough inventory and creating an inventory update (which create a user_activities entry for us)
@@ -572,7 +596,7 @@ def fill_prescription(prescription_id: int, db: Session = Depends(get_db), curre
         
         # set the timestamp of filling to the current time
         db_prescription.filled_timestamp = datetime.now()
-        # get the user who filled the prescription from the current user
+        # get the user_id of the user who filled the prescription from the current user
         db_prescription.user_filled_id = current_user.id
 
     db.commit()
@@ -588,18 +612,30 @@ def fill_prescription(prescription_id: int, db: Session = Depends(get_db), curre
 # create inventory_update
 # just as a function that will get called by other endpoints
 # @app.post("/inventory-updates", response_model=InventoryUpdateResponse)
-def create_inventory_update(inventory_update: InventoryUpdateCreate, request: Request, db: Session = Depends(get_db)):
-    # Ensure that inventory_update data is valid
+def create_inventory_update(inventory_update: InventoryUpdateCreate, db: Session, current_user: UserToReturn):
+    # Catch possible exceptions when creating the DB entries
     try:
-        db_inventory_update = models.InventoryUpdate(**inventory_update.model_dump())  # Use .model_dump() for Pydantic V2
+        # create a user_activities entry for this
+        # need to do this first so we can reference the user_activity_id in the inventory_update
+        # any type of updating the inventory (add, discard, filling, selling), the user_activity entry for it will be "Inventory Update"
+        # **NOTE: need to use the 'key' of the enum ('INVENTORY_UPDATE') instead of the 'value' ('Inventory Update')
+        user_activity_create = UserActivityCreate(type="INVENTORY_UPDATE")
+        new_user_activity = create_user_activity(user_activity_create, db, current_user)
+
+        # populate the fields of the new inventory_update
+        db_inventory_update = models.InventoryUpdate(
+            medication_id=inventory_update.medication_id,
+            user_activity_id=new_user_activity.id,
+            # might be None if there is no transaction associated with this update
+            transaction_id=inventory_update.transaction_id,
+            quantity_changed_by=inventory_update.quantity_changed_by,
+            # set the timestamp in UTC so timezones don't affect it
+            timestamp=datetime.now(timezone.utc),
+            type=inventory_update.type
+        )
+
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-
-    # create a user_activities entry for this
-    # any type of updating the inventory (add, discard, filling, selling), the user_activity entry for it will be "Inventory Update"
-    user_activity_create = UserActivityCreate(activity=models.UserActivityType.INVENTORY_UPDATE)
-    create_user_activity(user_activity_create, db)
-
 
     # add the inventory_update to the database
     db.add(db_inventory_update)
@@ -647,15 +683,13 @@ def get_inventory_updates(type: Optional[models.InventoryUpdateType] = Query(Non
 
 # endregion
 # region User Activities CRUD
-def create_user_activity(user_activity: UserActivityCreate, db: Session, current_user: UserToReturn = Depends(get_current_user)):
-    # get user_id from current_user
-    # TODO: should I be explicitly passing current_user here?
-    user_details = read_users_me(current_user=current_user)
+def create_user_activity(user_activity: UserActivityCreate, db: Session, current_user: UserToReturn):
 
     # Create a new UserActivity instance
     db_user_activity = models.UserActivity(
-        user_id=user_details.id,
-        activity=user_activity.activity,
+        # get user_id from current_user
+        user_id=current_user.id,
+        type=user_activity.type,
         timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
     )
 

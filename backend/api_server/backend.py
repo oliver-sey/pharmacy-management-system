@@ -75,13 +75,16 @@ async def log_requests(request: Request, call_next):
     db: Session = SessionLocal()
     logger.info(f"Request Path: {request.url.path}")
     logger.info(f'isloggingin: {request.url.path in ("/token", "/currentuser/me/", "/currentuser/me")}')
-    if request.url.path in ("/token", "/currentuser/me/", "/currentuser/me"):
+    if request.url.path in ("/token"):
         # check if a user is loggin in 
         logger.info(f"logging in: {request.url.path}")
          # Read the request body only once and store it
         request_body = await request.body()
+        logger.info(f"request_body: {request_body}")
         parsed_data = urllib.parse.parse_qs(request_body.decode())
+        logger.info(f"parsed_data: {parsed_data}")  
         email = parsed_data.get("username", [None])[0]
+        logger.info(f"email: {email}")
         user = db.query(models.User).filter(models.User.email == email).first()
         logger.info(f"user: {user.id}")
         request = Request(request.scope, receive=lambda: request_body)
@@ -129,30 +132,45 @@ async def log_requests(request: Request, call_next):
             logger.info(f"Completed request with status code: {response.status_code}")
             
             # Log this information to the database
-            log_entry = create_user_activity(UserActivityCreate(determine_activity_type(request)), db=db, current_user=current_user)
-            db.add(log_entry)
+            db_user_activity = models.UserActivity(
+                user_id=user.id,
+                type=determine_activity_type(request),
+                timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
+            )
+
+            db.add(db_user_activity)
             db.commit()
+            db.refresh(db_user_activity)
 
             return response
         except SQLAlchemyError as e: # if there is an error with the database / ORM
             logger.error(f"Database error occurred: {str(e)}")
 
             # Insert log entry to database for DB errors
-            log_entry = create_user_activity(
-                UserActivityCreate(models.UserActivityType.ERROR),
-                db=db, 
-                current_user=current_user)
-            db.add(log_entry)
+            db_user_activity = models.UserActivity(
+                user_id=user.id,
+                type=determine_activity_type(request),
+                timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
+            )
+
+            db.add(db_user_activity)
             db.commit()
+            db.refresh(db_user_activity)
             # Re-raise error after logging
             raise e  
         except Exception as e: # if there is any other error
             logger.error(f"An error occurred: {str(e)}")
 
             # Insert log entry to database for other errors
-            log_entry = create_user_activity(models.UserActivityType.ERROR, db=db, current_user=current_user)
-            db.add(log_entry)
+            db_user_activity = models.UserActivity(
+                user_id=user.id,
+                type=determine_activity_type(request),
+                timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
+            )
+
+            db.add(db_user_activity)
             db.commit()
+            db.refresh(db_user_activity)
 
             # Re-raise error after logging
             raise e

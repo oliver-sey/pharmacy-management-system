@@ -174,30 +174,37 @@ async def read_own_items(
 @app.post("/resetpassword")
 async def reset_password(
     newPassword: Annotated[str, Body(..., embed=True)],
-    currentUser: Annotated[UserToReturn, Depends(get_current_user)]
+    currentUser: Annotated[UserToReturn, Depends(get_current_user)],
+    db: Session = Depends(get_db)
 ):
     if not newPassword:
         raise HTTPException(status_code=400, detail="Password is required")
     
     # Checks that password is valid
-    if len(newPassword) < 8:
-        raise HTTPException(status_code=400, detail="Password must be at least 8 characters long.")
-    if not any(char.isdigit() for char in newPassword):
-        raise HTTPException(status_code=400, detail="Password must contain at least one number.")
-    if not any(char.isupper() for char in newPassword):
-        raise HTTPException(status_code=400, detail="Password must contain at least one uppercase letter.")
-    if not any(char.islower() for char in newPassword):
-        raise HTTPException(status_code=400, detail="Password must contain at least one lowercase letter.")
-    if not any(char in "!@#$%^&*()_+" for char in newPassword):
-        raise HTTPException(status_code=400, detail="Password must contain at least one special character.")
+    # if len(newPassword) < 8:
+    #     raise HTTPException(status_code=400, detail="Password must be at least 8 characters long.")
+    # if not any(char.isdigit() for char in newPassword):
+    #     raise HTTPException(status_code=400, detail="Password must contain at least one number.")
+    # if not any(char.isupper() for char in newPassword):
+    #     raise HTTPException(status_code=400, detail="Password must contain at least one uppercase letter.")
+    # if not any(char.islower() for char in newPassword):
+    #     raise HTTPException(status_code=400, detail="Password must contain at least one lowercase letter.")
+    # if not any(char in "!@#$%^&*()_+" for char in newPassword):
+    #     raise HTTPException(status_code=400, detail="Password must contain at least one special character.")
 
     # Hash the new password
     hashedPassword = get_password_hash(newPassword)
 
-    # Update the user's password in the fake database (in-memory)
-    fake_users_db[currentUser.email]["hashed_password"] = hashedPassword
+    
+    user = db.query(models.User).filter(models.User.id == currentUser.id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    user.password = hashedPassword
+    db.commit()
 
     return {"message": "Password has been successfully reset."}
+
 
 
 

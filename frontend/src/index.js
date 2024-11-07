@@ -3,12 +3,15 @@ import ReactDOM from 'react-dom/client';
 import './Styles/styles.css'; // import the global stylesheet so it gets used on all pages
 import './Styles/index.css';
 import App from './App';
+import NotificationProvider from './Components/NotificationProvider';
 import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <App />
+    <NotificationProvider>
+      <App />
+    </NotificationProvider>
   </React.StrictMode>
 );
 

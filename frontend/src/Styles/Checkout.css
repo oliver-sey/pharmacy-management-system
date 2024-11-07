@@ -1,0 +1,7 @@
+.patient-select-div {
+	display: flex;
+	justify-content: center;
+	margin-top: 20px;
+	/* take up 80% of the width */
+	width: 80%;
+}

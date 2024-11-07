@@ -110,7 +110,7 @@ const ViewOfPatientPrescriptions = () => {
                         {uniquePrescriptions.map((prescription) => (
                             <TableRow key={prescription.medication_id}>
                                 <TableCell>{prescription.medication_id}</TableCell>
-                                <TableCell>{prescription.dosage}</TableCell>
+                                <TableCell>{prescription.quantity}</TableCell>
                                 <TableCell>{prescription.doctor_name}</TableCell>
                                 <TableCell>
                                     <Button 
@@ -148,7 +148,7 @@ const ViewOfPatientPrescriptions = () => {
                                 {selectedPrescriptionHistory.map((history) => (
                                     <TableRow key={history.id}>
                                         <TableCell>{history.medication_id}</TableCell>
-                                        <TableCell>{history.dosage}</TableCell>
+                                        <TableCell>{history.quantity}</TableCell>
                                         <TableCell>{history.doctor_name}</TableCell>
                                         <TableCell>{new Date(history.date_prescribed).toLocaleDateString()}</TableCell>
                                         <TableCell>{new Date(history.filled_timestamp).toLocaleString()}</TableCell>

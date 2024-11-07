@@ -8,6 +8,7 @@ const Header = () => {
     const navigate = useNavigate();
     const location = useLocation(); 
     const token = localStorage.getItem('token'); 
+    const secondToken = sessionStorage.getItem('token')
     const userRole = localStorage.getItem('role'); 
     const { state: notifications, dispatch } = useContext(NotificationContext); // Get notifications from context
     const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
@@ -15,16 +16,17 @@ const Header = () => {
     useEffect(() => {
         const unread = notifications.some(notification => !notification.read);
         setHasUnreadNotifications(unread);
-
-       
+      
+        // Mark as read only if the user is on the notifications page
         if (location.pathname === "/notifications" && unread) {
-            dispatch({ type: "MARK_ALL_AS_READ" });
+          dispatch({ type: "MARK_ALL_AS_READ" });
         }
-    }, [notifications, location.pathname, dispatch]);
+      }, [notifications, location.pathname, dispatch]);
 
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('role');
+        sessionStorage.removeItem("notifications");
         navigate('/login'); 
     };
 

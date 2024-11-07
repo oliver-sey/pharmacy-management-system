@@ -25,20 +25,21 @@ const notificationReducer = (state, action) => {
 };
 
 const NotificationProvider = ({ children }) => {
-   const [state, dispatch] = useReducer(notificationReducer, [], () => {
-      const storedNotifications = localStorage.getItem("notifications");
+    const [state, dispatch] = useReducer(notificationReducer, [], () => {
+      const storedNotifications = sessionStorage.getItem("notifications");
       return storedNotifications ? JSON.parse(storedNotifications) : [];
-   });
-
-   useEffect(() => {
-      localStorage.setItem("notifications", JSON.stringify(state));
-   }, [state]);
-
-   return (
+    });
+  
+    useEffect(() => {
+      sessionStorage.setItem("notifications", JSON.stringify(state));
+    }, [state]);
+  
+    return (
       <NotificationContext.Provider value={{ state, dispatch }}>
-         {children}
+        {children}
       </NotificationContext.Provider>
-   );
-};
+    );
+  };
+  
 
 export default NotificationProvider;

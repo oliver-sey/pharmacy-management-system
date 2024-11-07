@@ -9,23 +9,24 @@ const NotificationManager = () => {
   const location = useLocation();
 
   useEffect(() => {
+    let intervalId;
+
     const checkLowStock = async () => {
       try {
         const response = await fetch("http://localhost:8000/medicationlist", {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         if (!response.ok) throw new Error("Failed to fetch medication list");
 
         const medications = await response.json();
         const lowStockThreshold = 10;
-        const lowStockItems = medications.filter(
-          (med) => med.quantity < lowStockThreshold
-        );
+        const lowStockItems = medications.filter((med) => med.quantity < lowStockThreshold);
 
         lowStockItems.forEach((item) => {
           // Check if a notification for this item already exists
           const notificationExists = notifications.some(
-            (notification) => notification.message.includes(item.name) && !notification.read
+            (notification) =>
+              notification.message.includes(`Low stock alert for ${item.name}`) && !notification.read
           );
 
           if (!notificationExists) {
@@ -35,7 +36,7 @@ const NotificationManager = () => {
                 id: uuidv4(),
                 type: "Warning",
                 message: `Low stock alert for ${item.name}! Only ${item.quantity} left.`,
-                timestamp: Date.now()
+                timestamp: Date.now(),
               },
             });
           }
@@ -45,9 +46,13 @@ const NotificationManager = () => {
       }
     };
 
+    // Set up an interval to check low stock every minute (adjust interval as needed)
     if (isLoggedIn && location.pathname !== "/notifications") {
-      checkLowStock();
+      intervalId = setInterval(checkLowStock, 60000); // Check every 60 seconds
     }
+
+    // Clear the interval when component unmounts or dependencies change
+    return () => clearInterval(intervalId);
   }, [dispatch, isLoggedIn, location.pathname, notifications]);
 
   return null;

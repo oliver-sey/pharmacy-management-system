@@ -90,7 +90,7 @@ class PatientResponse(BaseModel):
     id: int
     first_name: str
     last_name: str
-    date_of_birth: str
+    date_of_birth: date
     address: str
     phone_number: str
     email: EmailStr
@@ -98,15 +98,11 @@ class PatientResponse(BaseModel):
     insurance_group_number: str
     insurance_member_id: str
 
-    @field_validator('date_of_birth', pre=True)
-    def convert_date_to_string(cls, value):
-        if isinstance(value, date):
-            return value.strftime('%Y-%m-%d')  # Convert `date` to `string` format
-        return value
+    
     class Config:
         orm_mode = True
 
-    # this handles converting the date_of_birth from a datetime object to a string
+    
     @staticmethod
     def from_orm(patient):
         # Ensure date_of_birth is converted to a string

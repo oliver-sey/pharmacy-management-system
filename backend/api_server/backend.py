@@ -304,7 +304,7 @@ def list_users(db: Session = Depends(get_db), current_user: UserToReturn = Depen
 # region Patient CRUD
 #--------PATIENT CRUD OPERATIONS--------
 
-@app.get("/get/patient/{patient_id}", response_model=PatientResponse)
+@app.get("/patient/{patient_id}", response_model=PatientResponse)
 def get_patient(patient_id: int, db: Session = Depends(get_db),current_user: UserToReturn = Depends(get_current_user)):
     patient = db.query(models.Patient).filter(models.Patient.id == patient_id).first()
     if patient is None:

@@ -310,7 +310,9 @@ def get_patient(patient_id: int, db: Session = Depends(get_db),current_user: Use
     if patient is None:
         raise HTTPException(status_code=404, detail="Medication not found")
     
-    return patient
+    # fix the date_of_birth to be a string
+    patient_to_return = PatientResponse.from_orm(patient)
+    return patient_to_return
 
 @app.get("/patients", response_model=List[PatientResponse])
 def get_patients(db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):

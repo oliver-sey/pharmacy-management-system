@@ -45,26 +45,6 @@ const nonPrescriptionItems = [
 	{ id: 3, name: "Vitamin C", unitPrice: 12.0, details: "500mg Tablet" },
 ];
 
-const patients = ["John Doe", "Jane Smith", "Michael Johnson", "Alice Brown"];
-
-const prescriptions = [
-	{
-		id: 1,
-		patientId: 1,
-		patientName: "John Doe",
-		name: "Antibiotic",
-		unitPrice: 15.0,
-		details: "500mg Tablet",
-	},
-	{
-		id: 2,
-		patientId: 1,
-		patientName: "John Doe",
-		name: "Blood Pressure Med",
-		unitPrice: 20.0,
-		details: "20mg Tablet",
-	},
-];
 
 function Checkout() {
 	const [cart, setCart] = useState({ nonPrescription: [], prescription: [] });

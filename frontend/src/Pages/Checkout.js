@@ -89,18 +89,57 @@ function Checkout() {
 					},
 				}
 			);
-			const data = await response.json(); // Convert response to JSON
-			setFilteredPrescriptions(data); // Store the fetched data in state
+			const originalPrescriptions = await response.json(); // Convert response to JSON
 
-			// return data;
+			// make requests to the API with the original data to get the medication names
+			const medicationPromises = originalPrescriptions.map(
+				async (prescription) => {
+					const response = await fetch(
+						`http://localhost:8000/medication/${prescription.medication_id}`,
+						{
+							headers: {
+								Authorization: "Bearer " + token,
+							},
+						}
+					);
+					const medicationData = await response.json();
+					return {
+						...prescription,
+						medication_name: medicationData.name,
+						dosage: medicationData.dosage,
+						dollars_per_unit: medicationData.dollars_per_unit,
+					};
+				}
+			);
+
+			// wait on all the requests
+			const PrescriptionsWithMedNames = await Promise.all(
+				medicationPromises
+			);
+
+			// filter out prescriptions that are not yet filled - can't sell a medication to a patient if we haven't put it in the bottle yet
+			const filledPrescriptionsWithMedNames =
+				PrescriptionsWithMedNames.map((prescription) => ({
+					...prescription,
+					medication_name: prescription.medication_name,
+				})).filter(
+					(prescription) =>
+						prescription.filled_timestamp &&
+						prescription.user_filled_id
+				);
+
+			setFilteredPrescriptions(filledPrescriptionsWithMedNames); // Store the fetched data in state
 		} catch (error) {
-			console.error(`Error fetching prescriptions for patient_id ${patientId}: ${error}`);
+			console.error(
+				`Error fetching prescriptions for patient_id ${patientId}: ${error}`
+			);
 			// error handling
 			setErrorMessage("Failed to fetch prescriptions");
 			setOpenSnackbar(true); // Show Snackbar when error occurs
-		}
-		finally {
+		} finally {
 			// done loading prescriptions data
+			// wait 5 seconds
+			// await new Promise(resolve => setTimeout(resolve, 5000));
 			setPrescriptionsLoading(false);
 		}
 	};

@@ -25,6 +25,15 @@ import {
 	Snackbar
 } from "@mui/material";
 
+
+// TODO: use RemoveShoppingCartIcon instead of Button
+// TODO: clear cart when the selected patient changes? don't want to let the wrong patient buy prescription items
+	// or just clear prescriptions items from the cart?
+// TODO: get rid of grid and container
+// TODO: put the patient at the top and require the patient dropdown before checking out 
+// (need patient_id for the transaction)
+
+
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import RemoveShoppingCartIcon from "@mui/icons-material/RemoveShoppingCart";
 // import Autocomplete from "@mui/lab/Autocomplete";

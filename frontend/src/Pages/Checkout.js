@@ -21,7 +21,8 @@ import {
 	InputLabel, 
 	MenuItem,
 	FormControl,
-	Select
+	Select,
+	Snackbar
 } from "@mui/material";
 
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
@@ -156,6 +157,13 @@ function Checkout() {
 					},
 				}
 			);
+			if (response.status === 400) {
+				throw new Error("Bad request fetching patient data. There may be a bug in the code, please contact the development team.");
+			} else if (response.status === 401) {
+				throw new Error("Unauthorized request to fetch patient data. Please log in and try again.");
+			} else if (response.status === 500) {
+				throw new Error("Server error fetching patient data. Please try again later.");
+			}
 			if (!response.ok) {
 				// TODO: do more to handle the error?
 				throw new Error("Failed to fetch patient data");
@@ -181,7 +189,13 @@ function Checkout() {
 					Authorization: "Bearer " + token,
 				},
 			});
-
+			if (response.status === 400) {
+				throw new Error("Bad request fetching prescription data. There may be a bug in the code, please contact the development team.");
+			} else if (response.status === 401) {
+				throw new Error("Unauthorized request to fetch prescription data. Please log in and try again.");
+			} else if (response.status === 500) {
+				throw new Error("Server error fetching prescription data. Please try again later.");
+			}
 			if (!response.ok) {
 				throw new Error("Failed to fetch patient data");
 			}
@@ -573,6 +587,12 @@ function Checkout() {
 					</Paper>
 				</Grid>
 			</Grid>
+			<Snackbar
+				open={openSnackbar}
+				message={errorMessage}
+				autoHideDuration={6000}
+				onClose={() => setOpenSnackbar(false)}
+			/>
 		</Container>
 	);
 }

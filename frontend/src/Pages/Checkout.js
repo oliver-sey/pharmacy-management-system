@@ -338,7 +338,8 @@ function Checkout() {
 									labelId="patient-select-label"
 									id="patient-select"
 									// if selectedPatient is not null, show the name and DOB, otherwise show an empty string
-									value={selectedPatient ? `${selectedPatient.first_name} ${selectedPatient.last_name} (DOB ${selectedPatient.date_of_birth})` : ""}
+									// value={selectedPatient ? `${selectedPatient.first_name} ${selectedPatient.last_name} (DOB ${selectedPatient.date_of_birth})` : ""}
+									value={selectedPatient ? selectedPatient.id : ""}
 									label="Patient"
 									onChange={(e) => {
 										handlePatientSelect(e.target.value)
@@ -346,30 +347,12 @@ function Checkout() {
 									}
 									}
 								>
-									{/* <MenuItem value={10}>Ten</MenuItem>
-									<MenuItem value={20}>Twenty</MenuItem>
-									<MenuItem value={30}>Thirty</MenuItem> */}
-
 									{patients.map((patient) => (
 										<MenuItem key={patient.id} value={patient.id}>
 											{patient.first_name} {patient.last_name}{" "}
 											(DOB {patient.date_of_birth})
 										</MenuItem>
 									))} 
-
-
-									{/* code from before I started using Material UI and FormControl */}
-									{/* placeholder value that you can't select */}
-									{/* <option value="" disabled>
-									Select Patient
-								</option>
-
-								{patients.map((patient) => (
-									<option key={patient.id} value={patient.id}>
-										{patient.first_name} {patient.last_name}{" "}
-										(DOB {patient.date_of_birth})
-									</option>
-								))} */}
 								</Select>
 							</FormControl>
 						</div>

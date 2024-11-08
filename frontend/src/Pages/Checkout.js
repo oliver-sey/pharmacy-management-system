@@ -370,7 +370,11 @@ function Checkout() {
 								<TableHead>
 									<TableRow>
 										<TableCell>Name</TableCell>
-										<TableCell>Details</TableCell>
+										<TableCell>Dosage</TableCell>
+										<TableCell>Quantity</TableCell>
+										<TableCell>Date Prescribed</TableCell>
+										<TableCell>Date Filled</TableCell>
+										<TableCell>Doctor Name</TableCell>
 										<TableCell>Unit Price</TableCell>
 										<TableCell>Add to Cart</TableCell>
 									</TableRow>
@@ -394,7 +398,32 @@ function Checkout() {
 													<Skeleton variant="text" />
 												</TableCell>
 											</TableRow>
-											{/* (a few rows below this, but we can't put a comment there) */}
+											<TableRow>
+												<TableCell colSpan={4}>
+													<Skeleton variant="text" />
+												</TableCell>
+											</TableRow>
+											<TableRow>
+												<TableCell colSpan={4}>
+													<Skeleton variant="text" />
+												</TableCell>
+											</TableRow>
+											<TableRow>
+												<TableCell colSpan={4}>
+													<Skeleton variant="text" />
+												</TableCell>
+											</TableRow>
+											<TableRow>
+												<TableCell colSpan={4}>
+													<Skeleton variant="text" />
+												</TableCell>
+											</TableRow>
+											<TableRow>
+												<TableCell colSpan={4}>
+													<Skeleton variant="text" />
+												</TableCell>
+											</TableRow>
+											{/* (these comments are for a few rows below this, but we can't put a comment there) */}
 											{/* handling the case if there is a problem getting the prescriptions */}
 											{/* make sure filteredPrescriptions even exists, then make sure the length is greater than 0 */}
 										</>
@@ -403,16 +432,30 @@ function Checkout() {
 										filteredPrescriptions.map(
 											(prescription) => (
 												<TableRow key={prescription.id}>
+												{/* for the medication name */}
 													<TableCell>
-														{prescription.name}
+														{prescription.medication_name}
 													</TableCell>
 													<TableCell>
-														{prescription.details}
+														{prescription.dosage}
 													</TableCell>
 													<TableCell>
+														{prescription.quantity}
+													</TableCell>
+													<TableCell>
+														{prescription.date_prescribed}
+													</TableCell>
+													<TableCell>
+														{prescription.filled_timestamp}
+													</TableCell>
+													<TableCell>
+														{prescription.doctor_name}
+													</TableCell>
+													<TableCell>
+													{/* TODO: how many decimal places here?? */}
 														$
-														{prescription.unitPrice.toFixed(
-															2
+														{prescription.dollars_per_unit.toFixed(
+															4
 														)}
 													</TableCell>
 													<TableCell>

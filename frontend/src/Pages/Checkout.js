@@ -244,14 +244,11 @@ function Checkout() {
 		setSelectedPatient(patient);
 		// call the function to get prescriptions for this patient, and put it into filteredPrescriptions
 		// so it can be displayed in the list
-		const prescriptions = await fetchPrescriptionsForPatient(patientID)
-		setFilteredPrescriptions(
-			// prescriptions.filter(
-			// 	(prescription) => prescription.patientId === patientID
-			// )
 
-			prescriptions
-		);
+		// don't need to call setFilteredPrescriptions here since it is already called in fetchPrescriptionsForPatient
+		// const prescriptions = await fetchPrescriptionsForPatient(patientID)
+		await fetchPrescriptionsForPatient(patientID)
+
 	};
 
 	const calculateTotal = (items) =>

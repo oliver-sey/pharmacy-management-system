@@ -70,7 +70,7 @@ function ViewOfUsers() {
 	// headerName is what shows up on the website
 	// width is the default width of the column, user can adjust it
 	const columns = [
-		{ field: "id", headerName: "ID", width: 70 },
+		//{ field: "id", headerName: "ID", width: 70 },
 		{ field: "first_name", headerName: "First name", width: 130 },
 		{ field: "last_name", headerName: "Last name", width: 130 },
 		{
@@ -94,7 +94,7 @@ function ViewOfUsers() {
 			},
 		},
 		{ field: "email", headerName: "Email", width: 220 },
-		{ field: "password", headerName: "Password", width: 220, renderCell: (params) => '•••••••' }
+		//{ field: "password", headerName: "Password", width: 220, renderCell: (params) => '•••••••' }
 
 
 		

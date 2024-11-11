@@ -112,6 +112,9 @@ class UserActivityType(PyEnum):
     DELETE_PATIENT = "Delete Patient"
     UPDATE_PATIENT = "Update Patient"
     CREATE_PRESCRIPTION = "Create Prescription"
+    CREATE_MEDICATION = "Create Medication"
+    DELETE_MEDICATION = "Delete Medication"
+    UPDATE_MEDICATION = "Update Medication"
     OTHER = "Other"
     ERROR = "Error"
 

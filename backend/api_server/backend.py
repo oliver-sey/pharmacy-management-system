@@ -59,7 +59,15 @@ def determine_activity_type(request: Request):
     elif "prescription" in request.url.path:
         if request.method == "POST":
             return models.UserActivityType.CREATE_PRESCRIPTION
-        
+    
+    elif "medication" in request.url.path:
+        if request.method == "POST":
+            return models.UserActivityType.CREATE_MEDICATION
+        elif request.method == "PUT":
+            return models.UserActivityType.UPDATE_MEDICATION
+        elif request.method == "DELETE":
+            return models.UserActivityType.DELETE_MEDICATION
+
     else:
         return models.UserActivityType.OTHER   
 
@@ -104,6 +112,9 @@ async def log_requests(request: Request, call_next):
         logger.info(f"verifying token: {request.url.path}")
         response = await call_next(request)
         return response
+    elif request.method == "GET":
+        response = await call_next(request)
+        return response
     else:
         logger.info(f"request.headers: {request.headers.keys()}") 
         token = request.headers.get("Authorization")
@@ -118,7 +129,7 @@ async def log_requests(request: Request, call_next):
             # rebuild request
             request = Request(request.scope, receive=request.body)
 
-            response = await call_next(request)
+            response = call_next(request)
             return response
 
         try:

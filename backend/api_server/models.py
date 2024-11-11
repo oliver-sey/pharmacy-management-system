@@ -61,7 +61,7 @@ class Prescription(Base):
     __tablename__ = 'prescriptions'
 
     id = Column(Integer, primary_key=True, index=True)
-    patient_id = Column(Integer, ForeignKey('patients.id'), nullable=True)
+    patient_id = Column(Integer, ForeignKey('patients.id', ondelete="SET NULL"), nullable=True)
     user_entered_id = Column(Integer, ForeignKey('users.id'), nullable=False)  # User who typed in the prescription
     user_filled_id = Column(Integer, ForeignKey('users.id'), default=None, nullable=True)  # User who filled the prescription
     date_prescribed = Column(Date, default=func.current_date(), nullable=False)

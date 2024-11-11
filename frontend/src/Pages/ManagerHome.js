@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useRef} from 'react'
 import CheckUserType from '../Functions/CheckUserType';
 import { useNavigate, Link } from 'react-router-dom';
-import { styled } from '@mui/material/styles';
+import { styled, makeStyles } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid2';
@@ -10,6 +10,7 @@ import AddCircleOutlinedIcon from '@mui/icons-material/AddCircleOutlined';
 import AddEditPrescriptionModal from '../Components/AddEditPrescriptionModal';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';
+import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import "../Styles/ManagerHome.css"
 
 const Item = styled(Paper)(({ theme }) => ({
@@ -27,7 +28,6 @@ function ManagerHome() {
   const role = ["Pharmacy Manager"]
   const navigate = useNavigate();
   const [curr_user_id, set_curr_user_id] = useState("");
-
 
 
     const [isEditOpen, setIsEditOpen] = useState(false); // Tracks if the modal is open
@@ -113,6 +113,15 @@ function ManagerHome() {
     const handleViewPatientsClick = () => {
       navigate('../viewofpatients', {replace: true})
     }
+
+    const handleViewMedicationsClick = () => {
+      navigate('../viewofmedications', {replace: true})
+    }
+
+    //TODO: update when page is added
+    const handleViewInventoryChangesClick = () => {
+      
+    }
   
     useEffect(() => {
         CheckUserType(role, navigate);
@@ -129,7 +138,7 @@ function ManagerHome() {
             <Item>
             Enter New Prescription
             <div/>
-            <IconButton aria-label="addPrescription" size="large" color='primary' onClick={openAddPrescriptionHandler}>
+            <IconButton sx={{maxWidth: 60}} aria-label="addPrescription" color='primary' onClick={openAddPrescriptionHandler}>
                 <AddCircleOutlinedIcon />
               </IconButton>
             </Item>
@@ -138,7 +147,7 @@ function ManagerHome() {
             <Item>
               View All Prescriptions
               <div/>
-              <IconButton aria-label="viewPrescriptions" size="large" color='primary' onClick={handleViewPrescriptionsClick}>
+              <IconButton sx={{maxWidth: 60}} aria-label="viewPrescriptions" color='primary' onClick={handleViewPrescriptionsClick}>
                 <VisibilityOutlinedIcon />
               </IconButton>
             </Item>
@@ -147,7 +156,7 @@ function ManagerHome() {
             <Item>
               See Prescription Fill History
               <div/>
-              <IconButton aria-label="viewPrescriptionFillHistory" size="large" color='primary' onClick={handleViewPrescriptionFillHistoryClick}>
+              <IconButton sx={{maxWidth: 60}} aria-label="viewPrescriptionFillHistory" color='primary' onClick={handleViewPrescriptionFillHistoryClick}>
                 <HistoryOutlinedIcon />
               </IconButton>
             </Item>
@@ -164,7 +173,7 @@ function ManagerHome() {
             <Item>
             View/Add Patients
             <div/>
-              <IconButton aria-label="viewPrescriptions" size="large" color='primary' onClick={handleViewPatientsClick}>
+              <IconButton sx={{maxWidth: 60}} aria-label="viewPrescriptions" color='primary' onClick={handleViewPatientsClick}>
                 <VisibilityOutlinedIcon />
               </IconButton>
 
@@ -175,8 +184,33 @@ function ManagerHome() {
             <Item>
               View/Add Users
               <div/>
-              <IconButton aria-label="addPatient" size="large" color='primary' onClick={handleViewUsersClick}>
+              <IconButton sx={{maxWidth: 60}} aria-label="addPatient" color='primary' onClick={handleViewUsersClick}>
                 <VisibilityOutlinedIcon />
+              </IconButton>
+            </Item>
+          </Grid>
+        </Grid>
+      </Box>
+
+      <div/>
+      <h1 className='section-header'>Medications</h1>
+        <Box sx={{ flexGrow: 1 }}>
+        <Grid container spacing={6} margin={4}>
+          <Grid size={6}>
+            <Item>
+              View Medications
+              <div/>
+              <IconButton sx={{maxWidth: 60}} aria-label="viewMedications" color='primary' onClick={handleViewMedicationsClick}>
+                  <VisibilityOutlinedIcon />
+              </IconButton>
+            </Item>
+          </Grid>
+          <Grid size={6}>
+            <Item>
+              View Inventory Changes
+              <div/>
+              <IconButton sx={{maxWidth: 60}} aria-label="viewInventoryChanges"  color='primary' onClick={handleViewInventoryChangesClick}>
+                <Inventory2OutlinedIcon />
               </IconButton>
             </Item>
           </Grid>

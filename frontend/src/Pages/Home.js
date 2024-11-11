@@ -7,8 +7,35 @@ import logo from '../assets/FishbowlLogo.png';  // Adjust the path to match wher
 const HomePage = () => {
     const navigate = useNavigate();
 
-    const handleLogInClick = () => {
-        navigate('/Login');
+    const handleLogInClick = async () => {
+        if (localStorage.getItem('token') === null) {
+            navigate('/Login');
+        } else {
+            const token = localStorage.getItem('token')
+            const userResponse = await fetch('http://localhost:8000/currentuser/me', {
+                method: 'GET',
+                headers: {'Authorization': 'Bearer ' + token}
+      
+              })
+      
+              if (userResponse.ok) {
+                const userData = await userResponse.json();
+                
+                //if user's role is one other than the following, they are redirected back to login
+                if (userData.user_type === 'Pharmacy Manager') {
+                navigate('../managerhome', {replace: true})
+                } else if (userData.user_type === 'Pharmacist') {
+                navigate('../pharmacisthome', {replace: true})
+                } else if (userData.user_type === 'Cashier'){
+                navigate('../cashierhome', {replace: true})
+                } else if (userData.user_type === 'Pharmacy Technician'){
+                navigate('../pharmtechhome', {replace: true})
+                } else {
+                navigate('../protected', {replace: true})
+                }
+            }
+        }
+        
     }
 
     return (

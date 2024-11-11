@@ -9,13 +9,17 @@ import { IconButton, Button, Tooltip, Snackbar, Alert } from "@mui/material";
 import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import WarningIcon from "@mui/icons-material/Warning";
+import { useNavigate } from "react-router-dom";
+import CheckUserType from "../Functions/CheckUserType";
 
 function ViewOfMedications() {
 	const [rows, setRows] = useState([]);
 	const [errorMessage, setErrorMessage] = useState(null);
 	const [openSnackbar, setOpenSnackbar] = useState(false);
-
+	const roles = ["Pharmacy Manager", "Pharmacist", "Pharmacy Technician"]
 	const token = localStorage.getItem('token');
+	const navigate = useNavigate();
+
 
 	// Async function to fetch medications data
 	const fetchMedications = async () => {
@@ -37,6 +41,7 @@ function ViewOfMedications() {
 
 	// useEffect to fetch data when the component mounts
 	useEffect(() => {
+		CheckUserType(roles, navigate);
 		fetchMedications(); // Call the async function
 	  }, []); // Empty array means this effect runs once when the component mounts
 
@@ -288,6 +293,7 @@ function ViewOfMedications() {
 	return (
 		<div>
 			<h2>Medication Inventory Table</h2>
+			{localStorage.getItem("role") === "Pharmacy Manager" &&
 			<Button
 				variant="contained"
 				onClick={() => {
@@ -297,7 +303,7 @@ function ViewOfMedications() {
 				}}
 			>
 				Add Medication
-			</Button>
+			</Button>}
 
 			<EditDeleteTable
 				columns={columns}

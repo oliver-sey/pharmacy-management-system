@@ -112,7 +112,7 @@ class UserActivity(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey('users.id'))
     # restrict the set of possible values in the type column
-    type = Column(SQLAlchemyEnum(UserActivityType))
+    activity_type = Column(SQLAlchemyEnum(UserActivityType))
     timestamp = Column(DateTime, default=func.now())
 
     user = relationship("User", back_populates="user_activities")
@@ -144,7 +144,7 @@ class InventoryUpdate(Base):
     quantity_changed_by = Column(Integer)
     timestamp = Column(DateTime, default=func.now())
     # what action type it was, e.g. 'add', 'discard', 'fillpresc', or 'sellnonpresc'
-    type = Column(SQLAlchemyEnum(InventoryUpdateType))
+    activity_type = Column(SQLAlchemyEnum(InventoryUpdateType))
     medication = relationship("Medication", back_populates="inventory_updates")
     user_activity = relationship("UserActivity", back_populates="inventory_updates")  # Correct the relationship
     # transaction = relationship("Transaction", back_populates="inventory_update")

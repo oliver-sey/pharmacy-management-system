@@ -27,9 +27,6 @@ services:
     build:
       context: ./frontend  # Point to your frontend directory
       dockerfile: Dockerfile  # Ensure this matches the name and location of your Dockerfile
-    volumes:
-      - ./frontend:/app  # Mount the frontend directory for live updates
-      - /app/node_modules  # Prevent local node_modules from overwriting container's node_modules
     ports:
       - "3000:3000"
     command: npm start  # Start the React development server

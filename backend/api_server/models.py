@@ -112,7 +112,7 @@ class UserActivity(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey('users.id'))
     # restrict the set of possible values in the type column
-    type = Column(SQLAlchemyEnum(UserActivityType))
+    activity = Column(SQLAlchemyEnum(UserActivityType))
     timestamp = Column(DateTime, default=func.now())
 
     user = relationship("User", back_populates="user_activities")

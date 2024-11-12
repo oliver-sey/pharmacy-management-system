@@ -235,5 +235,7 @@ class UserActivityCreate(BaseModel):
 class UserActivityResponse(BaseModel):
     id: int
     user_id: int
-    type: str # the activity type, an enum
+    activity: str # the activity type, an enum
     timestamp: datetime
+    class Config:
+        orm_mode = True

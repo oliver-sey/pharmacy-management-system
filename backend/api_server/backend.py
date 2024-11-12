@@ -384,6 +384,13 @@ def create_medication(medication: schema.MedicationCreate, db: Session = Depends
     db.add(db_medication)
     db.commit()
     db.refresh(db_medication)
+
+    #create inventory update
+    inventory_update = create_inventory_update(inventory_update=InventoryUpdateCreate(
+        medication_id=db_medication.id,
+        quantity_changed_by= - medication.quantity,
+        activity_type=models.InventoryUpdateType.ADD
+    ), db=db, current_user=current_user)
     return db_medication
 
 # get medication by id
@@ -496,7 +503,7 @@ def create_prescription(
             patient_id=prescription.patient_id,
             # get the user who entered the prescription from the current user
             user_entered_id=current_user.id,
-            medication_id=prescription.id,
+            medication_id=prescription.medication_id,
             doctor_name=prescription.doctor_name,
             quantity=prescription.quantity,  # The number of units of medication that this prescription allows the patient to get
         )
@@ -588,7 +595,7 @@ def fill_prescription(prescription_id: int, db: Session = Depends(get_db), curre
             quantity_changed_by= - db_prescription.quantity,
             # no transaction_id since this is not associated with a transaction
             # TODO: is this right? or should we do "Fill prescription"
-            type=models.InventoryUpdateType.FILLPRESC   # set the type to fill prescription
+            activity_type=models.InventoryUpdateType.FILLPRESC   # set the type to fill prescription
         )
 
         # send the inventory_update_request to actually be stored in the database

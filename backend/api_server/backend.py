@@ -13,6 +13,7 @@ from typing import Optional
 from .database import SessionLocal, engine, Base
 from .schema import Token, TokenData, UserActivityCreate, UserCreate, UserResponse, UserLogin, UserToReturn, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, InventoryUpdateCreate,  InventoryUpdateResponse, UserActivityResponse
 from . import models  # Ensure this is the SQLAlchemy model
+from .models import UserActivity
 from sqlalchemy.orm import Session
 from typing import List
 from . import schema
@@ -704,14 +705,27 @@ def create_user_activity(user_activity: UserActivityCreate, db: Session, current
     db.commit()
     db.refresh(db_user_activity)
     return db_user_activity
-
-# Endpoint to retrieve all user activities for the current user
 @app.get("/user-activities", response_model=List[UserActivityResponse])
-def get_user_activities(
-    db: Session = Depends(get_db),
-    current_user: UserToReturn = Depends(get_current_user)
+def get_all_user_activities(
+    user_id: Optional[int] = Query(None),
+    activity: Optional[str] = Query(None),
+    start_date: Optional[str] = Query(None),
+    end_date: Optional[str] = Query(None),
+    db: Session = Depends(get_db)
 ):
-    activities = db.query(models.UserActivity).filter(models.UserActivity.user_id == current_user.id).all()
+    query = db.query(UserActivity)
+
+    if user_id:
+        query = query.filter(UserActivity.user_id == user_id)
+    if activity:
+        query = query.filter(UserActivity.activity == activity)
+    if start_date:
+        query = query.filter(UserActivity.timestamp >= datetime.fromisoformat(start_date))
+    if end_date:
+        query = query.filter(UserActivity.timestamp <= datetime.fromisoformat(end_date))
+
+    activities = query.all()
     if not activities:
         raise HTTPException(status_code=404, detail="No activities found")
     return activities
+

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import '../Styles/UserActivitiesTable.css';
+import '../Styles/UserActivitiesTable.css'; // Import the CSS file for styling
 
 const UserActivitiesTable = () => {
   const [activities, setActivities] = useState([]);
@@ -16,7 +16,8 @@ const UserActivitiesTable = () => {
   }, []);
 
   const fetchActivities = async () => {
-    setError(null);
+    setError(null); // Reset error at the start of each fetch
+
     const params = new URLSearchParams();
     if (filters.userId) params.append('user_id', filters.userId);
     if (filters.activity) params.append('activity', filters.activity);
@@ -24,8 +25,8 @@ const UserActivitiesTable = () => {
     if (filters.endDate) params.append('end_date', filters.endDate);
 
     const query = `http://localhost:8000/user-activities?${params.toString()}`;
-    const token = localStorage.getItem('token');
 
+    const token = localStorage.getItem('token');
     if (!token) {
       alert("No authentication token found. Please log in.");
       return;
@@ -44,16 +45,16 @@ const UserActivitiesTable = () => {
           alert("Session expired. Please log in again.");
           return;
         }
-        setError(`Server responded with status ${response.status}`);
-        return;
+        const errorMessage = `Server responded with status ${response.status}`;
+        setError(errorMessage);
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
-      console.log(data); // Log to check if data is complete
       setActivities(data);
     } catch (error) {
       console.error("Error fetching activities:", error);
-      setError("An error occurred while fetching user activities.");
+      setError("An error occurred while fetching user activities. Please check the server and try again.");
     }
   };
 
@@ -66,7 +67,17 @@ const UserActivitiesTable = () => {
   };
 
   const handleApplyFilters = () => {
-    fetchActivities(); // Fetch filtered activities
+    fetchActivities(); // Apply filters when button is clicked
+  };
+
+  const handleClearFilters = () => {
+    setFilters({
+      userId: '',
+      activity: '',
+      startDate: '',
+      endDate: '',
+    });
+    fetchActivities(); // Refresh activities without filters
   };
 
   return (
@@ -77,7 +88,7 @@ const UserActivitiesTable = () => {
         <label>
           User ID:
           <input
-            type="number"
+            type="text"
             name="userId"
             value={filters.userId}
             onChange={handleFilterChange}
@@ -115,14 +126,17 @@ const UserActivitiesTable = () => {
             onChange={handleFilterChange}
           />
         </label>
-        <button onClick={handleApplyFilters}>Apply Filters</button>
+        <div className="button-container">
+          <button className="apply-button" onClick={handleApplyFilters}>Apply Filters</button>
+          <button className="clear-button" onClick={handleClearFilters}>Clear Filters</button>
+        </div>
       </div>
 
       <table className="activities-table">
         <thead>
           <tr>
             <th>User ID</th>
-            <th>Type</th>
+            <th>Activity</th>
             <th>Timestamp</th>
           </tr>
         </thead>

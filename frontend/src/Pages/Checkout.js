@@ -655,7 +655,11 @@ function Checkout() {
 											).toFixed(2)}
 											<Button
 												size="small"
-												color="secondary"
+												variant="outlined"
+												className="remove-from-cart-button"
+												startIcon={
+													<RemoveShoppingCartIcon />
+												}
 												onClick={() =>
 													handleRemoveFromCart(
 														item.id,
@@ -679,9 +683,15 @@ function Checkout() {
 											{(
 												item.dollars_per_unit * item.quantity
 											).toFixed(2)}
+
+
 											<Button
 												size="small"
-												color="secondary"
+												variant="outlined"
+												className="remove-from-cart-button"
+												startIcon={
+													<RemoveShoppingCartIcon />
+												}
 												onClick={() =>
 													handleRemoveFromCart(
 														item.id,

@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import '../Styles/Checkout.css';
 
 import {
-	Container,
-	Grid,
 	TextField,
 	Table,
 	TableBody,
@@ -12,7 +10,6 @@ import {
 	TableHead,
 	TableRow,
 	Button,
-	Typography,
 	Paper,
 	List,
 	ListItem,
@@ -29,7 +26,6 @@ import {
 // TODO: use RemoveShoppingCartIcon instead of Button
 // TODO: clear cart when the selected patient changes? don't want to let the wrong patient buy prescription items
 	// or just clear prescriptions items from the cart?
-// TODO: get rid of grid and container
 // TODO: put the patient at the top and require the patient dropdown before checking out 
 // (need patient_id for the transaction)
 
@@ -332,10 +328,10 @@ function Checkout() {
 	const grandTotal = subtotal + tax;
 
 	return (
-		<Container>
-			<Grid container spacing={2}>
-				<Grid item xs={8}>
-					<Typography variant="h5">Non-Prescription Items</Typography>
+		<div className="checkout-page">
+			<div className="checkout-container">
+				<div className="tables-container">
+					<h3>Non-Prescription Items</h3>
 					<Table>
 						<TableHead>
 							<TableRow>
@@ -373,9 +369,7 @@ function Checkout() {
 						</TableBody>
 					</Table>
 
-					<Typography variant="h5" sx={{ mt: 4 }}>
-						Prescription Items
-					</Typography>
+					<h4 className="cart-section-title">Prescription Items</h4>
 					{/* <Autocomplete */}
 					{/* options={patients}
 						inputValue={searchTerm}
@@ -434,10 +428,9 @@ function Checkout() {
 
 					{selectedPatient && (
 						<>
-							<Typography variant="h6" sx={{ mt: 2 }}>
-								Prescriptions for {selectedPatient.first_name}{" "}
-								{selectedPatient.last_name}
-							</Typography>
+							<h3 className="prescriptions-title">
+								Prescriptions for {selectedPatient.first_name} {selectedPatient.last_name}
+							</h3>
 							<Table>
 								<TableHead>
 									<TableRow>
@@ -571,24 +564,19 @@ function Checkout() {
 							</Table>
 						</>
 					)}
-				</Grid>
-
-				<Grid item xs={4}>
+				</div>
+				<div className="cart-container">
 					<Paper
 						elevation={3}
 						sx={{ padding: 2, position: "sticky", top: 20 }}
 					>
-						<Typography variant="h6">Shopping Cart</Typography>
+						<h2>Shopping Cart</h2>
 						{cart.nonPrescription.length === 0 &&
 						cart.prescription.length === 0 ? (
-							<Typography variant="body2" color="textSecondary">
-								No items in cart.
-							</Typography>
+							<p className="cart-empty">No items in cart.</p>
 						) : (
 							<>
-								<Typography variant="subtitle1">
-									Non-Prescription Items
-								</Typography>
+								<h3 className="cart-section-title">Non-Prescription Items</h3>
 								<List>
 									{cart.nonPrescription.map((item) => (
 										<ListItem key={item.id}>
@@ -614,9 +602,7 @@ function Checkout() {
 								</List>
 								<Divider />
 
-								<Typography variant="subtitle1">
-									Prescription Items
-								</Typography>
+								<h3 className="cart-section-title">Prescription Items</h3>
 								<List>
 									{cart.prescription.map((item) => (
 										<ListItem key={item.id}>
@@ -642,27 +628,21 @@ function Checkout() {
 								</List>
 								<Divider />
 
-								<Typography variant="subtitle1">
-									Subtotal: ${subtotal.toFixed(2)}
-								</Typography>
-								<Typography variant="subtitle1">
-									Tax (8%): ${tax.toFixed(2)}
-								</Typography>
-								<Typography variant="h6">
-									Grand Total: ${grandTotal.toFixed(2)}
-								</Typography>
+								<p className="cart-summary">Subtotal: ${subtotal.toFixed(2)}</p>
+								<p className="cart-summary">Tax (8%): ${tax.toFixed(2)}</p>
+								<h4 className="cart-total">Grand Total: ${grandTotal.toFixed(2)}</h4>
 							</>
 						)}
 					</Paper>
-				</Grid>
-			</Grid>
+					</div>
+				</div>
 			<Snackbar
 				open={openSnackbar}
 				message={errorMessage}
 				autoHideDuration={6000}
 				onClose={() => setOpenSnackbar(false)}
 			/>
-		</Container>
+		</div>
 	);
 }
 

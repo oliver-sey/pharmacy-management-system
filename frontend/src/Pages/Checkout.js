@@ -404,20 +404,27 @@ function Checkout() {
 									id="patient-select"
 									// if selectedPatient is not null, show the name and DOB, otherwise show an empty string
 									// value={selectedPatient ? `${selectedPatient.first_name} ${selectedPatient.last_name} (DOB ${selectedPatient.date_of_birth})` : ""}
-									value={selectedPatient ? selectedPatient.id : ""}
+									value={
+										selectedPatient
+											? selectedPatient.id
+											: ""
+									}
 									label="Patient"
 									onChange={(e) => {
-										handlePatientSelect(e.target.value)
+										handlePatientSelect(e.target.value);
 										// console.log("in the onChange for the patient selection. e.target.value: " + e.target.value + ", selected patient: " + selectedPatient)
-									}
-									}
+									}}
 								>
 									{patients.map((patient) => (
-										<MenuItem key={patient.id} value={patient.id}>
-											{patient.first_name} {patient.last_name}{" "}
-											(DOB {patient.date_of_birth})
+										<MenuItem
+											key={patient.id}
+											value={patient.id}
+										>
+											{patient.first_name}{" "}
+											{patient.last_name} (DOB{" "}
+											{patient.date_of_birth})
 										</MenuItem>
-									))} 
+									))}
 								</Select>
 							</FormControl>
 						</div>
@@ -497,9 +504,11 @@ function Checkout() {
 										filteredPrescriptions.map(
 											(prescription) => (
 												<TableRow key={prescription.id}>
-												{/* for the medication name */}
+													{/* for the medication name */}
 													<TableCell>
-														{prescription.medication_name}
+														{
+															prescription.medication_name
+														}
 													</TableCell>
 													<TableCell>
 														{prescription.dosage}
@@ -508,16 +517,22 @@ function Checkout() {
 														{prescription.quantity}
 													</TableCell>
 													<TableCell>
-														{prescription.date_prescribed}
+														{
+															prescription.date_prescribed
+														}
 													</TableCell>
 													<TableCell>
-														{prescription.filled_timestamp}
+														{
+															prescription.filled_timestamp
+														}
 													</TableCell>
 													<TableCell>
-														{prescription.doctor_name}
+														{
+															prescription.doctor_name
+														}
 													</TableCell>
 													<TableCell>
-													{/* TODO: how many decimal places here?? */}
+														{/* TODO: how many decimal places here?? */}
 														$
 														{prescription.dollars_per_unit.toFixed(
 															4

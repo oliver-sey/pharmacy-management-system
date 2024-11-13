@@ -336,36 +336,88 @@ function Checkout() {
 						<TableHead>
 							<TableRow>
 								<TableCell>Name</TableCell>
-								<TableCell>Details</TableCell>
+								<TableCell>Dosage</TableCell>
+								<TableCell>Quantity</TableCell>
 								<TableCell>Unit Price</TableCell>
 								<TableCell>Add to Cart</TableCell>
 							</TableRow>
 						</TableHead>
 						<TableBody>
-							{nonPrescriptionItems.map((item) => (
-								<TableRow key={item.id}>
-									<TableCell>{item.name}</TableCell>
-									<TableCell>{item.details}</TableCell>
-									<TableCell>
-										${item.unitPrice.toFixed(2)}
-									</TableCell>
-									<TableCell>
-										<Button
-											variant="contained"
-											color="primary"
-											startIcon={<AddShoppingCartIcon />}
-											onClick={() =>
-												handleAddToCart(
-													item,
-													"nonPrescription"
-												)
-											}
-										>
-											Add
-										</Button>
+							{nonPrescriptionItemsLoading ? (
+								// Show skeletons while loading
+								<>
+									<TableRow>
+										<TableCell colSpan={4}>
+											<Skeleton variant="text" />
+										</TableCell>
+									</TableRow>
+									<TableRow>
+										<TableCell colSpan={4}>
+											<Skeleton variant="text" />
+										</TableCell>
+									</TableRow>
+									<TableRow>
+										<TableCell colSpan={4}>
+											<Skeleton variant="text" />
+										</TableCell>
+									</TableRow>
+									<TableRow>
+										<TableCell colSpan={4}>
+											<Skeleton variant="text" />
+										</TableCell>
+									</TableRow>
+									<TableRow>
+										<TableCell colSpan={4}>
+											<Skeleton variant="text" />
+										</TableCell>
+									</TableRow>
+								</>
+							) : nonPrescriptionItems &&
+							  nonPrescriptionItems.length > 0 ? (
+								nonPrescriptionItems.map((medication) => (
+									<TableRow key={medication.id}>
+										<TableCell>{medication.name}</TableCell>
+										<TableCell>
+											{medication.dosage}
+										</TableCell>
+										<TableCell>
+											{medication.quantity}
+										</TableCell>
+										<TableCell>
+											{/* TODO: how many decimal places here?? */}
+											$
+											{medication.dollars_per_unit.toFixed(
+												4
+											)}
+										</TableCell>
+
+										<TableCell>
+											<Button
+												variant="contained"
+												color="primary"
+												startIcon={
+													<AddShoppingCartIcon />
+												}
+												onClick={() =>
+													handleAddToCart(
+														medication,
+														"nonPrescription"
+													)
+												}
+											>
+												Add
+											</Button>
+										</TableCell>
+									</TableRow>
+								))
+							) : (
+								// Show message if no non-prescription items
+								<TableRow>
+									<TableCell colSpan={4}>
+										No non-prescription items found.
 									</TableCell>
 								</TableRow>
-							))}
+							)}
 						</TableBody>
 					</Table>
 

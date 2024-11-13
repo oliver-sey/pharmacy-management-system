@@ -3,7 +3,8 @@
 from typing import Optional
 from pydantic import BaseModel, EmailStr, field_validator
 from datetime import date, datetime
-from .models import UserType
+from .models import UserType, UserActivityType, InventoryUpdateType
+from enum import Enum as PyEnum
 
 class SimpleResponse(BaseModel):
     message: str
@@ -214,14 +215,14 @@ class InventoryUpdateCreate(BaseModel):
     # optional since some updates will not be associated with a transaction (e.g. add or discard)
     transaction_id: Optional[int] = None
     quantity_changed_by: int
-    type: str
+    activity_type: InventoryUpdateType
 
 class InventoryUpdateResponse(BaseModel):
     medication_id: int
     user_activity_id: int
     transaction_id: Optional[int] = None
     quantity_changed_by: int
-    type: str
+    activity_type: InventoryUpdateType
 
 # **NOTE: we will not be allowing updating or deleting inventory_updates
 
@@ -229,13 +230,11 @@ class InventoryUpdateResponse(BaseModel):
 # endregion
 # region User Activities
 class UserActivityCreate(BaseModel):
-    type: str # the activity type, an enum which can be "Login", "Logout", "Unlock Account", "Inventory Update"
+    activity_type: UserActivityType # the activity type, an enum which can be "Login", "Logout", "Unlock Account", "Inventory Update"
     # TODO: let the database set the timestamp to the current time?
 
 class UserActivityResponse(BaseModel):
     id: int
     user_id: int
-    activity: str # the activity type, an enum
+    activity_type: UserActivityType # the activity type, an enum
     timestamp: datetime
-    class Config:
-        orm_mode = True

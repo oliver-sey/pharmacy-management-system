@@ -144,7 +144,7 @@ class InventoryUpdate(Base):
     quantity_changed_by = Column(Integer)
     timestamp = Column(DateTime, default=func.now())
     # what action type it was, e.g. 'add', 'discard', 'fillpresc', or 'sellnonpresc'
-    type = Column(SQLAlchemyEnum(InventoryUpdateType))
+    activity_type = Column(SQLAlchemyEnum(InventoryUpdateType))
     medication = relationship("Medication", back_populates="inventory_updates")
     user_activity = relationship("UserActivity", back_populates="inventory_updates")  # Correct the relationship
     # transaction = relationship("Transaction", back_populates="inventory_update")

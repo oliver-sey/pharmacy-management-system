@@ -214,9 +214,9 @@ async def reset_password(
 # region User CRUD
 # POST endpoint to create a user
 @app.post("/users/", response_model=UserResponse)
-def create_user(user: UserCreate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+def create_user(user: UserCreate, db: Session = Depends(get_db)):
 
-    validate_user_type(current_user, ["Pharmacy Manager"])
+    # validate_user_type(current_user, ["Pharmacy Manager"])
     # Check if the email already exists
     existing_user = db.query(models.User).filter(models.User.email == user.email).first()
     if existing_user:
@@ -385,6 +385,13 @@ def create_medication(medication: schema.MedicationCreate, db: Session = Depends
     db.add(db_medication)
     db.commit()
     db.refresh(db_medication)
+
+    #create inventory update
+    inventory_update = create_inventory_update(inventory_update=InventoryUpdateCreate(
+        medication_id=db_medication.id,
+        quantity_changed_by= - medication.quantity,
+        activity_type=models.InventoryUpdateType.ADD
+    ), db=db, current_user=current_user)
     return db_medication
 
 # get medication by id
@@ -443,7 +450,7 @@ def delete_medication(medication_id: int, db: Session = Depends(get_db), current
 @app.get("/medicationlist/")
 def list_medication(db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
 
-    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist", "Pharmacy Technician"])
 
     # Query the database for all medications
     medications = db.query(models.Medication).all()
@@ -497,7 +504,7 @@ def create_prescription(
             patient_id=prescription.patient_id,
             # get the user who entered the prescription from the current user
             user_entered_id=current_user.id,
-            medication_id=prescription.id,
+            medication_id=prescription.medication_id,
             doctor_name=prescription.doctor_name,
             quantity=prescription.quantity,  # The number of units of medication that this prescription allows the patient to get
         )
@@ -589,7 +596,7 @@ def fill_prescription(prescription_id: int, db: Session = Depends(get_db), curre
             quantity_changed_by= - db_prescription.quantity,
             # no transaction_id since this is not associated with a transaction
             # TODO: is this right? or should we do "Fill prescription"
-            type=models.InventoryUpdateType.FILLPRESC   # set the type to fill prescription
+            activity_type=models.InventoryUpdateType.FILLPRESC   # set the type to fill prescription
         )
 
         # send the inventory_update_request to actually be stored in the database
@@ -627,7 +634,7 @@ def create_inventory_update(inventory_update: InventoryUpdateCreate, db: Session
         # need to do this first so we can reference the user_activity_id in the inventory_update
         # any type of updating the inventory (add, discard, filling, selling), the user_activity entry for it will be "Inventory Update"
         # **NOTE: need to use the 'key' of the enum ('INVENTORY_UPDATE') instead of the 'value' ('Inventory Update')
-        user_activity_create = UserActivityCreate(type="INVENTORY_UPDATE")
+        user_activity_create = UserActivityCreate(activity_type=models.UserActivityType.INVENTORY_UPDATE)
         new_user_activity = create_user_activity(user_activity_create, db, current_user)
 
         # populate the fields of the new inventory_update
@@ -639,7 +646,7 @@ def create_inventory_update(inventory_update: InventoryUpdateCreate, db: Session
             quantity_changed_by=inventory_update.quantity_changed_by,
             # set the timestamp in UTC so timezones don't affect it
             timestamp=datetime.now(timezone.utc),
-            type=inventory_update.type
+            activity_type=inventory_update.activity_type
         )
 
     except ValueError as e:
@@ -670,7 +677,7 @@ def get_inventory_update(id: int, db: Session = Depends(get_db), current_user: U
 # get all inventory_updates - **optional param to filter to one value of 'type'
 @app.get("/inventory-updates", response_model=List[InventoryUpdateResponse])
 # restrict type to the values in InventoryUpdateType
-def get_inventory_updates(type: Optional[models.InventoryUpdateType] = Query(None), db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+def get_inventory_updates(activity_type: Optional[models.InventoryUpdateType] = Query(None), db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
     '''
     endpoint to get inventory_updates with optional type (e.g. add, discard, fillpresc, sellnonpresc).
     If type is provided, only inventory_updates for that type are returned.
@@ -680,8 +687,8 @@ def get_inventory_updates(type: Optional[models.InventoryUpdateType] = Query(Non
     validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
 
     # if type is provided, return all inventory_updates of that type
-    if type:
-        inventory_updates = db.query(models.InventoryUpdate).filter(models.InventoryUpdate.type == type).all()
+    if activity_type:
+        inventory_updates = db.query(models.InventoryUpdate).filter(models.InventoryUpdate.activity_type == activity_type).all()
     # else return all inventory_updates
     else:
         inventory_updates = db.query(models.InventoryUpdate).all()
@@ -697,7 +704,7 @@ def create_user_activity(user_activity: UserActivityCreate, db: Session, current
     db_user_activity = models.UserActivity(
         # get user_id from current_user
         user_id=current_user.id,
-        type=user_activity.type,
+        activity_type=user_activity.activity_type,
         timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
     )
 
@@ -729,3 +736,34 @@ def get_all_user_activities(
         raise HTTPException(status_code=404, detail="No activities found")
     return activities
 
+
+# selling non-prescription items
+@app.put("/non-prescription/{id}", response_model=InventoryUpdateResponse)
+def sell_non_prescription_item(id: int, medication_update: schema.MedicationUpdate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+    # make sure only pharmacy managers or pharmacists can call this endpoint
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
+
+    # query medication with id and make sure it's prescription-required is False
+    db_medication = db.query(models.Medication).filter(models.Medication.id == id).first()
+    if db_medication is None:
+        raise HTTPException(status_code=404, detail="Medication not found")
+    elif db_medication.prescription_required:
+        raise HTTPException(status_code=400, detail="This medication requires a prescription to be sold")
+    
+    # update the medication
+    for key, value in medication_update.model_dump().items():
+        if value is not None:
+            setattr(db_medication, key, value)
+
+    # commit the changes
+    db.commit()
+    db.refresh(db_medication)
+
+    #create inventory update
+    inventory_update = create_inventory_update(inventory_update=InventoryUpdateCreate(
+        medication_id=id,
+        quantity_changed_by= - medication_update.quantity,
+        activity_type=models.InventoryUpdateType.SELLNONPRESC
+    ), db=db, current_user=current_user)
+    return inventory_update
+    

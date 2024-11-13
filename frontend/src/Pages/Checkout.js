@@ -304,6 +304,22 @@ function Checkout() {
 	};
 
 	const handlePatientSelect = async (patientID) => {
+		// Clear the prescription items in the cart if the selected patient changes (from a value other than the default, to a new value)
+		// and also if there were any prescription items in the cart
+		// we don't want to have prescription items in the cart that the newly-selected
+		// patient possibly isn't allowed to purchase
+		if (cart.prescription.length && selectedPatient && selectedPatient.id !== patientID) {
+			setCart((prevCart) => ({
+				...prevCart,
+				prescription: []
+			}));
+
+			// it's not really an error message, but the Snackbar always just displays the text in errorMessage
+			setErrorMessage("Cleared prescription items from cart since patient changed");
+			// show the snackbar with the message
+			setOpenSnackbar(true);
+		}
+
 		const patient = await fetchOnePatient(patientID);
 		setSelectedPatient(patient);
 		// call the function to get prescriptions for this patient, and put it into filteredPrescriptions

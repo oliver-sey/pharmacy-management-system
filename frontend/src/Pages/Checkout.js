@@ -317,7 +317,7 @@ function Checkout() {
 
 	const calculateTotal = (items) =>
 		items.reduce(
-			(total, item) => total + item.unitPrice * item.quantity,
+			(total, item) => total + item.dollars_per_unit * item.quantity,
 			0
 		);
 
@@ -580,10 +580,10 @@ function Checkout() {
 								<List>
 									{cart.nonPrescription.map((item) => (
 										<ListItem key={item.id}>
-											{item.name} - ${item.unitPrice} x{" "}
+											{item.name} - ${item.dollars_per_unit} x{" "}
 											{item.quantity} = $
 											{(
-												item.unitPrice * item.quantity
+												item.dollars_per_unit * item.quantity
 											).toFixed(2)}
 											<Button
 												size="small"
@@ -606,10 +606,10 @@ function Checkout() {
 								<List>
 									{cart.prescription.map((item) => (
 										<ListItem key={item.id}>
-											{item.name} - ${item.unitPrice} x{" "}
+											{item.name} - ${item.dollars_per_unit} x{" "}
 											{item.quantity} = $
 											{(
-												item.unitPrice * item.quantity
+												item.dollars_per_unit * item.quantity
 											).toFixed(2)}
 											<Button
 												size="small"

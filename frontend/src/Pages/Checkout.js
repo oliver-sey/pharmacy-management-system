@@ -219,7 +219,7 @@ function Checkout() {
 		} catch (error) {
 			console.error("Error fetching patient:", error);
 			// error handling
-			setErrorMessage("Failed to fetch patient");
+			setErrorMessage(error.message);
 			setOpenSnackbar(true); // Show Snackbar when error occurs
 		}
 	};

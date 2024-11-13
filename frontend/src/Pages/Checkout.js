@@ -39,11 +39,11 @@ import RemoveShoppingCartIcon from "@mui/icons-material/RemoveShoppingCart";
 // import Autocomplete from "@mui/lab/Autocomplete";
 
 // Mock data
-const nonPrescriptionItems = [
-	{ id: 1, name: "Pain Reliever", unitPrice: 5.0, details: "200mg Tablet" },
-	{ id: 2, name: "Cough Syrup", unitPrice: 8.5, details: "100ml Bottle" },
-	{ id: 3, name: "Vitamin C", unitPrice: 12.0, details: "500mg Tablet" },
-];
+// const nonPrescriptionItems = [
+	// 	{ id: 1, name: "Pain Reliever", dollars_per_unit: 5.0, details: "200mg Tablet" },
+	// 	{ id: 2, name: "Cough Syrup", dollars_per_unit: 8.5, details: "100ml Bottle" },
+	// 	{ id: 3, name: "Vitamin C", dollars_per_unit: 12.0, details: "500mg Tablet" },
+	// ];
 
 
 function Checkout() {
@@ -52,19 +52,79 @@ function Checkout() {
 	const [selectedPatient, setSelectedPatient] = useState(null);
 	const [searchTerm, setSearchTerm] = useState("");
 	const [filteredPrescriptions, setFilteredPrescriptions] = useState([]);
+	const [nonPrescriptionItems, setNonPrescriptionItems] = useState([]);
 
 
 	const [errorMessage, setErrorMessage] = useState(null);
 	const [openSnackbar, setOpenSnackbar] = useState(false);
 
-	// to see if the data is still loading for patients and prescriptions
+	// to see if the data is still loading for patients, non-prescription items, and prescriptions
 	const [patientsLoading, setPatientsLoading] = useState(false);
+	const [nonPrescriptionItemsLoading, setNonPrescriptionItemsLoading] = useState(false);
 	const [prescriptionsLoading, setPrescriptionsLoading] = useState(false);
 
 
 	const navigate = useNavigate();
 	const role = ["Pharmacist"];
 	const token = localStorage.getItem("token");
+
+
+	const fetchNonPrescriptionItems = useCallback(async () => {
+		// set that non-prescription items data is still loading
+		setNonPrescriptionItemsLoading(true);
+
+		try {
+			// get all the medications first
+			const response = await fetch(
+				`http://localhost:8000/medicationlist`,
+				{
+					headers: {
+						Authorization: "Bearer " + token,
+					},
+				}
+			);
+			if (response.status === 400) {
+				throw new Error("Bad request fetching non-prescription items data. There may be a bug in the code, please contact the development team.");
+			} else if (response.status === 401) {
+				throw new Error("Unauthorized request to fetch non-prescription items. Please log in and try again.");
+			} else if (response.status === 404) {
+				throw new Error("404 error while fetching non-prescription items. The API route may have a typo in it, please contact the development team.");
+			} else if (response.status === 500) {
+				throw new Error("Server error fetching non-prescription items. Please try again later.");
+			}
+			if (!response.ok) {
+				// TODO: do more to handle the error?
+				throw new Error("Failed to fetch non-prescription items");
+			}
+
+			const originalMedications = await response.json(); // Convert response to JSON
+
+			// filter out medications that require a prescription
+			// since this is for the non-prescription items
+			const nonPrescriptionMedications = originalMedications.filter(
+				(medication) => !medication.prescription_required
+			);
+
+			setNonPrescriptionItems(nonPrescriptionMedications); // Store the fetched data in state
+		} catch (error) {
+			console.error(
+				`Error fetching non-prescription items (medications): ${error}`
+			);
+			// error handling
+			// setErrorMessage("Failed to fetch non-prescription items");
+			// use the error message from the Error that gives some more details
+			// TODO: is this right?
+			setErrorMessage(error.message);
+
+			setOpenSnackbar(true); // Show Snackbar when error occurs
+		} finally {
+			// done loading non-prescription items data
+			// wait 5 seconds
+			// await new Promise(resolve => setTimeout(resolve, 5000));
+			setNonPrescriptionItemsLoading(false);
+		}
+	}, [token]);
+
 
 	// Async function to fetch presciptions data
 	const fetchPrescriptionsForPatient = async (patientId) => {
@@ -207,13 +267,18 @@ function Checkout() {
 	useEffect(() => {
 		try {
 			if (token) {
+				// get data on patients and non-prescription items
 				fetchPatients();
+				fetchNonPrescriptionItems();
+			}
+			else {
+				console.error(`Token is ${token} in useEffect when trying to call fetchPatients() and fetchNonPrescriptionItems()`);
 			}
 		}
 		catch (error) {
-			console.error("Error calling fetchPatients in the useEffect:", error);
+			console.error("Error calling fetchPatients() and fetchNonPrescriptionItems() in the useEffect:", error);
 		}
-    }, [fetchPatients, token]);
+    }, [fetchNonPrescriptionItems, fetchPatients, token]);
 
 
 

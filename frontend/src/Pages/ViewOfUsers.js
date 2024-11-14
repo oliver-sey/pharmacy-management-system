@@ -13,10 +13,14 @@ import BaseTable from "../Components/BaseTable";
 // Material UI components
 import { IconButton } from "@mui/material";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
+import { useNavigate } from "react-router-dom";
+import CheckUserType from "../Functions/CheckUserType";
 
 function ViewOfUsers() {
 	const [rows, setUsers] = useState([]);
 	const token = localStorage.getItem('token');
+	const role = ["Pharmacy Manager", "Pharmacist"]
+	const navigate = useNavigate()
 
 	// const fetchUsers = async () => {
 	// 	console.log("In fetchUsers");
@@ -63,6 +67,7 @@ function ViewOfUsers() {
 	}; 
 
 	useEffect(() => {
+		CheckUserType(role, navigate);
 		fetchUsers();
 	}, []);
 

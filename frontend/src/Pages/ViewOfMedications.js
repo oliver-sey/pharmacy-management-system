@@ -9,8 +9,12 @@ import { IconButton, Button, Tooltip, Snackbar, Alert } from "@mui/material";
 import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import WarningIcon from "@mui/icons-material/Warning";
+
 import { useNavigate } from "react-router-dom";
 import CheckUserType from "../Functions/CheckUserType";
+
+import { jsPDF} from 'jspdf'; // Import jsPDF
+
 
 function ViewOfMedications() {
 	const [rows, setRows] = useState([]);
@@ -177,7 +181,6 @@ function ViewOfMedications() {
 	];
 
 
-	// TODO: is this right?
 	// only pharmacy manager can edit
 	const canEdit = () => {
 		const role = localStorage.getItem('role');
@@ -185,7 +188,6 @@ function ViewOfMedications() {
 		return role === 'Pharmacy Manager';
 	};
 	  
-	// TODO: is this right?
 	// only pharmacy managers can delete
 	const canDelete = () => {
 		const role = localStorage.getItem('role');
@@ -290,10 +292,52 @@ function ViewOfMedications() {
 
 	const openAddMedicationModal = useRef(null);
 
+	// for generating inventory report
+	const generatePDF = () => {
+		const doc = new jsPDF();
+	  
+		// Set title for the PDF
+		doc.setFontSize(20);
+		doc.text('Medication Inventory Report', 10, 20);
+	  
+		// Set table headers
+		doc.setFontSize(12);
+		let yPosition = 30;
+		doc.text('Name', 10, yPosition);
+		doc.text('Dosage', 40, yPosition);
+		doc.text('Quantity', 60, yPosition);
+		doc.text('Prescription Required', 80, yPosition);
+		doc.text('Expiration Date', 130, yPosition);
+		doc.text('Dollars per Unit', 170, yPosition);
+	  
+		yPosition += 10; // Space after header row
+	  
+		// Loop through rows and add each medication
+		rows.forEach((medication) => {
+		  doc.text(medication.name, 10, yPosition);
+		  doc.text(medication.dosage, 40, yPosition);
+		  doc.text(medication.quantity.toString(), 60, yPosition);
+		  doc.text(medication.prescription_required ? 'Yes' : 'No', 80, yPosition);
+		  doc.text(medication.expiration_date, 130, yPosition);
+		  doc.text(medication.dollars_per_unit.toFixed(2), 170, yPosition);
+		  yPosition += 10; // Move to the next row
+		});
+	  
+		// Save the generated PDF
+		doc.save('medication_inventory_report.pdf');
+	  };
+		  
 	return (
 		<div>
 			<h2>Medication Inventory Table</h2>
-			{localStorage.getItem("role") === "Pharmacy Manager" &&
+
+			
+
+			<Button variant="contained" onClick={generatePDF}>
+				Generate Medication Inventory Report
+			</Button>
+
+    {localStorage.getItem("role") === "Pharmacy Manager" &&
 			<Button
 				variant="contained"
 				onClick={() => {

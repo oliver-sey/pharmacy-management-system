@@ -1,9 +1,10 @@
 # build a schema using pydantic
 
 from typing import Optional
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, field_validator
 from datetime import date, datetime
-from .models import UserType
+from .models import UserType, UserActivityType, InventoryUpdateType
+from enum import Enum as PyEnum
 
 class SimpleResponse(BaseModel):
     message: str
@@ -90,7 +91,7 @@ class PatientResponse(BaseModel):
     id: int
     first_name: str
     last_name: str
-    date_of_birth: str
+    date_of_birth: date
     address: str
     phone_number: str
     email: EmailStr
@@ -98,10 +99,11 @@ class PatientResponse(BaseModel):
     insurance_group_number: str
     insurance_member_id: str
 
+    
     class Config:
         orm_mode = True
 
-    # this handles converting the date_of_birth from a datetime object to a string
+    
     @staticmethod
     def from_orm(patient):
         # Ensure date_of_birth is converted to a string
@@ -170,7 +172,8 @@ class PrescriptionResponse(BaseModel):
 
 class PrescriptionCreate(BaseModel):
     patient_id: int
-    user_entered_id: int
+    # user_id comes from the token
+    # user_entered_id: int
     # TODO: i don't think you should be allowed to create an already filled prescription right away
     # it makes more sense to make them call the fill prescription route after creating the prescription
     # user_filled_id: Optional[int] = None
@@ -183,9 +186,15 @@ class PrescriptionCreate(BaseModel):
     class Config:
         orm_mode = True
 
+# **NOTE: prescriptions are only able to be edited until they are filled
+# since we rely on the prescription to store important information and it doesn't
+# make sense to edit info after the patients already has the medication
 class PrescriptionUpdate(BaseModel):
     patient_id: Optional[int] = None
-    user_entered_id: Optional[int] = None
+    # Not allowing user to change who entered the prescription, this comes from the token anyways
+    # to see who modified a prescription, look at user_activities
+    # user_entered_id: Optional[int] = None
+
     # I think you should have to call the fill prescription route to edit these
     # so we can have control over checking if we're able to fill the prescription
     # user_filled_id: Optional[int] = None
@@ -198,7 +207,7 @@ class PrescriptionUpdate(BaseModel):
 
 
 # endregion
-# Region Inventory Updates
+# region Inventory Updates
 class InventoryUpdateCreate(BaseModel):
     medication_id: int
     # get user_id from token
@@ -206,14 +215,14 @@ class InventoryUpdateCreate(BaseModel):
     # optional since some updates will not be associated with a transaction (e.g. add or discard)
     transaction_id: Optional[int] = None
     quantity_changed_by: int
-    type: str
+    activity_type: InventoryUpdateType
 
 class InventoryUpdateResponse(BaseModel):
     medication_id: int
     user_activity_id: int
     transaction_id: Optional[int] = None
     quantity_changed_by: int
-    type: str
+    activity_type: InventoryUpdateType
 
 # **NOTE: we will not be allowing updating or deleting inventory_updates
 
@@ -221,11 +230,11 @@ class InventoryUpdateResponse(BaseModel):
 # endregion
 # region User Activities
 class UserActivityCreate(BaseModel):
-    activity: str
+    activity_type: UserActivityType # the activity type, an enum which can be "Login", "Logout", "Unlock Account", "Inventory Update"
     # TODO: let the database set the timestamp to the current time?
 
 class UserActivityResponse(BaseModel):
     id: int
     user_id: int
-    activity: str
+    activity_type: UserActivityType # the activity type, an enum
     timestamp: datetime

@@ -75,7 +75,7 @@ function ViewOfUsers() {
 	// headerName is what shows up on the website
 	// width is the default width of the column, user can adjust it
 	const columns = [
-		{ field: "id", headerName: "ID", width: 70 },
+		//{ field: "id", headerName: "ID", width: 70 },
 		{ field: "first_name", headerName: "First name", width: 130 },
 		{ field: "last_name", headerName: "Last name", width: 130 },
 		{
@@ -99,37 +99,11 @@ function ViewOfUsers() {
 			},
 		},
 		{ field: "email", headerName: "Email", width: 220 },
-		{ field: "password", headerName: "Password", width: 220, renderCell: (params) => '•••••••' }
+		//{ field: "password", headerName: "Password", width: 220, renderCell: (params) => '•••••••' }
 
 
 		
 	];
-
-	// hardcoded values for development, this will come from the backend/database later
-	// TODO: get rid of hardcoded values
-	// const rows = [
-	// 	{
-	// 		id: 1,
-	// 		firstName: "Silly",
-	// 		lastName: "McGiggles",
-	// 		email: "silly.giggles@example.com",
-	// 		isLockedOut: "true",
-	// 	},
-	// 	{
-	// 		id: 2,
-	// 		firstName: "Chuckles",
-	// 		lastName: "VonLaugh",
-	// 		email: "chuckles.von@example.com",
-	// 		isLockedOut: "false",
-	// 	},
-	// 	{
-	// 		id: 3,
-	// 		firstName: "Giggle",
-	// 		lastName: "FitzSnicker",
-	// 		email: "giggle.fitz@example.com",
-	// 		isLockedOut: "false",
-	// 	},
-	// ];
 
 	// all users can edit users
 	const canEdit = () => {
@@ -140,9 +114,8 @@ function ViewOfUsers() {
 	  
 	// only pharmacists or pharmacy managers can delete
 	const canDelete = () => {
-		//const role = localStorage.getItem('role');
-		//return role === 'Pharmacist' || role === 'Pharmacy Manager';
-		return true;
+		const role = localStorage.getItem('role');
+		return role === 'Pharmacist' || role === 'Pharmacy Manager';
 	};
 
 	const deleteUser = async (id) => {

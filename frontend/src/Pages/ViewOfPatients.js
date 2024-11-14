@@ -69,7 +69,6 @@ function ViewOfPatients() {
 	// all users can edit patients
 	const canEdit = () => {
 		// const userType = localStorage.getItem('userType');
-		// TODO: should we do this with no checks?
 		return true;
 	};
 	  

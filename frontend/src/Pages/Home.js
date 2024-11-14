@@ -17,8 +17,12 @@ const HomePage = () => {
                 headers: {'Authorization': 'Bearer ' + token}
       
               })
-      
-              if (userResponse.ok) {
+
+              if (!userResponse.ok) {
+                if (userResponse.status === 401) {
+                    navigate('/Login')
+                }
+              } else if (userResponse.ok) {
                 const userData = await userResponse.json();
                 
                 //if user's role is one other than the following, they are redirected back to login

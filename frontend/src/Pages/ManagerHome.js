@@ -91,7 +91,7 @@ function ManagerHome() {
         filled_timestamp: null,
         //date_prescribed: datetime.datetime.now(),
         medication_id: formData.medication,
-        doctor_name: formData.prescribing_doctor,
+        doctor_name: formData.doctor_name,
         quantity: formData.quantity
       }))
 

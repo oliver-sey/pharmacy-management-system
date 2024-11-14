@@ -595,7 +595,9 @@ def fill_prescription(prescription_id: int, db: Session = Depends(get_db), curre
             quantity_changed_by= - db_prescription.quantity,
             # no transaction_id since this is not associated with a transaction
             # TODO: is this right? or should we do "Fill prescription"
+
             activity_type=models.InventoryUpdateType.FILLPRESC   # set the type to fill prescription
+
         )
 
         # send the inventory_update_request to actually be stored in the database

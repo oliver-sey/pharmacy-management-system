@@ -14,90 +14,319 @@ import CheckUserType from "../Functions/CheckUserType";
 import { jsPDF } from "jspdf";
 
 function ViewOfMedications() {
-    const [rows, setRows] = useState([]);
-    const [errorMessage, setErrorMessage] = useState(null);
-    const [openSnackbar, setOpenSnackbar] = useState(false);
-    const roles = ["Pharmacy Manager", "Pharmacist", "Pharmacy Technician"];
-    const token = localStorage.getItem("token");
-    const navigate = useNavigate();
-    const openAddMedicationModal = useRef(null);
+	const [rows, setRows] = useState([]);
+	const [errorMessage, setErrorMessage] = useState(null);
+	const [openSnackbar, setOpenSnackbar] = useState(false);
+	const roles = ["Pharmacy Manager", "Pharmacist", "Pharmacy Technician"]
+	const token = localStorage.getItem('token');
+	const navigate = useNavigate();
 
-    // Columns for the medication table
-    const columns = [
-        { field: "name", headerName: "Medication Name", width: 200 },
-        { field: "dosage", headerName: "Dosage", width: 100 },
-        { field: "quantity", headerName: "Quantity", width: 100 },
-        { field: "expiration_date", headerName: "Expiration Date", width: 100 },
-        { field: "dollars_per_unit", headerName: "$ Per Unit", width: 100 },
-    ];
 
-    // Function to check if the user can edit
-    const canEdit = () => localStorage.getItem("role") === "Pharmacy Manager";
+	// Async function to fetch medications data
+	const fetchMedications = async () => {
+		try {
+			const response = await fetch('http://localhost:8000/medicationlist', {
+				headers: {
+					'Authorization': 'Bearer ' + token,
+				},
+			  });
+			const data = await response.json(); // Convert response to JSON
+			setRows(data); // Update rows state with fetched data
+		} catch (error) {
+			console.error('Error fetching medications:', error);
+			// error handling
+			setErrorMessage('Failed to fetch medications');
+			setOpenSnackbar(true); // Show Snackbar when error occurs
+		}
+	}; 
 
-    // Function to check if the user can delete
-    const canDelete = () => localStorage.getItem("role") === "Pharmacy Manager";
+	// useEffect to fetch data when the component mounts
+	useEffect(() => {
+		CheckUserType(roles, navigate);
+		fetchMedications(); // Call the async function
+	  }, []); // Empty array means this effect runs once when the component mounts
 
-    // Confirmation message format for deletion modal
-    const medicationConfirmMessage = (row) => `${row?.name || "Unknown Medication Name"} - ${row?.dosage || "Unknown Dosage"}`;
 
-    // Async function to fetch medications data
-    const fetchMedications = async () => {
-        try {
-            const response = await fetch("http://localhost:8000/medicationlist", {
-                headers: {
-                    Authorization: "Bearer " + token,
-                },
-            });
-            const data = await response.json();
-            setRows(data);
-        } catch (error) {
-            console.error("Error fetching medications:", error);
-            setErrorMessage("Failed to fetch medications");
-            setOpenSnackbar(true);
-        }
-    };
+	// the columns for the table
+	// headerName is what shows up on the website
+	// width is the default width of the column, user can adjust it
+	const columns = [
+		// { field: "id", headerName: "ID", width: 70 },
+		{ field: "name", headerName: "Medication Name", width: 200 },
+		{ field: "dosage", headerName: "Dosage", width: 100 },
+		{ field: "quantity", headerName: "Quantity", width: 100 },
+		{
+			field: "prescription_required",
+			headerName: "Prescription Required",
+			width: 100,
+		},
+		{ field: "expiration_date", headerName: "Expiration Date", width: 100 },
+		{ field: "dollars_per_unit", headerName: "$ Per Unit", width: 100 },
+		{
+			field: "alerts",
+			headerName: "Alerts",
+			width: 200,
+			// calculate time between now and the expiration date, to see what alert icons we should show
+			renderCell: (params) => {
+				// TODO: fix some weird stuff with time zones??? dates still print weird
+				const today = new Date();
+				const expirationDate = new Date(params.row.expiration_date);
 
-    useEffect(() => {
-        CheckUserType(roles, navigate);
-        fetchMedications();
-    }, []);
+				// cut off anything beyond the date to avoid weird stuff with time zones
+				const todayUTC = new Date(
+					Date.UTC(
+						today.getUTCFullYear(),
+						today.getUTCMonth(),
+						today.getUTCDate()
+					)
+				);
+				const expirationDateUTC = new Date(
+					Date.UTC(
+						expirationDate.getUTCFullYear(),
+						expirationDate.getUTCMonth(),
+						expirationDate.getUTCDate()
+					)
+				);
 
-    const generateMedicationPDF = () => {
-        const doc = new jsPDF();
-        doc.setFontSize(20);
-        doc.text("Medication Inventory Report", 10, 20);
+				// TODO: is a medicine expired on the expiration date, or the next day??
+				// get the difference in time in milliseconds, then convert to days
+				// to avoid weird time zone differences
+				let differenceMS =
+					expirationDateUTC.getTime() - todayUTC.getTime();
+				let differenceDays = differenceMS / (1000 * 60 * 60 * 24);
 
-        doc.setFontSize(12);
-        let yPosition = 30;
-        doc.text("Name", 10, yPosition);
-        doc.text("Dosage", 40, yPosition);
-        doc.text("Quantity", 60, yPosition);
-        doc.text("Prescription Required", 80, yPosition);
-        doc.text("Expiration Date", 130, yPosition);
-        doc.text("Dollars per Unit", 170, yPosition);
+				// collection icons to end up in this cell together
+				const icons = [];
 
-        yPosition += 10;
+				// expiration date is today or earlier
+				if (differenceDays <= 0) {
+					// console.log(
+					// 	"Difference between expiration",
+					// 	expirationDate,
+					// 	"and today is",
+					// 	differenceDays,
+					// 	"**is expired"
+					// );
+					icons.push(
+						// empty hourglass icon, says "Expired" when you hover
+						<IconButton>
+							<Tooltip id="expired" title="Expired">
+								<HourglassEmptyIcon color="error" />
+							</Tooltip>
+						</IconButton>
+					);
+				}
+				// expiration date is within the next 30 days
+				else if (differenceDays <= 30) {
+					// console.log(
+					// 	"Difference between expiration (in UTC)",
+					// 	expirationDate,
+					// 	"and today is",
+					// 	differenceDays,
+					// 	"not expired, **but need a warning"
+					// );
+					icons.push(
+						// TODO: fix style?
+						// <div style={[{"display": "flex"}, { "align-items": "center" }]}>
+						// half-empty hourglass icon, says the warning when you hover
+						<IconButton>
+							<Tooltip
+								id="warning"
+								title="Warning - expires within 30 days"
+							>
+								<HourglassBottomIcon color="warning" />
+							</Tooltip>
+						</IconButton>
+						// </div>
+					);
+				}
+				// expiration date is over 30 days into the future
+				else {
+					// console.log(
+					// 	"Difference between expiration (in UTC)",
+					// 	expirationDate,
+					// 	"and today is",
+					// 	differenceDays,
+					// 	"not expired, and don't need a warning"
+					// );
+				}
 
-        rows.forEach((medication) => {
-            doc.text(medication.name, 10, yPosition);
-            doc.text(medication.dosage, 40, yPosition);
-            doc.text(medication.quantity.toString(), 60, yPosition);
-            doc.text(medication.prescription_required ? "Yes" : "No", 80, yPosition);
-            doc.text(medication.expiration_date, 130, yPosition);
-            doc.text(medication.dollars_per_unit.toFixed(2), 170, yPosition);
-            yPosition += 10;
-        });
+				// check inventory
+				// less than 120 should give a warning
+				if (params.row.quantity < 120) {
+					// console.log("Less than 120 units/doses, giving a warning");
+					icons.push(
+						<IconButton>
+							<Tooltip
+								id="inventoryWarning"
+								title="Warning - less than 120 units/doses left"
+							>
+								<WarningIcon color="warning" />
+							</Tooltip>
+						</IconButton>
+					);
+				}
 
-        doc.save("medication_inventory_report.pdf");
-    };
+				// return the icons together
+				return (
+					<div style={{ display: "flex", alignItems: "center" }}>
+						{icons}
+					</div>
+				);
+			},
+		},
+	];
 
-    const handleCloseSnackbar = () => {
-        setOpenSnackbar(false);
-    };
 
-    return (
-        <div>
-            <h2>Medication Inventory Table</h2>
+	// only pharmacy manager can edit
+	const canEdit = () => {
+		const role = localStorage.getItem('role');
+		// console.log("canEdit:", (role === 'Pharmacy Manager'));
+		return role === 'Pharmacy Manager';
+	};
+	  
+	// only pharmacy managers can delete
+	const canDelete = () => {
+		const role = localStorage.getItem('role');
+		// console.log("canDelete:", (role === 'Pharmacy Manager'));
+		return role === 'Pharmacy Manager';
+	};
+
+
+	const deleteMedication = async (id) => {
+		try {
+			console.log("row", id);
+			const response = await fetch(`http://localhost:8000/medication/${id}`, {
+				method: 'DELETE',
+				headers: {
+					'Authorization': 'Bearer ' + token,
+				},
+			});
+			if (!response.ok) {
+				throw new Error('Failed to delete medication');
+			}
+			fetchMedications();
+		} catch (error) {
+			console.error('Error deleting medication:', error);
+			setErrorMessage('Failed to delete medication' + error);
+			setOpenSnackbar(true);
+		}
+	}
+
+	const addEditMedication = async (data, id) => {
+		if (id) {
+			editMedication(data, id);
+		} else {
+			addMedication(data);
+		}
+	}
+
+	const editMedication = async (data, id) => {
+		try {
+			console.log("row in editMedication", id, data)
+			const response = await fetch(`http://localhost:8000/medication/${id}`, {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+					'Authorization': 'Bearer ' + token,
+				},
+				body: JSON.stringify(data),
+			});
+			if (!response.ok) {
+				const responseData = await response.json(); // Wait for the JSON to be parsed
+				console.log("Error detail from response:", responseData.detail[0].msg);
+				throw new Error(responseData.detail[0].msg);
+			}
+			fetchMedications();
+		} catch (error) {
+			setErrorMessage('Failed to update medication');
+			setOpenSnackbar(true);
+		}
+	}
+
+	const addMedication = async (data) => {
+		try {
+			console.log("row in addMedication", data)
+			const response = await fetch(`http://localhost:8000/medication/`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'Authorization': 'Bearer ' + token,
+				},
+				body: JSON.stringify(data),
+			});
+			if (!response.ok) {
+				const responseData = await response.json(); // Wait for the JSON to be parsed
+				var errorMessage;
+				// if responseData.detail is a string, return the strig, else return the first element of the array
+				if (typeof(responseData.detail) == 'string') {// check if response.detail is a string or an array
+					errorMessage = responseData.detail;
+				} else {
+					errorMessage = responseData.detail[0].msg;
+				}
+				throw new Error(errorMessage);
+			}
+			fetchMedications();
+		} catch (error) {
+			setErrorMessage('Failed to add medication: ' + error);
+			setOpenSnackbar(true);
+		}
+	}
+
+
+	// Handle closing of the Snackbar
+	const handleCloseSnackbar = () => {
+		setOpenSnackbar(false);
+	};
+
+
+	// the message format that should get used in the delete confirmation modal (popup) for this table
+	// need this since we want a different format on other tables that use this same base component
+	const medicationConfirmMessage = (row) =>
+		`${row?.name || "Unknown Medication Name"} - ${
+			row?.dosage || "Unknown Dosage"
+		}`;
+
+	const openAddMedicationModal = useRef(null);
+
+	// for generating inventory report
+	const generatePDF = () => {
+		const doc = new jsPDF();
+	  
+		// Set title for the PDF
+		doc.setFontSize(20);
+		doc.text('Medication Inventory Report', 10, 20);
+	  
+		// Set table headers
+		doc.setFontSize(12);
+		let yPosition = 30;
+		doc.text('Name', 10, yPosition);
+		doc.text('Dosage', 40, yPosition);
+		doc.text('Quantity', 60, yPosition);
+		doc.text('Prescription Required', 80, yPosition);
+		doc.text('Expiration Date', 130, yPosition);
+		doc.text('Dollars per Unit', 170, yPosition);
+	  
+		yPosition += 10; // Space after header row
+	  
+		// Loop through rows and add each medication
+		rows.forEach((medication) => {
+		  doc.text(medication.name, 10, yPosition);
+		  doc.text(medication.dosage, 40, yPosition);
+		  doc.text(medication.quantity.toString(), 60, yPosition);
+		  doc.text(medication.prescription_required ? 'Yes' : 'No', 80, yPosition);
+		  doc.text(medication.expiration_date, 130, yPosition);
+		  doc.text(medication.dollars_per_unit.toFixed(2), 170, yPosition);
+		  yPosition += 10; // Move to the next row
+		});
+	  
+		// Save the generated PDF
+		doc.save('medication_inventory_report.pdf');
+	  };
+		  
+	return (
+		<div>
+			<h2>Medication Inventory Table</h2>
 
             <Button variant="contained" onClick={generateMedicationPDF}>
                 Generate Medication Inventory Report

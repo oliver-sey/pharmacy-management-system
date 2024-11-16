@@ -87,7 +87,6 @@ const AddEditPatientModal = ({ open, onClose, row, onSave }) => {
 	};
 
 	// **************new stuff
-	
 	const [formErrors, setFormErrors] = useState({
 		first_name: '',
 		last_name: '',

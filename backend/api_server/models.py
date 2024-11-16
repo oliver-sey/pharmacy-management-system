@@ -136,6 +136,7 @@ class UserActivity(Base):
 # an enum class so we can restrict the set of possible values in the type column in inventory_updates
 class InventoryUpdateType(PyEnum):
     ADD = "Add medication"
+    UPDATE = "Update quantity"
     DISCARD = "Discard medication"
     FILLPRESC = "Fill prescription"
     SELLNONPRESC = "Sell non-prescription item"

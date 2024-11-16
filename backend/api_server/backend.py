@@ -532,11 +532,18 @@ def delete_patient(pid: int, db: Session = Depends(get_db), current_user: UserTo
 # create medication
 @app.post("/medication/", response_model=schema.MedicationResponse)
 def create_medication(medication: schema.MedicationCreate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
-
     validate_user_type(current_user, ["Pharmacy Manager"])
-
     db_medication = models.Medication(**medication.dict())
     db.add(db_medication)
+    db.commit()
+    inventory_update = models.InventoryUpdate (
+        medication_id = db_medication.id,
+        user_activity_id = 1, # FIXME: idk how to get the user activity id here
+        transaction_id = None,
+        quantity_changed_by = db_medication.quantity,
+        type = models.InventoryUpdateType.ADD
+    )
+    db.add(inventory_update)
     db.commit()
     db.refresh(db_medication)
     return db_medication
@@ -567,6 +574,20 @@ def update_medication(medication_id: int, new_medication: schema.MedicationUpdat
 
     # Dump the data from the medication model
     medication_data = new_medication.model_dump()
+    if medication_data['quantity'] == db_medication.quantity:
+        isChaningQuantity = False
+    else:
+        isChaningQuantity = True
+
+    if isChaningQuantity:
+        inventory_update = models.InventoryUpdate (
+            medication_id = db_medication.id,
+            user_activity_id = 1, # FIXME: idk how to get the user activity id here
+            transaction_id = None,
+            quantity_changed_by = db_medication.quantity,
+            type = models.InventoryUpdateType.UPDATE
+        )
+        db.add(inventory_update)
 
     # Update the fields of the existing medication
     for key, value in medication_data.items():
@@ -588,7 +609,6 @@ def delete_medication(medication_id: int, db: Session = Depends(get_db), current
     db_medication = db.query(models.Medication).filter(models.Medication.id == medication_id).first()
     if db_medication is None:
         raise HTTPException(status_code=404, detail="Medication not found")
-
     db.delete(db_medication)
     db.commit()
     return {"message": "Medication deleted successfully", "medication_id": medication_id}

@@ -1,13 +1,17 @@
 import React, {useEffect, useState, useRef} from 'react'
 import CheckUserType from '../Functions/CheckUserType';
 import { useNavigate, Link } from 'react-router-dom';
-import { styled } from '@mui/material/styles';
+import { styled, makeStyles } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid2';
 import IconButton from '@mui/material/IconButton';
 import AddCircleOutlinedIcon from '@mui/icons-material/AddCircleOutlined';
 import AddEditPrescriptionModal from '../Components/AddEditPrescriptionModal';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';
+import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
+import "../Styles/ManagerHome.css"
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: '#fff',
@@ -24,7 +28,6 @@ function ManagerHome() {
   const role = ["Pharmacy Manager"]
   const navigate = useNavigate();
   const [curr_user_id, set_curr_user_id] = useState("");
-
 
 
     const [isEditOpen, setIsEditOpen] = useState(false); // Tracks if the modal is open
@@ -88,12 +91,37 @@ function ManagerHome() {
         filled_timestamp: null,
         //date_prescribed: datetime.datetime.now(),
         medication_id: formData.medication,
-        doctor_name: formData.prescribing_doctor,
+        doctor_name: formData.doctor_name,
         quantity: formData.quantity
       }))
 
       closeEditModal(); // Close modal after saving
     };
+
+    const handleViewPrescriptionsClick = () => {
+      navigate('../viewofprescriptions', {replace: true})
+    }
+
+    const handleViewPrescriptionFillHistoryClick = () => {
+      navigate('../viewofprescriptionfillhistory', {replace: true})
+    }
+
+    const handleViewUsersClick = () => {
+      navigate('../viewofusers', {replace: true})
+    }
+
+    const handleViewPatientsClick = () => {
+      navigate('../viewofpatients', {replace: true})
+    }
+
+    const handleViewMedicationsClick = () => {
+      navigate('../viewofmedications', {replace: true})
+    }
+
+    //TODO: update when page is added
+    const handleViewInventoryChangesClick = () => {
+      
+    }
   
     useEffect(() => {
         CheckUserType(role, navigate);
@@ -102,44 +130,93 @@ function ManagerHome() {
   
   
     return (
-      <div>
+      <div >
+        <h1 className='section-header'>Prescriptions</h1>
         <Box sx={{ flexGrow: 1 }}>
-        <Grid container spacing={6}>
+        <Grid container spacing={6} margin={4}>
           <Grid size={6}>
             <Item>
-            Enter new prescription
+            Enter New Prescription
             <div/>
-            <IconButton aria-label="addPrescription" size="large" color='primary' onClick={openAddPrescriptionHandler}>
+            <IconButton sx={{maxWidth: 60}} aria-label="addPrescription" color='primary' onClick={openAddPrescriptionHandler}>
                 <AddCircleOutlinedIcon />
               </IconButton>
             </Item>
           </Grid>
           <Grid size={6}>
-          <Item>
-              {/* Link to the List of Users page */}
-              <Link to="/viewofusers" style={{ textDecoration: 'none', color: '#007bff' }}>
-                View of Users
-              </Link>
+            <Item>
+              View All Prescriptions
+              <div/>
+              <IconButton sx={{maxWidth: 60}} aria-label="viewPrescriptions" color='primary' onClick={handleViewPrescriptionsClick}>
+                <VisibilityOutlinedIcon />
+              </IconButton>
             </Item>
           </Grid>
           <Grid size={6}>
-          <Item>
-              {/* Link to the List of Users page */}
-              <Link to="/viewofmedications" style={{ textDecoration: 'none', color: '#007bff' }}>
-                View of Medications
-              </Link>
-            </Item>
-          </Grid>
-          <Grid size={6}>
-          <Item>
-              {/* Link to the List of Users page */}
-              <Link to="/viewofpatients" style={{ textDecoration: 'none', color: '#007bff' }}>
-                View of Patients
-              </Link>
+            <Item>
+              See Prescription Fill History
+              <div/>
+              <IconButton sx={{maxWidth: 60}} aria-label="viewPrescriptionFillHistory" color='primary' onClick={handleViewPrescriptionFillHistoryClick}>
+                <HistoryOutlinedIcon />
+              </IconButton>
             </Item>
           </Grid>
         </Grid>
       </Box>
+
+      <div/>
+      
+      <Box sx={{ flexGrow: 1 }}>
+        <Grid container spacing={6} margin={4}>
+          <Grid size={6}>
+          <h1 className='section-header'>Patients</h1>
+            <Item>
+            View/Add Patients
+            <div/>
+              <IconButton sx={{maxWidth: 60}} aria-label="viewPrescriptions" color='primary' onClick={handleViewPatientsClick}>
+                <VisibilityOutlinedIcon />
+              </IconButton>
+
+            </Item>
+          </Grid>
+          <Grid size={6}>
+          <h1 className='section-header'>Users</h1>
+            <Item>
+              View/Add Users
+              <div/>
+              <IconButton sx={{maxWidth: 60}} aria-label="addPatient" color='primary' onClick={handleViewUsersClick}>
+                <VisibilityOutlinedIcon />
+              </IconButton>
+            </Item>
+          </Grid>
+        </Grid>
+      </Box>
+
+      <div/>
+      <h1 className='section-header'>Medications</h1>
+        <Box sx={{ flexGrow: 1 }}>
+        <Grid container spacing={6} margin={4}>
+          <Grid size={6}>
+            <Item>
+              View Medications
+              <div/>
+              <IconButton sx={{maxWidth: 60}} aria-label="viewMedications" color='primary' onClick={handleViewMedicationsClick}>
+                  <VisibilityOutlinedIcon />
+              </IconButton>
+            </Item>
+          </Grid>
+          <Grid size={6}>
+            <Item>
+              View Inventory Changes
+              <div/>
+              <IconButton sx={{maxWidth: 60}} aria-label="viewInventoryChanges"  color='primary' onClick={handleViewInventoryChangesClick}>
+                <Inventory2OutlinedIcon />
+              </IconButton>
+            </Item>
+          </Grid>
+        </Grid>
+      </Box>
+
   
       <AddEditPrescriptionModal
       open={isEditOpen}

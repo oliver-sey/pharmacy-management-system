@@ -88,7 +88,7 @@ function ViewOfPrescriptions() {
           }
     }
 
-    const loadRows = async () =>{
+    const loadRows = async () => {
         const patients = await fetchPatients();
         const medications = await fetchMedications();
         const prescriptions = await fetchPrescriptions();
@@ -148,10 +148,8 @@ function ViewOfPrescriptions() {
 		{ field: 'filled_timestamp', headerName: 'Date Filled' }
 	  ];
 
-	// all users can edit patients
+	// all users can edit prescriptions
 	const canEdit = () => {
-		// const userType = localStorage.getItem('userType');
-		// TODO: should we do this with no checks?
 		return true;
 	};
 	  

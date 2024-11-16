@@ -29,7 +29,7 @@ const AddEditPrescriptionModal = ({ open, onClose, row, onSave }) => {
 	const [patient_data, set_patient_data] = useState([])
 	const [valid_patient, set_valid_patient] = useState(true)
 	const [valid_medication, set_valid_medication] = useState(true)
-	const [valid_dosage, set_valid_dosage] = useState(true)
+	
 
 	const token = localStorage.getItem('token');
 	
@@ -80,9 +80,7 @@ const AddEditPrescriptionModal = ({ open, onClose, row, onSave }) => {
 		fetchMedication(); // Call the async function
 		set_valid_medication(true)
 		set_valid_patient(true)
-		set_valid_dosage(true)
-
-		console.log(valid_medication)
+		
 	  }, [formData]);
 
 	// Update form data when the row prop changes
@@ -130,21 +128,14 @@ const AddEditPrescriptionModal = ({ open, onClose, row, onSave }) => {
 		return true
 	}
 
-	const checkValidDosage = () => {
-		if (/^\d+$/.test(medication_data.dosage)) {
-			return true
-		}
-		set_valid_dosage(false)
-		return false
-	}
 
 	// Handle saving of the updated data
 	const handleSave = () => {
 		const medication_valid = checkValidMedication()
 		const patient_valid = checkValidPatient()
-		const dosage_valid = checkValidDosage()
 
-		if (medication_valid && patient_valid && dosage_valid) {
+
+		if (medication_valid && patient_valid ) {
 			const patient_id = patient_data.filter(item => {
 				const searchTerm = formData.patient.toLowerCase();
 				const patient_name = item.name.toLowerCase();
@@ -160,10 +151,13 @@ const AddEditPrescriptionModal = ({ open, onClose, row, onSave }) => {
 			}).map(item => (item.id))[0].toString();
 
 			
+
+			
 			const data_to_return = {...formData, medication: medication_id, patient: patient_id}
 
 			setFormData((prev) => ({medication: medication_id, patient: patient_id, ...prev}));
 			
+			console.log(data_to_return)
 			onSave(data_to_return, row?.id); // Pass updated form data to parent component
 			onClose()
 		}
@@ -250,9 +244,7 @@ const AddEditPrescriptionModal = ({ open, onClose, row, onSave }) => {
 				<DialogContentText className="error-text">
 					{!valid_patient && <p>Patient is not found.</p>}
 				</DialogContentText>
-				<DialogContentText className="error-text">
-					{!valid_dosage && <p>Dosage must be a valid number.</p>}
-				</DialogContentText>
+				
 			</DialogContent>
 			<DialogActions>
 				<Button onClick={onClose}>Cancel</Button>

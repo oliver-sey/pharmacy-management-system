@@ -11,8 +11,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from passlib.context import CryptContext
 from typing import Optional
 from .database import SessionLocal, engine, Base
-from .schema import Token, TokenData, UserActivityCreate, UserCreate, UserResponse, UserLogin, UserToReturn, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, InventoryUpdateCreate,  InventoryUpdateResponse
+from .schema import Token, TokenData, UserActivityCreate, UserCreate, UserResponse, UserLogin, UserToReturn, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, InventoryUpdateCreate,  InventoryUpdateResponse, UserActivityResponse
 from . import models  # Ensure this is the SQLAlchemy model
+from .models import UserActivity
 from sqlalchemy.orm import Session
 from typing import List
 from . import schema
@@ -336,30 +337,37 @@ async def read_own_items(
 @app.post("/resetpassword")
 async def reset_password(
     newPassword: Annotated[str, Body(..., embed=True)],
-    currentUser: Annotated[UserToReturn, Depends(get_current_user)]
+    currentUser: Annotated[UserToReturn, Depends(get_current_user)],
+    db: Session = Depends(get_db)
 ):
     if not newPassword:
         raise HTTPException(status_code=400, detail="Password is required")
     
     # Checks that password is valid
-    if len(newPassword) < 8:
-        raise HTTPException(status_code=400, detail="Password must be at least 8 characters long.")
-    if not any(char.isdigit() for char in newPassword):
-        raise HTTPException(status_code=400, detail="Password must contain at least one number.")
-    if not any(char.isupper() for char in newPassword):
-        raise HTTPException(status_code=400, detail="Password must contain at least one uppercase letter.")
-    if not any(char.islower() for char in newPassword):
-        raise HTTPException(status_code=400, detail="Password must contain at least one lowercase letter.")
-    if not any(char in "!@#$%^&*()_+" for char in newPassword):
-        raise HTTPException(status_code=400, detail="Password must contain at least one special character.")
+    # if len(newPassword) < 8:
+    #     raise HTTPException(status_code=400, detail="Password must be at least 8 characters long.")
+    # if not any(char.isdigit() for char in newPassword):
+    #     raise HTTPException(status_code=400, detail="Password must contain at least one number.")
+    # if not any(char.isupper() for char in newPassword):
+    #     raise HTTPException(status_code=400, detail="Password must contain at least one uppercase letter.")
+    # if not any(char.islower() for char in newPassword):
+    #     raise HTTPException(status_code=400, detail="Password must contain at least one lowercase letter.")
+    # if not any(char in "!@#$%^&*()_+" for char in newPassword):
+    #     raise HTTPException(status_code=400, detail="Password must contain at least one special character.")
 
     # Hash the new password
     hashedPassword = get_password_hash(newPassword)
 
-    # Update the user's password in the fake database (in-memory)
-    fake_users_db[currentUser.email]["hashed_password"] = hashedPassword
+    
+    user = db.query(models.User).filter(models.User.id == currentUser.id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    user.password = hashedPassword
+    db.commit()
 
     return {"message": "Password has been successfully reset."}
+
 
 
 
@@ -368,9 +376,9 @@ async def reset_password(
 # region User CRUD
 # POST endpoint to create a user
 @app.post("/users/", response_model=UserResponse)
-def create_user(user: UserCreate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+def create_user(user: UserCreate, db: Session = Depends(get_db)):
 
-    validate_user_type(current_user, ["Pharmacy Manager"])
+    # validate_user_type(current_user, ["Pharmacy Manager"])
     # Check if the email already exists
     existing_user = db.query(models.User).filter(models.User.email == user.email).first()
     if existing_user:
@@ -539,6 +547,13 @@ def create_medication(medication: schema.MedicationCreate, db: Session = Depends
     db.add(db_medication)
     db.commit()
     db.refresh(db_medication)
+
+    #create inventory update
+    inventory_update = create_inventory_update(inventory_update=InventoryUpdateCreate(
+        medication_id=db_medication.id,
+        quantity_changed_by= - medication.quantity,
+        activity_type=models.InventoryUpdateType.ADD
+    ), db=db, current_user=current_user)
     return db_medication
 
 # get medication by id
@@ -597,7 +612,7 @@ def delete_medication(medication_id: int, db: Session = Depends(get_db), current
 @app.get("/medicationlist/")
 def list_medication(db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
 
-    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist", "Pharmacy Technician"])
 
     # Query the database for all medications
     medications = db.query(models.Medication).all()
@@ -636,10 +651,26 @@ def get_prescription(prescription_id: int, db: Session = Depends(get_db), curren
 
 # create prescription
 @app.post("/prescription", response_model=schema.PrescriptionResponse)
-def create_prescription(prescription: schema.PrescriptionCreate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+def create_prescription(
+    prescription: schema.PrescriptionCreate,
+    db: Session = Depends(get_db),
+    current_user: UserToReturn = Depends(get_current_user),
+):
     # Ensure that prescription data is valid
     try:
-        db_prescription = models.Prescription(**prescription.model_dump())  # Use .model_dump() for Pydantic V2
+        # db_prescription = models.Prescription(**prescription.model_dump())  # Use .model_dump() for Pydantic V2
+
+        # not all the fields needed for the DB come from PrescriptionCreate (user_entered_id)
+        # so we need to add it here
+        db_prescription = models.Prescription(
+            patient_id=prescription.patient_id,
+            # get the user who entered the prescription from the current user
+            user_entered_id=current_user.id,
+            medication_id=prescription.medication_id,
+            doctor_name=prescription.doctor_name,
+            quantity=prescription.quantity,  # The number of units of medication that this prescription allows the patient to get
+        )
+
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -653,10 +684,17 @@ def create_prescription(prescription: schema.PrescriptionCreate, db: Session = D
 # update prescription
 @app.put("/prescription/{prescription_id}", response_model=schema.PrescriptionUpdate)
 def update_prescription(prescription_id: int, prescription: schema.PrescriptionUpdate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
-    
+    # ** don't allow a prescription to be update if it has already been filled
+    # since we rely on the prescription to store important details, and if it is already filled,
+    # it doesn't make sense to change the patient_id, date_prescribed, medication_id, doctor_name, or quantity
+
     db_prescription = db.query(models.Prescription).filter(models.Prescription.id == prescription_id).first()
     if db_prescription is None:
         raise HTTPException(status_code=404, detail="Prescription not found")
+    # don't allow a prescription to be updated if it has already been filled
+    # check both the filled_timestamp and the user_filled_id just in case something weird happens and only one gets updated
+    elif db_prescription.filled_timestamp is not None or db_prescription.user_filled_id is not None:
+        raise HTTPException(status_code=409, detail="Prescriptions cannot be updated after they have already been filled")
     
     # Update only provided fields
     for key, value in prescription.model_dump().items():
@@ -716,15 +754,18 @@ def fill_prescription(prescription_id: int, db: Session = Depends(get_db), curre
         # if we successfully deduct medication from inventory, create an inventory update instance in InventoryUpdate table
         inventory_update_request = models.InventoryUpdate(
             medication_id=db_medication.id,
-            quantity_changed_by=db_prescription.quantity,       # The quantity deducted
+            # The quantity deducted - make it negative since we want it to be a delta of e.g. -20, instead of 20
+            quantity_changed_by= - db_prescription.quantity,
             # no transaction_id since this is not associated with a transaction
             # TODO: is this right? or should we do "Fill prescription"
-            type=models.InventoryUpdateType.FILL_PRESCRIPTION   # set the type to fill prescription
+
+            activity_type=models.InventoryUpdateType.FILLPRESC   # set the type to fill prescription
+
         )
 
         # send the inventory_update_request to actually be stored in the database
         # this will add an entry to user_activities (for filling the prescription) for us
-        create_inventory_update(inventory_update=inventory_update_request, db=db)
+        create_inventory_update(inventory_update=inventory_update_request, db=db, current_user=current_user)
 
 
         # after making sure we have enough inventory and creating an inventory update (which create a user_activities entry for us)
@@ -734,7 +775,7 @@ def fill_prescription(prescription_id: int, db: Session = Depends(get_db), curre
         
         # set the timestamp of filling to the current time
         db_prescription.filled_timestamp = datetime.now()
-        # get the user who filled the prescription from the current user
+        # get the user_id of the user who filled the prescription from the current user
         db_prescription.user_filled_id = current_user.id
 
     db.commit()
@@ -750,18 +791,30 @@ def fill_prescription(prescription_id: int, db: Session = Depends(get_db), curre
 # create inventory_update
 # just as a function that will get called by other endpoints
 # @app.post("/inventory-updates", response_model=InventoryUpdateResponse)
-def create_inventory_update(inventory_update: InventoryUpdateCreate, request: Request, db: Session = Depends(get_db)):
-    # Ensure that inventory_update data is valid
+def create_inventory_update(inventory_update: InventoryUpdateCreate, db: Session, current_user: UserToReturn):
+    # Catch possible exceptions when creating the DB entries
     try:
-        db_inventory_update = models.InventoryUpdate(**inventory_update.model_dump())  # Use .model_dump() for Pydantic V2
+        # create a user_activities entry for this
+        # need to do this first so we can reference the user_activity_id in the inventory_update
+        # any type of updating the inventory (add, discard, filling, selling), the user_activity entry for it will be "Inventory Update"
+        # **NOTE: need to use the 'key' of the enum ('INVENTORY_UPDATE') instead of the 'value' ('Inventory Update')
+        user_activity_create = UserActivityCreate(activity_type=models.UserActivityType.INVENTORY_UPDATE)
+        new_user_activity = create_user_activity(user_activity_create, db, current_user)
+
+        # populate the fields of the new inventory_update
+        db_inventory_update = models.InventoryUpdate(
+            medication_id=inventory_update.medication_id,
+            user_activity_id=new_user_activity.id,
+            # might be None if there is no transaction associated with this update
+            transaction_id=inventory_update.transaction_id,
+            quantity_changed_by=inventory_update.quantity_changed_by,
+            # set the timestamp in UTC so timezones don't affect it
+            timestamp=datetime.now(timezone.utc),
+            activity_type=inventory_update.activity_type
+        )
+
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-
-    # create a user_activities entry for this
-    # any type of updating the inventory (add, discard, filling, selling), the user_activity entry for it will be "Inventory Update"
-    user_activity_create = UserActivityCreate(activity=models.UserActivityType.INVENTORY_UPDATE)
-    create_user_activity(user_activity_create, db)
-
 
     # add the inventory_update to the database
     db.add(db_inventory_update)
@@ -788,7 +841,7 @@ def get_inventory_update(id: int, db: Session = Depends(get_db), current_user: U
 # get all inventory_updates - **optional param to filter to one value of 'type'
 @app.get("/inventory-updates", response_model=List[InventoryUpdateResponse])
 # restrict type to the values in InventoryUpdateType
-def get_inventory_updates(type: Optional[models.InventoryUpdateType] = Query(None), db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+def get_inventory_updates(activity_type: Optional[models.InventoryUpdateType] = Query(None), db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
     '''
     endpoint to get inventory_updates with optional type (e.g. add, discard, fillpresc, sellnonpresc).
     If type is provided, only inventory_updates for that type are returned.
@@ -798,8 +851,8 @@ def get_inventory_updates(type: Optional[models.InventoryUpdateType] = Query(Non
     validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
 
     # if type is provided, return all inventory_updates of that type
-    if type:
-        inventory_updates = db.query(models.InventoryUpdate).filter(models.InventoryUpdate.type == type).all()
+    if activity_type:
+        inventory_updates = db.query(models.InventoryUpdate).filter(models.InventoryUpdate.activity_type == activity_type).all()
     # else return all inventory_updates
     else:
         inventory_updates = db.query(models.InventoryUpdate).all()
@@ -809,14 +862,12 @@ def get_inventory_updates(type: Optional[models.InventoryUpdateType] = Query(Non
 
 # endregion
 # region User Activities CRUD
-def create_user_activity(user_activity: UserActivityCreate, db: Session, current_user: UserToReturn = Depends(get_current_user)):
-    # get user_id from current_user
-    # TODO: should I be explicitly passing current_user here?
-
+def create_user_activity(user_activity: UserActivityCreate, db: Session, current_user: UserToReturn):
     # Create a new UserActivity instance
     db_user_activity = models.UserActivity(
+        # get user_id from current_user
         user_id=current_user.id,
-        type=user_activity.activity,
+        activity_type=user_activity.activity_type,
         timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
     )
 
@@ -824,3 +875,42 @@ def create_user_activity(user_activity: UserActivityCreate, db: Session, current
     db.commit()
     db.refresh(db_user_activity)
     return db_user_activity
+
+@app.get("/user-activities", response_model=List[UserActivityResponse])
+def get_all_user_activities(db: Session = Depends(get_db)):
+    activities = db.query(UserActivity).all()
+    if not activities:
+        raise HTTPException(status_code=404, detail="No activities found")
+    return activities
+
+
+# selling non-prescription items
+@app.put("/non-prescription/{id}", response_model=InventoryUpdateResponse)
+def sell_non_prescription_item(id: int, medication_update: schema.MedicationUpdate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+    # make sure only pharmacy managers or pharmacists can call this endpoint
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
+
+    # query medication with id and make sure it's prescription-required is False
+    db_medication = db.query(models.Medication).filter(models.Medication.id == id).first()
+    if db_medication is None:
+        raise HTTPException(status_code=404, detail="Medication not found")
+    elif db_medication.prescription_required:
+        raise HTTPException(status_code=400, detail="This medication requires a prescription to be sold")
+    
+    # update the medication
+    for key, value in medication_update.model_dump().items():
+        if value is not None:
+            setattr(db_medication, key, value)
+
+    # commit the changes
+    db.commit()
+    db.refresh(db_medication)
+
+    #create inventory update
+    inventory_update = create_inventory_update(inventory_update=InventoryUpdateCreate(
+        medication_id=id,
+        quantity_changed_by= - medication_update.quantity,
+        activity_type=models.InventoryUpdateType.SELLNONPRESC
+    ), db=db, current_user=current_user)
+    return inventory_update
+    

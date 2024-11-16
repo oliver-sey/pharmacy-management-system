@@ -142,17 +142,17 @@ VALUES('Levothyroxine', '75 mg', 300, TRUE, '2026-01-01', 0.55);
 INSERT INTO prescriptions (patient_id, user_entered_id, user_filled_id, date_prescribed, filled_timestamp, medication_id, doctor_name, quantity) 
 VALUES (1, 3, 1, '2024-09-28', '2024-09-30 09:22:13', 2, 'Dr. Matthews', 50);
 INSERT INTO prescriptions (patient_id, user_entered_id, user_filled_id, date_prescribed, filled_timestamp, medication_id, doctor_name, quantity) 
-VALUES (2, 17, 5, '2024-09-10', '2024-09-12 11:18:45', 3, 'Dr. Philips', 20);
+VALUES (2, 17, null, '2024-09-10', null, 3, 'Dr. Philips', 20);
 INSERT INTO prescriptions (patient_id, user_entered_id, user_filled_id, date_prescribed, filled_timestamp, medication_id, doctor_name, quantity) 
 VALUES (3, 21, 24, '2024-08-05', '2024-08-06 14:47:59', 6, 'Dr. Greene', 100);
 INSERT INTO prescriptions (patient_id, user_entered_id, user_filled_id, date_prescribed, filled_timestamp, medication_id, doctor_name, quantity) 
 VALUES (1, 10, 10, '2024-09-29', '2024-09-30 12:10:22', 2, 'Dr. Stanley', 500);
 INSERT INTO prescriptions (patient_id, user_entered_id, user_filled_id, date_prescribed, filled_timestamp, medication_id, doctor_name, quantity) 
-VALUES (17, 12, 14, '2024-09-01', '2024-09-02 10:03:11', 7, 'Dr. Wills', 200);
+VALUES (17, 12, null, '2024-09-01', null, 7, 'Dr. Wills', 200);
 INSERT INTO prescriptions (patient_id, user_entered_id, user_filled_id, date_prescribed, filled_timestamp, medication_id, doctor_name, quantity) 
 VALUES (1, 11, 17, '2024-07-15', '2024-07-17 09:35:44', 11, 'Dr. Matthews', 50);
 INSERT INTO prescriptions (patient_id, user_entered_id, user_filled_id, date_prescribed, filled_timestamp, medication_id, doctor_name, quantity) 
-VALUES (5, 12, 21, '2024-09-25', '2024-09-26 14:22:30', 15, 'Dr. Hall', 12);
+VALUES (5, 12, null, '2024-09-25', null, 15, 'Dr. Hall', 12);
 INSERT INTO prescriptions (patient_id, user_entered_id, user_filled_id, date_prescribed, filled_timestamp, medication_id, doctor_name, quantity) 
 VALUES (16, 22, 24, '2024-09-29', '2024-09-30 15:45:15', 17, 'Dr. Squatch', 1000);
 INSERT INTO prescriptions (patient_id, user_entered_id, user_filled_id, date_prescribed, filled_timestamp, medication_id, doctor_name, quantity) 
@@ -160,59 +160,56 @@ VALUES (17, 6, 5, '2024-09-29', '2024-09-30 12:10:22', 2, 'Dr. Oz', 25);
 INSERT INTO prescriptions (patient_id, user_entered_id, user_filled_id, date_prescribed, filled_timestamp, medication_id, doctor_name, quantity) 
 VALUES (17, 1, 9, '2024-09-01', '2024-09-02 10:03:11', 7, 'Dr. Oz', 200);
 INSERT INTO prescriptions (patient_id, user_entered_id, user_filled_id, date_prescribed, filled_timestamp, medication_id, doctor_name, quantity) 
-VALUES (21, 19, 10, '2024-07-15', '2024-09-17 11:34:44', 15, 'Dr. Doofenschmirz', 12);
+VALUES (21, 19, null, '2024-07-15', null, 15, 'Dr. Doofenschmirz', 12);
 INSERT INTO prescriptions (patient_id, user_entered_id, user_filled_id, date_prescribed, filled_timestamp, medication_id, doctor_name, quantity) 
 VALUES (20, 24, 14, '2024-09-02', '2024-09-26 14:42:30', 2, 'Dr. Hall', 12);
 INSERT INTO prescriptions (patient_id, user_entered_id, user_filled_id, date_prescribed, filled_timestamp, medication_id, doctor_name, quantity) 
-VALUES (21, 2, 1, '2024-09-29', '2024-09-30 15:12:15', 17, 'Dr. Carter', 90);
+VALUES (21, 2, null, '2024-09-29', null, 17, 'Dr. Carter', 90);
 
 
 -- user_activities table
 
 
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (21, 'INVENTORY_UPDATE', '2024-07-18 10:47:00');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (24, 'LOGIN', '2024-08-06 07:55:35');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (5, 'INVENTORY_UPDATE', '2024-08-07 16:05:00');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (2, 'LOGIN', '2024-09-01 11:00:18');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (2, 'UNLOCK_ACCOUNT', '2024-09-02 09:10:20');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (7, 'INVENTORY_UPDATE', '2024-09-03 09:15:00');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (13, 'INVENTORY_UPDATE', '2024-09-03 12:25:00');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (1, 'LOGIN', '2024-09-11 08:24:10');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (5, 'LOGIN', '2024-09-12 08:20:00');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (8, 'LOGIN', '2024-09-12 11:00:20');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (2, 'LOGOUT', '2024-09-12 11:45:30');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (8, 'INVENTORY_UPDATE', '2024-09-12 12:35:22');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (8, 'LOGOUT', '2024-09-12 12:37:50');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (19, 'INVENTORY_UPDATE', '2024-09-13 12:23:00');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (12, 'LOGIN', '2024-09-25 08:13:30');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (12, 'INVENTORY_UPDATE', '2024-09-25 08:45:30');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (12, 'LOGOUT', '2024-09-25 09:01:30');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (24, 'LOGIN', '2024-09-26 09:05:10');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (24, 'LOGIN', '2024-09-26 09:05:31');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (1, 'LOGOUT', '2024-09-26 10:15:10');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (5, 'LOGOUT', '2024-09-26 17:20:55');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (10, 'INVENTORY_UPDATE', '2024-09-27 11:53:00');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (15, 'INVENTORY_UPDATE', '2024-09-27 17:14:00');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (14, 'LOGIN', '2024-09-29 09:00:05');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (12, 'INVENTORY_UPDATE', '2024-09-29 10:12:45');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (19, 'INVENTORY_UPDATE', '2024-09-29 15:10:00');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (14, 'LOGOUT', '2024-09-29 17:45:20');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (20, 'LOGIN', '2024-09-30 08:00:12');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (1, 'LOGIN', '2024-09-30 08:01:00');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (3, 'INVENTORY_UPDATE', '2024-09-30 08:15:40');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (3, 'INVENTORY_UPDATE', '2024-09-30 08:20:10');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (14, 'INVENTORY_UPDATE', '2024-09-30 10:23:00');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (21, 'INVENTORY_UPDATE', '2024-09-30 14:35:00');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (9, 'INVENTORY_UPDATE', '2024-09-30 14:40:00');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (8, 'INVENTORY_UPDATE', '2024-09-30 16:52:00');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (1, 'LOGOUT', '2024-09-30 17:05:32');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (20, 'LOGOUT', '2024-09-30 18:00:25');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (19, 'INVENTORY_UPDATE', '2024-10-01 09:32:00');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (16, 'INVENTORY_UPDATE', '2024-10-01 09:57:00');
-INSERT INTO user_activities (user_id, type, timestamp) VALUES (17, 'INVENTORY_UPDATE', '2024-10-02 14:12:00');
-
-
-
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (21, 'INVENTORY_UPDATE', '2024-07-18 10:47:00');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (24, 'LOGIN', '2024-08-06 07:55:35');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (5, 'INVENTORY_UPDATE', '2024-08-07 16:05:00');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (2, 'LOGIN', '2024-09-01 11:00:18');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (2, 'UNLOCK_ACCOUNT', '2024-09-02 09:10:20');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (7, 'INVENTORY_UPDATE', '2024-09-03 09:15:00');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (13, 'INVENTORY_UPDATE', '2024-09-03 12:25:00');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (1, 'LOGIN', '2024-09-11 08:24:10');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (5, 'LOGIN', '2024-09-12 08:20:00');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (8, 'LOGIN', '2024-09-12 11:00:20');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (2, 'LOGOUT', '2024-09-12 11:45:30');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (8, 'INVENTORY_UPDATE', '2024-09-12 12:35:22');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (8, 'LOGOUT', '2024-09-12 12:37:50');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (19, 'INVENTORY_UPDATE', '2024-09-13 12:23:00');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (12, 'LOGIN', '2024-09-25 08:13:30');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (12, 'INVENTORY_UPDATE', '2024-09-25 08:45:30');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (12, 'LOGOUT', '2024-09-25 09:01:30');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (24, 'LOGIN', '2024-09-26 09:05:10');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (24, 'LOGIN', '2024-09-26 09:05:31');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (1, 'LOGOUT', '2024-09-26 10:15:10');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (5, 'LOGOUT', '2024-09-26 17:20:55');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (10, 'INVENTORY_UPDATE', '2024-09-27 11:53:00');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (15, 'INVENTORY_UPDATE', '2024-09-27 17:14:00');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (14, 'LOGIN', '2024-09-29 09:00:05');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (12, 'INVENTORY_UPDATE', '2024-09-29 10:12:45');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (19, 'INVENTORY_UPDATE', '2024-09-29 15:10:00');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (14, 'LOGOUT', '2024-09-29 17:45:20');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (20, 'LOGIN', '2024-09-30 08:00:12');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (1, 'LOGIN', '2024-09-30 08:01:00');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (3, 'INVENTORY_UPDATE', '2024-09-30 08:15:40');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (3, 'INVENTORY_UPDATE', '2024-09-30 08:20:10');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (14, 'INVENTORY_UPDATE', '2024-09-30 10:23:00');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (21, 'INVENTORY_UPDATE', '2024-09-30 14:35:00');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (9, 'INVENTORY_UPDATE', '2024-09-30 14:40:00');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (8, 'INVENTORY_UPDATE', '2024-09-30 16:52:00');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (1, 'LOGOUT', '2024-09-30 17:05:32');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (20, 'LOGOUT', '2024-09-30 18:00:25');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (19, 'INVENTORY_UPDATE', '2024-10-01 09:32:00');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (16, 'INVENTORY_UPDATE', '2024-10-01 09:57:00');
+INSERT INTO user_activities (user_id, activity, timestamp) VALUES (17, 'INVENTORY_UPDATE', '2024-10-02 14:12:00activity');
 -- transactions table
 
 INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (5, 1, '2024-09-30 14:35:18', 'credit card');

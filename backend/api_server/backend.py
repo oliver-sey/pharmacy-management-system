@@ -11,8 +11,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from passlib.context import CryptContext
 from typing import Optional
 from .database import SessionLocal, engine, Base
-from .schema import Token, TokenData, UserActivityCreate, UserCreate, UserResponse, UserLogin, UserToReturn, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, InventoryUpdateCreate,  InventoryUpdateResponse
+from .schema import Token, TokenData, UserActivityCreate, UserCreate, UserResponse, UserLogin, UserToReturn, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, InventoryUpdateCreate,  InventoryUpdateResponse, UserActivityResponse
 from . import models  # Ensure this is the SQLAlchemy model
+from .models import UserActivity
 from sqlalchemy.orm import Session
 from typing import List
 from . import schema
@@ -713,6 +714,14 @@ def create_user_activity(user_activity: UserActivityCreate, db: Session, current
     db.commit()
     db.refresh(db_user_activity)
     return db_user_activity
+
+@app.get("/user-activities", response_model=List[UserActivityResponse])
+def get_all_user_activities(db: Session = Depends(get_db)):
+    activities = db.query(UserActivity).all()
+    if not activities:
+        raise HTTPException(status_code=404, detail="No activities found")
+    return activities
+
 
 # selling non-prescription items
 @app.put("/non-prescription/{id}", response_model=InventoryUpdateResponse)

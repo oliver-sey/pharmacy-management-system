@@ -250,7 +250,7 @@ function ViewOfMedications() {
 	const addMedication = async (data) => {
 		try {
 			console.log("row in addMedication", data)
-			const response = await fetch(`http://localhost:8000/medication`, {
+			const response = await fetch(`http://localhost:8000/medication/`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',

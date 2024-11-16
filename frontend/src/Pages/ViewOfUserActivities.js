@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import '../Styles/UserActivitiesTable.css'; // Import the CSS file for styling
+import '../Styles/UserActivitiesTable.css';
 
 const UserActivitiesTable = () => {
-  const [activities, setActivities] = useState([]);
+  const [allActivities, setAllActivities] = useState([]); // Store all activities fetched from the backend
+  const [filteredActivities, setFilteredActivities] = useState([]); // Store filtered activities for display
   const [filters, setFilters] = useState({
     userId: '',
     activity: '',
@@ -12,20 +13,11 @@ const UserActivitiesTable = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchActivities(); // Fetch all activities initially
+    fetchActivities(); // Fetch all activities once on component mount
   }, []);
 
   const fetchActivities = async () => {
-    setError(null); // Reset error at the start of each fetch
-
-    const params = new URLSearchParams();
-    if (filters.userId) params.append('user_id', filters.userId);
-    if (filters.activity) params.append('activity', filters.activity);
-    if (filters.startDate) params.append('start_date', filters.startDate);
-    if (filters.endDate) params.append('end_date', filters.endDate);
-
-    const query = `http://localhost:8000/user-activities?${params.toString()}`;
-
+    setError(null);
     const token = localStorage.getItem('token');
     if (!token) {
       alert("No authentication token found. Please log in.");
@@ -33,7 +25,7 @@ const UserActivitiesTable = () => {
     }
 
     try {
-      const response = await fetch(query, {
+      const response = await fetch("http://localhost:8000/user-activities", {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -45,16 +37,16 @@ const UserActivitiesTable = () => {
           alert("Session expired. Please log in again.");
           return;
         }
-        const errorMessage = `Server responded with status ${response.status}`;
-        setError(errorMessage);
-        throw new Error(errorMessage);
+        setError(`Server responded with status ${response.status}`);
+        throw new Error(`Server responded with status ${response.status}`);
       }
 
       const data = await response.json();
-      setActivities(data);
+      setAllActivities(data); // Store all activities for reference
+      setFilteredActivities(data); // Display all activities initially
     } catch (error) {
       console.error("Error fetching activities:", error);
-      setError("An error occurred while fetching user activities. Please check the server and try again.");
+      setError("An error occurred while fetching user activities.");
     }
   };
 
@@ -66,9 +58,39 @@ const UserActivitiesTable = () => {
     });
   };
 
-  const handleApplyFilters = () => {
-    fetchActivities(); // Apply filters when button is clicked
+  const applyFilters = () => {
+    console.log("Applying filters:", filters); // Log current filter values
+  
+    const filtered = allActivities.filter(activity => {
+      // Check each filter condition separately
+      const matchUserId = filters.userId ? activity.user_id.toString() === filters.userId : true;
+      const matchActivity = filters.activity ? activity.activity === filters.activity : true;
+  
+      // Parse dates for comparison
+      const activityDate = new Date(activity.timestamp);
+      const startDate = filters.startDate ? new Date(filters.startDate) : null;
+      const endDate = filters.endDate ? new Date(filters.endDate) : null;
+  
+      const matchStartDate = startDate ? activityDate >= startDate : true;
+      const matchEndDate = endDate ? activityDate <= endDate : true;
+  
+      // Log each condition to see where it might fail
+      console.log({
+        activity: activity,
+        matchUserId,
+        matchActivity,
+        matchStartDate,
+        matchEndDate,
+      });
+  
+      // Return true only if all conditions match
+      return matchUserId && matchActivity && matchStartDate && matchEndDate;
+    });
+  
+    setFilteredActivities(filtered);
+    console.log("Filtered Activities:", filtered); // Log filtered results
   };
+  
 
   const handleClearFilters = () => {
     setFilters({
@@ -77,7 +99,7 @@ const UserActivitiesTable = () => {
       startDate: '',
       endDate: '',
     });
-    fetchActivities(); // Refresh activities without filters
+    setFilteredActivities(allActivities); // Reset to show all activities
   };
 
   return (
@@ -127,7 +149,7 @@ const UserActivitiesTable = () => {
           />
         </label>
         <div className="button-container">
-          <button className="apply-button" onClick={handleApplyFilters}>Apply Filters</button>
+          <button className="apply-button" onClick={applyFilters}>Apply Filters</button>
           <button className="clear-button" onClick={handleClearFilters}>Clear Filters</button>
         </div>
       </div>
@@ -141,8 +163,8 @@ const UserActivitiesTable = () => {
           </tr>
         </thead>
         <tbody>
-          {activities.length > 0 ? (
-            activities.map((activity) => (
+          {filteredActivities.length > 0 ? (
+            filteredActivities.map((activity) => (
               <tr key={activity.id}>
                 <td>{activity.user_id}</td>
                 <td>{activity.activity}</td>

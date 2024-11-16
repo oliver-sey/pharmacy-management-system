@@ -712,26 +712,10 @@ def create_user_activity(user_activity: UserActivityCreate, db: Session, current
     db.commit()
     db.refresh(db_user_activity)
     return db_user_activity
+
 @app.get("/user-activities", response_model=List[UserActivityResponse])
-def get_all_user_activities(
-    user_id: Optional[int] = Query(None),
-    activity: Optional[str] = Query(None),
-    start_date: Optional[str] = Query(None),
-    end_date: Optional[str] = Query(None),
-    db: Session = Depends(get_db)
-):
-    query = db.query(UserActivity)
-
-    if user_id:
-        query = query.filter(UserActivity.user_id == user_id)
-    if activity:
-        query = query.filter(UserActivity.activity == activity)
-    if start_date:
-        query = query.filter(UserActivity.timestamp >= datetime.fromisoformat(start_date))
-    if end_date:
-        query = query.filter(UserActivity.timestamp <= datetime.fromisoformat(end_date))
-
-    activities = query.all()
+def get_all_user_activities(db: Session = Depends(get_db)):
+    activities = db.query(UserActivity).all()
     if not activities:
         raise HTTPException(status_code=404, detail="No activities found")
     return activities

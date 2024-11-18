@@ -347,7 +347,60 @@ function Checkout() {
 		<div className="checkout-page">
 			<div className="checkout-container">
 				<div className="tables-container">
-					<h3>Non-Prescription Items</h3>
+
+					{/* handling the case if there is a problem fetching the patients */}
+					{patientsLoading ? (
+						<Skeleton
+							variant="rectangular"
+							width="100%"
+							height={50}
+						/>
+					) : patients.length > 0 ? (
+						<div id="patient-select-div">
+							{/* take up the fill width of the parent element */}
+							<FormControl fullWidth>
+								<InputLabel id="patient-select-label">
+									Patient
+								</InputLabel>
+								<Select
+									labelId="patient-select-label"
+									id="patient-select"
+									className="patient-dropdown"
+									// if selectedPatient is not null, show the name and DOB, otherwise show an empty string
+									// value={selectedPatient ? `${selectedPatient.first_name} ${selectedPatient.last_name} (DOB ${selectedPatient.date_of_birth})` : ""}
+									value={
+										selectedPatient
+											? selectedPatient.id
+											: ""
+									}
+									label="Patient"
+									onChange={(e) => {
+										handlePatientSelect(e.target.value);
+										// console.log("in the onChange for the patient selection. e.target.value: " + e.target.value + ", selected patient: " + selectedPatient)
+									}}
+								>
+									{patients.map((patient) => (
+										<MenuItem
+											key={patient.id}
+											value={patient.id}
+										>
+											{patient.first_name}{" "}
+											{patient.last_name} (DOB{" "}
+											{patient.date_of_birth})
+										</MenuItem>
+									))}
+								</Select>
+							</FormControl>
+						</div>
+					) : (
+						<p>Loading patients...</p>
+					)}
+
+
+
+					{selectedPatient ? (
+						<>
+					<h1 className="prescriptions-title">Non-Prescription Items</h1>
 					<Table>
 						<TableHead>
 							<TableRow>
@@ -447,55 +500,7 @@ function Checkout() {
 					/> */}
 
 					{/* use the skeleton from Material UI to show a placeholder while data is loading */}
-					{/* handling the case if there is a problem fetching the patients */}
-					{patientsLoading ? (
-						<Skeleton
-							variant="rectangular"
-							width="100%"
-							height={50}
-						/>
-					) : patients.length > 0 ? (
-						<div id="patient-select-div">
-							{/* take up the fill width of the parent element */}
-							<FormControl fullWidth>
-								<InputLabel id="patient-select-label">
-									Patient
-								</InputLabel>
-								<Select
-									labelId="patient-select-label"
-									id="patient-select"
-									// if selectedPatient is not null, show the name and DOB, otherwise show an empty string
-									// value={selectedPatient ? `${selectedPatient.first_name} ${selectedPatient.last_name} (DOB ${selectedPatient.date_of_birth})` : ""}
-									value={
-										selectedPatient
-											? selectedPatient.id
-											: ""
-									}
-									label="Patient"
-									onChange={(e) => {
-										handlePatientSelect(e.target.value);
-										// console.log("in the onChange for the patient selection. e.target.value: " + e.target.value + ", selected patient: " + selectedPatient)
-									}}
-								>
-									{patients.map((patient) => (
-										<MenuItem
-											key={patient.id}
-											value={patient.id}
-										>
-											{patient.first_name}{" "}
-											{patient.last_name} (DOB{" "}
-											{patient.date_of_birth})
-										</MenuItem>
-									))}
-								</Select>
-							</FormControl>
-						</div>
-					) : (
-						<p>Loading patients...</p>
-					)}
 
-					{selectedPatient && (
-						<>
 							<h3 className="prescriptions-title">
 								Prescriptions for {selectedPatient.first_name}{" "}
 								{selectedPatient.last_name}
@@ -631,7 +636,9 @@ function Checkout() {
 									)}
 								</TableBody>
 							</Table>
-						</>
+							</>
+					) : (
+					<p className="select-patient-message">Please select a patient before proceeding.</p>
 					)}
 				</div>
 				<div className="cart-container">

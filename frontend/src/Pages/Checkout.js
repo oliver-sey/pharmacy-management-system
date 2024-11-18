@@ -285,6 +285,21 @@ function Checkout() {
 		}));
 	};
 
+
+	const handleAddNonPrescToCart = (item, type) => {
+		const quantity = cart.nonPrescription[item.id] || 1;
+		if (quantity <= item.quantity) {
+			// Add item to cart with selected quantity
+			setCart((prevCart) => ({
+				...prevCart,
+				[type]: [...prevCart[type], { ...item, quantity }]
+			}));
+		} else {
+			openSnackbar("Quantity exceeds available stock.");
+		}
+	};
+	
+
 	const handleRemoveFromCart = (id, type) => {
 		setCart((prevCart) => ({
 			...prevCart,
@@ -292,16 +307,40 @@ function Checkout() {
 		}));
 	};
 
-	const handleQuantityChange = (id, type, quantity) => {
-		setCart((prevCart) => ({
-			...prevCart,
-			[type]: prevCart[type].map((item) =>
-				item.id === id
-					? { ...item, quantity: quantity < 1 ? 1 : quantity }
-					: item
-			),
-		}));
+	// const handleQuantityChange = (id, type, quantity) => {
+	// 	setCart((prevCart) => ({
+	// 		...prevCart,
+	// 		[type]: prevCart[type].map((item) =>
+	// 			item.id === id
+	// 				? { ...item, quantity: quantity < 1 ? 1 : quantity }
+	// 				: item
+	// 		),
+	// 	}));
+	// };
+
+
+
+	const handleQuantityChange = (itemId, change) => {
+		setCart((prev) => {
+			const newQty = (prev[itemId] || 0) + change;
+			if (newQty >= 0 && newQty <= nonPrescriptionItems.find(item => item.id === itemId).quantity) {
+				return { ...prev, [itemId]: newQty };
+			}
+			return prev;
+		});
 	};
+	
+	const handleManualQuantityChange = (itemId, value) => {
+		const quantity = parseInt(value, 10);
+		const maxQuantity = nonPrescriptionItems.find(item => item.id === itemId).quantity;
+		if (!isNaN(quantity) && quantity >= 0 && quantity <= maxQuantity) {
+			setCart((prev) => ({ ...prev, [itemId]: quantity }));
+		} else {
+			// Show Snackbar error
+			openSnackbar("Quantity exceeds available stock.");
+		}
+	};
+	
 
 	const handlePatientSelect = async (patientID) => {
 		// Clear the prescription items in the cart if the selected patient changes (from a value other than the default, to a new value)
@@ -408,6 +447,7 @@ function Checkout() {
 								<TableCell>Dosage</TableCell>
 								<TableCell>Quantity</TableCell>
 								<TableCell>Unit Price</TableCell>
+								<TableCell>Edit Quantity</TableCell>
 								<TableCell>Add to Cart</TableCell>
 							</TableRow>
 						</TableHead>
@@ -443,6 +483,42 @@ function Checkout() {
 												4
 											)}
 										</TableCell>
+										<TableCell>
+											<Button
+												variant="outlined"
+												onClick={() => handleQuantityChange(medication.id, -1)}
+												className="quantity-button"
+												disabled={cart.nonPrescription[medication.id] <= 0}
+											>
+												-
+											</Button>
+											<TextField
+												type="number"
+												value={cart.nonPrescription[medication.id] || 0}
+												onChange={(e) => handleManualQuantityChange(medication.id, e.target.value)}
+												className="quantity-input"
+											/>
+											<Button
+												variant="outlined"
+												onClick={() => handleQuantityChange(medication.id, 1)}
+												className="quantity-button"
+												disabled={cart.nonPrescription[medication.id] >= medication.quantity}
+											>
+												+
+											</Button>
+											<Button
+												variant="contained"
+												color="primary"
+												startIcon={<AddShoppingCartIcon />}
+												onClick={() => handleAddNonPrescToCart(medication, "nonPrescription")}
+												disabled={cart.nonPrescription.some((item) => item.id === medication.id)}
+												className="add-to-cart-button"
+											>
+												Add
+											</Button>
+										</TableCell>
+
+
 
 										<TableCell>
 											<Button

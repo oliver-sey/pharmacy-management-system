@@ -1,17 +1,20 @@
-// src/Pages/ViewOfMedications.js
+import { React, useRef, useState, useEffect } from "react";
 
-import React, { useRef, useState, useEffect } from "react";
 import EditDeleteTable from "../Components/EditDeleteTable";
 import AddEditMedicationModal from "../Components/AddEditMedicationModal";
 import DeleteModal from "../Components/DeleteModal";
-import { generateTransactionPDF } from "../Functions/GenerateFinancialReports"; // Import the transaction PDF function
+
 import { IconButton, Button, Tooltip, Snackbar, Alert } from "@mui/material";
+
 import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import WarningIcon from "@mui/icons-material/Warning";
+
 import { useNavigate } from "react-router-dom";
 import CheckUserType from "../Functions/CheckUserType";
-import { jsPDF } from "jspdf";
+
+import { jsPDF} from 'jspdf'; // Import jsPDF
+
 
 function ViewOfMedications() {
 	const [rows, setRows] = useState([]);
@@ -328,49 +331,50 @@ function ViewOfMedications() {
 		<div>
 			<h2>Medication Inventory Table</h2>
 
-            <Button variant="contained" onClick={generateMedicationPDF}>
-                Generate Medication Inventory Report
-            </Button>
+			
 
-            <Button variant="contained" onClick={generateTransactionPDF} style={{ marginLeft: 10 }}>
-                Generate Transaction Report
-            </Button>
+			<Button variant="contained" onClick={generatePDF}>
+				Generate Medication Inventory Report
+			</Button>
 
-            {localStorage.getItem("role") === "Pharmacy Manager" && (
-                <Button
-                    variant="contained"
-                    onClick={() => {
-                        if (openAddMedicationModal.current) {
-                            openAddMedicationModal.current();
-                        }
-                    }}
-                >
-                    Add Medication
-                </Button>
-            )}
+    {localStorage.getItem("role") === "Pharmacy Manager" &&
+			<Button
+				variant="contained"
+				onClick={() => {
+					if (openAddMedicationModal.current) {
+						openAddMedicationModal.current(); // Trigger modal to open for adding a medication
+					}
+				}}
+			>
+				Add Medication
+			</Button>}
 
-            <EditDeleteTable
-                columns={columns}
-                rows={rows}
-                editModal={AddEditMedicationModal}
-                deleteModal={DeleteModal}
-                showEditButton={canEdit()}
-                showDeleteButton={canDelete()}
-                customConfirmMessage={medicationConfirmMessage}
-                onAdd={(handler) => {
-                    openAddMedicationModal.current = handler;
-                }}
-                onEdit={() => {}}
-                onConfirmDelete={() => {}}
-            />
-
-            <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar}>
-                <Alert onClose={handleCloseSnackbar} severity="error">
-                    {errorMessage}
-                </Alert>
-            </Snackbar>
-        </div>
-    );
+			<EditDeleteTable
+				columns={columns}
+				rows={rows}
+				editModal={AddEditMedicationModal}
+				deleteModal={DeleteModal}
+				showEditButton={canEdit()}
+				showDeleteButton={canDelete()}
+				customConfirmMessage={medicationConfirmMessage}
+				onAdd={(handler) => {
+					openAddMedicationModal.current = handler; // Store the open modal handler
+				}}
+				onEdit={addEditMedication}
+				onConfirmDelete={deleteMedication}
+			></EditDeleteTable>
+			{/* Snackbar for error messages */}
+			<Snackbar 
+				open={openSnackbar} 
+				autoHideDuration={6000} 
+				onClose={handleCloseSnackbar}
+		 	>
+				<Alert onClose={handleCloseSnackbar} severity="error">
+					{errorMessage}
+				</Alert>
+		  	</Snackbar>
+		</div>
+	);
 }
 
 export default ViewOfMedications;

@@ -1,0 +1,116 @@
+/* Centering and styling the main container */
+.user-activities-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background-color: #f0f0f0;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 90%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+h2 {
+  font-size: 1.5em;
+  margin-bottom: 20px;
+  color: #007bff; /* Optional: make the title color match the theme */
+}
+
+/* Styling for error messages */
+.error-message {
+  color: red;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+/* Filter styling */
+.filters {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px; /* Adjusted gap to add more space between fields */
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.filters label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.9em;
+}
+
+input[type="text"],
+input[type="date"],
+select {
+  padding: 6px;
+  font-size: 1em;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  width: 100%; /* Ensure fields take up full column width */
+}
+
+/* Button container styling */
+.button-container {
+  grid-column: span 4;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+/* Button styling */
+.apply-button,
+.clear-button {
+  padding: 8px 16px;
+  font-size: 1em;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  transition: background-color 0.2s;
+  width: 120px; /* Consistent button width */
+}
+
+.apply-button {
+  background-color: #007bff;
+  color: white;
+}
+
+.apply-button:hover {
+  background-color: #0056b3;
+}
+
+.clear-button {
+  background-color: #6c757d;
+  color: white;
+}
+
+.clear-button:hover {
+  background-color: #5a6268;
+}
+
+/* Table styling */
+.activities-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.activities-table th,
+.activities-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.activities-table th {
+  background-color: #007bff;
+  color: white;
+}
+
+.activities-table .no-data {
+  text-align: center;
+  font-style: italic;
+  color: #999;
+}
+

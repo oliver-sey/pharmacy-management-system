@@ -474,7 +474,7 @@ function Checkout() {
 						</TableBody>
 					</Table>
 
-					<h4 className="cart-section-title">Prescription Items</h4>
+					<h1 className="prescriptions-title">Prescription Items</h1>
 					{/* <Autocomplete */}
 					{/* options={patients}
 						inputValue={searchTerm}

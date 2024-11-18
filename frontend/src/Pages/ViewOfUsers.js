@@ -13,10 +13,14 @@ import BaseTable from "../Components/BaseTable";
 // Material UI components
 import { IconButton } from "@mui/material";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
+import { useNavigate } from "react-router-dom";
+import CheckUserType from "../Functions/CheckUserType";
 
 function ViewOfUsers() {
 	const [rows, setUsers] = useState([]);
 	const token = localStorage.getItem('token');
+	const role = ["Pharmacy Manager", "Pharmacist"]
+	const navigate = useNavigate()
 
 	// const fetchUsers = async () => {
 	// 	console.log("In fetchUsers");
@@ -63,6 +67,7 @@ function ViewOfUsers() {
 	}; 
 
 	useEffect(() => {
+		CheckUserType(role, navigate);
 		fetchUsers();
 	}, []);
 
@@ -70,7 +75,7 @@ function ViewOfUsers() {
 	// headerName is what shows up on the website
 	// width is the default width of the column, user can adjust it
 	const columns = [
-		{ field: "id", headerName: "ID", width: 70 },
+		//{ field: "id", headerName: "ID", width: 70 },
 		{ field: "first_name", headerName: "First name", width: 130 },
 		{ field: "last_name", headerName: "Last name", width: 130 },
 		{
@@ -94,7 +99,7 @@ function ViewOfUsers() {
 			},
 		},
 		{ field: "email", headerName: "Email", width: 220 },
-		{ field: "password", headerName: "Password", width: 220, renderCell: (params) => '•••••••' }
+		//{ field: "password", headerName: "Password", width: 220, renderCell: (params) => '•••••••' }
 
 
 		

@@ -412,38 +412,22 @@ function Checkout() {
 							</TableRow>
 						</TableHead>
 						<TableBody>
+							{/* 5 Skeletons, one per column in the table */}
 							{nonPrescriptionItemsLoading ? (
 								// Show skeletons while loading
 								<>
-									<TableRow>
-										<TableCell colSpan={4}>
-											<Skeleton variant="text" />
-										</TableCell>
-									</TableRow>
-									<TableRow>
-										<TableCell colSpan={4}>
-											<Skeleton variant="text" />
-										</TableCell>
-									</TableRow>
-									<TableRow>
-										<TableCell colSpan={4}>
-											<Skeleton variant="text" />
-										</TableCell>
-									</TableRow>
-									<TableRow>
-										<TableCell colSpan={4}>
-											<Skeleton variant="text" />
-										</TableCell>
-									</TableRow>
-									<TableRow>
-										<TableCell colSpan={4}>
-											<Skeleton variant="text" />
-										</TableCell>
-									</TableRow>
+									{[...Array(5)].map((_, index) => (
+										<TableRow key={index}>
+											<TableCell colSpan={4}>
+												<Skeleton variant="text" />
+											</TableCell>
+										</TableRow>
+									))}
 								</>
 							) : nonPrescriptionItems &&
 							  nonPrescriptionItems.length > 0 ? (
 								nonPrescriptionItems.map((medication) => (
+									
 									<TableRow key={medication.id}>
 										<TableCell>{medication.name}</TableCell>
 										<TableCell>

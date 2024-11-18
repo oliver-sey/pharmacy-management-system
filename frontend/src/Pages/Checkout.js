@@ -497,7 +497,8 @@ function Checkout() {
 					{selectedPatient && (
 						<>
 							<h3 className="prescriptions-title">
-								Prescriptions for {selectedPatient.first_name} {selectedPatient.last_name}
+								Prescriptions for {selectedPatient.first_name}{" "}
+								{selectedPatient.last_name}
 							</h3>
 							<Table>
 								<TableHead>
@@ -644,14 +645,18 @@ function Checkout() {
 							<p className="cart-empty">No items in cart.</p>
 						) : (
 							<>
-								<h3 className="cart-section-title">Non-Prescription Items</h3>
+								<h3 className="cart-section-title">
+									Non-Prescription Items
+								</h3>
 								<List>
 									{cart.nonPrescription.map((item) => (
 										<ListItem key={item.id}>
-											{item.name} - ${item.dollars_per_unit} x{" "}
+											{item.name} - $
+											{item.dollars_per_unit} x{" "}
 											{item.quantity} = $
 											{(
-												item.dollars_per_unit * item.quantity
+												item.dollars_per_unit *
+												item.quantity
 											).toFixed(2)}
 											<Button
 												size="small"
@@ -674,17 +679,23 @@ function Checkout() {
 								</List>
 								<Divider />
 
-								<h3 className="cart-section-title">Prescription Items</h3>
+								<h3 className="cart-section-title">
+									Prescription Items
+								</h3>
 								<List>
 									{cart.prescription.map((item) => (
 										<ListItem key={item.id}>
-											{item.name} - ${item.dollars_per_unit} x{" "}
+											{/* use medication_name here since that is what we call it 
+											when we add the name (from Medication) into the list of Prescriptions */}
+											{item.medication_name} - $
+											{item.dollars_per_unit} x{" "}
 											{item.quantity} = $
 											{(
-												item.dollars_per_unit * item.quantity
+												item.dollars_per_unit *
+												item.quantity
 											).toFixed(2)}
 
-
+											
 											<Button
 												size="small"
 												variant="outlined"
@@ -706,14 +717,20 @@ function Checkout() {
 								</List>
 								<Divider />
 
-								<p className="cart-summary">Subtotal: ${subtotal.toFixed(2)}</p>
-								<p className="cart-summary">Tax (8%): ${tax.toFixed(2)}</p>
-								<h4 className="cart-total">Grand Total: ${grandTotal.toFixed(2)}</h4>
+								<p className="cart-summary">
+									Subtotal: ${subtotal.toFixed(2)}
+								</p>
+								<p className="cart-summary">
+									Tax (8%): ${tax.toFixed(2)}
+								</p>
+								<h4 className="cart-total">
+									Grand Total: ${grandTotal.toFixed(2)}
+								</h4>
 							</>
 						)}
 					</Paper>
-					</div>
 				</div>
+			</div>
 			<Snackbar
 				open={openSnackbar}
 				message={errorMessage}

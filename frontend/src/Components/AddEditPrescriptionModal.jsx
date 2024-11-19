@@ -46,7 +46,7 @@ const AddEditPrescriptionModal = ({ open, onClose, row, onSave }) => {
 
 	const fetchMedication = async () => {
 		try {
-		  const response = await fetch('http://localhost:8000/medicationlist', {
+		  const response = await fetch('http://localhost:8000/medicationlist/', {
 			headers: { 'Authorization': 'Bearer ' + token }
 		});
 		  const data = await response.json(); // Convert response to JSON

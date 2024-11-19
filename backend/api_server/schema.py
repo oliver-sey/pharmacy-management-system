@@ -218,6 +218,7 @@ class InventoryUpdateCreate(BaseModel):
     activity_type: InventoryUpdateType
 
 class InventoryUpdateResponse(BaseModel):
+    id: int
     medication_id: int
     user_activity_id: int
     transaction_id: Optional[int] = None
@@ -236,5 +237,5 @@ class UserActivityCreate(BaseModel):
 class UserActivityResponse(BaseModel):
     id: int
     user_id: int
-    activity_type: UserActivityType # the activity type, an enum
+    activity: UserActivityType # the activity type, an enum
     timestamp: datetime

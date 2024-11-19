@@ -17,12 +17,22 @@ function ViewOfInventoryChanges() {
 	const navigate = useNavigate();
 	const role = ["Pharmacist", "Pharmacy Manager"]
 	const token = localStorage.getItem('token');
-	const [updated, setUpdated] = useState(false);
+
+
+	// useEffect to fetch data when the component mounts
+	useEffect( () => {
+		CheckUserType(role, navigate).then(loadRows())
+		
+		}, []);
 	
 	// Async function to fetch presciptions data
 const fetchInventoryChanges = async () => {
 	try {
-	  const response = await fetch('http://localhost:8000/inventory-updates');
+	  const response = await fetch('http://localhost:8000/inventory-updates', {
+		headers: {
+			'Authorization': 'Bearer ' + token,
+		},
+	  })
 	  const data = await response.json(); // Convert response to JSON
 
 	  return data
@@ -37,19 +47,18 @@ const fetchInventoryChanges = async () => {
 
 const fetchUserActivities = async () => {
 	try {
-		const response = await fetch('http://localhost:8000/inventory-updates', {
+		const response = await fetch('http://localhost:8000/user-activities', {
 			headers: {
 				'Authorization': 'Bearer ' + token,
 			},
 		  })
 		const data = await response.json()
 
-		console.log("Inv updates data: " + JSON.stringify(data))
 		return data
 	} catch (error) {
-		console.error('Error fetching patient:', error);
+		console.error('Error fetching user activities:', error);
 		// error handling
-		setErrorMessage('Failed to fetch patient');
+		setErrorMessage('Failed to fetch user activities');
 		  setOpenSnackbar(true); // Show Snackbar when error occurs
 	  }
 }
@@ -62,8 +71,6 @@ const fetchMedications = async () => {
 			},
 		  })
 		const data = await response.json()
-
-		console.log("medication data: " + JSON.stringify(data))
 		
 		return data
 	} catch (error) {
@@ -82,8 +89,6 @@ const fetchUsers = async () => {
 			},
 		  })
 		const data = await response.json()
-
-		console.log("users data: " + JSON.stringify(data))
 		
 		return data
 	} catch (error) {
@@ -113,7 +118,7 @@ const loadRows = async () =>{
 	  
 		return {
 		  ...invChange,
-		  
+
 		  // Replace medication_id with medication_name
 		  medication_name: medication ? medication.name : 'Unknown Medication',
 
@@ -134,34 +139,12 @@ const loadRows = async () =>{
 		delete invChange.timestamp
 	  })
 
-	console.log(updatedInvChanges)
+	
 	setRows(updatedInvChanges)
 }
 
-	// useEffect to fetch data when the component mounts
-	useEffect(() => {
-		loadRows()
-		
-	  }, []);
-
-	  // useEffect to fetch data when the component mounts
-	useEffect(() => {
-		
-		CheckUserType(role, navigate);
-	  }, []);
-
-	//   id = Column(Integer, primary_key=True, index=True)
-    // medication_id = Column(Integer, ForeignKey('medications.id'))
-    // user_activity_id = Column(Integer, ForeignKey('user_activities.id'))
-    
-    // transaction_id = Column(Integer, ForeignKey('transactions.id'), nullable=True) # don't think we need this - Hsinwei
-    
-    // quantity_changed_by = Column(Integer)
-    // timestamp = Column(DateTime, default=func.now())
-    
-    // activity_type = Column(SQLAlchemyEnum(InventoryUpdateType))
-
 	  const columns = [
+		
 		{ field: 'date', headerName: 'Date' },
 		{ field: 'time', headerName: 'Time' },
 		{ field: 'user_name', headerName: 'User' },

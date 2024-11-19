@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from passlib.context import CryptContext
 from typing import Optional
 from .database import SessionLocal, engine, Base
-from .schema import Token, TokenData, UserActivityCreate, UserCreate, UserResponse, UserLogin, UserToReturn, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, InventoryUpdateCreate,  InventoryUpdateResponse, UserActivityResponse
+from .schema import Token, TokenData, UserActivityCreate, UserCreate, UserResponse, UserLogin, UserToReturn, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, InventoryUpdateCreate,  InventoryUpdateResponse, UserActivityResponse,  TransactionResponse
 from . import models  # Ensure this is the SQLAlchemy model
 from .models import UserActivity
 from sqlalchemy.orm import Session
@@ -99,7 +99,7 @@ async def log_requests(request: Request, call_next):
 
             db_user_activity = models.UserActivity(
                 user_id=user.id,
-                type=models.UserActivityType.LOGIN,
+                activity_type=models.UserActivityType.LOGIN,
                 timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
             )
 
@@ -147,7 +147,7 @@ async def log_requests(request: Request, call_next):
             # Log this information to the database
             db_user_activity = models.UserActivity(
                 user_id=current_user.id,
-                type=activity_type,
+                activity_type=activity_type,
                 timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
             )
 
@@ -162,7 +162,7 @@ async def log_requests(request: Request, call_next):
             # Insert log entry to database for DB errors
             db_user_activity = models.UserActivity(
                 user_id=current_user.id,
-                type=determine_activity_type(request),
+                activity_type=determine_activity_type(request),
                 timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
             )
 
@@ -177,7 +177,7 @@ async def log_requests(request: Request, call_next):
             # Insert log entry to database for other errors
             db_user_activity = models.UserActivity(
                 user_id=current_user.id,
-                type=determine_activity_type(request),
+                activity_type=determine_activity_type(request),
                 timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
             )
 
@@ -923,6 +923,3 @@ def get_transaction_report(db: Session = Depends(get_db), current_user: UserToRe
     # Query all transactions
     transactions = db.query(Transaction).all()
     return transactions
-
-# Add the router to the FastAPI app
-app.include_router(router)

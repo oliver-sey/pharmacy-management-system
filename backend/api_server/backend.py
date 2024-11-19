@@ -470,6 +470,21 @@ def list_users(db: Session = Depends(get_db), current_user: UserToReturn = Depen
     
     return users
 
+# recovery lock account
+@app.put("/users/unlock/{user_id}", response_model=UserResponse)
+def unlock_user(user_id: int, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+    '''
+    unlocks a user account
+    '''
+    validate_user_type(current_user, ["Pharmacy Manager"])
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    db_user.is_locked_out = False # set is lock out = false
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
 # endregion
 # region Patient CRUD
 #--------PATIENT CRUD OPERATIONS--------

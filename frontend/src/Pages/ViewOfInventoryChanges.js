@@ -34,17 +34,17 @@ const fetchInventoryChanges = async () => {
 	}
 }; 
 
-//TODO: Update when theres an endpoint
+
 const fetchUserActivities = async () => {
 	try {
-		const response = await fetch('http://localhost:8000/patients', {
+		const response = await fetch('http://localhost:8000/inventory-updates', {
 			headers: {
 				'Authorization': 'Bearer ' + token,
 			},
 		  })
 		const data = await response.json()
 
-		console.log("patient data: " + JSON.stringify(data))
+		console.log("Inv updates data: " + JSON.stringify(data))
 		return data
 	} catch (error) {
 		console.error('Error fetching patient:', error);

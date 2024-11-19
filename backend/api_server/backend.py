@@ -99,7 +99,7 @@ async def log_requests(request: Request, call_next):
 
             db_user_activity = models.UserActivity(
                 user_id=user.id,
-                type=models.UserActivityType.LOGIN,
+                activity=models.UserActivityType.LOGIN,
                 timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
             )
 
@@ -249,6 +249,7 @@ def verify_token(token: Annotated[str, Depends(oauth2_scheme)]):
         username: str = payload.get("sub")
         if username is None:
             raise HTTPException(status_code=403, detail="Token is invalid or expired")
+        print(payload)
         return payload
         
     except JWTError:

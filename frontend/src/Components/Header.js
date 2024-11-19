@@ -42,7 +42,8 @@ const Header = () => {
                         <li><Link to="/viewofusers">View Users</Link></li>
                         <li><Link to="/viewofmedications">View Medications</Link></li>
                         <li><Link to="/viewofpatients">View Patients</Link></li>
-                        <li><Link to="/useractivities">User Activities</Link></li> 
+                        <li><Link to="/useractivities">User Activities</Link></li>
+                        <li><Link to="/reportengine">Report Engine</Link></li>
                     </>
                 )}
 

@@ -238,3 +238,13 @@ class UserActivityResponse(BaseModel):
     user_id: int
     activity_type: UserActivityType # the activity type, an enum
     timestamp: datetime
+
+class TransactionResponse(BaseModel):
+    id: int
+    user_id: int
+    patient_id: Optional[int] = None
+    timestamp: datetime
+    payment_method: str
+
+    class Config:
+        from_attributes = True 

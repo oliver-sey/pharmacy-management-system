@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from passlib.context import CryptContext
 from typing import Optional
 from .database import SessionLocal, engine, Base
-from .schema import Token, TokenData, UserActivityCreate, UserCreate, UserResponse, UserLogin, UserToReturn, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, InventoryUpdateCreate,  InventoryUpdateResponse, UserActivityResponse,  TransactionResponse
+from .schema import Token, TokenData, UserActivityCreate, UserCreate, UserResponse, UserLogin, UserToReturn, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, InventoryUpdateCreate,  InventoryUpdateResponse, UserActivityResponse,  TransactionResponse, TransactionCreate
 from . import models  # Ensure this is the SQLAlchemy model
 from .models import UserActivity
 from sqlalchemy.orm import Session
@@ -913,6 +913,44 @@ def sell_non_prescription_item(id: int, medication_update: schema.MedicationUpda
         activity_type=models.InventoryUpdateType.SELLNONPRESC
     ), db=db, current_user=current_user)
     return inventory_update
+
+# transaction crud for checkout, don't have update or delete since we are not deleting or updating transaction
+# createa a transaction
+@app.post("/transaction", response_model=TransactionResponse)
+def create_transaction(transaction: TransactionCreate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+    # make sure only pharmacy managers or pharmacists can call this endpoint
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
+
+    # create a new transaction
+    db_transaction = models.Transaction(**transaction.dict())
+    db.add(db_transaction)
+    db.commit()
+    db.refresh(db_transaction)
+    return db_transaction
+
+# get a transaction
+@app.get("/transaction/{transaction_id}", response_model=TransactionResponse)
+def get_transaction(transaction_id: int, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+    # make sure only pharmacy managers or pharmacists can call this endpoint
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
+
+    # there will only be one transaction with the matching id (since the id is unique), so using first() is fine
+    db_transaction = db.query(models.Transaction).filter(models.Transaction.id == transaction_id).first()
+
+    if db_transaction is None:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    
+    return db_transaction
+
+# get all transactions
+@app.get("/transactions", response_model=List[TransactionResponse])
+def get_transactions(db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+    # make sure only pharmacy managers or pharmacists can call this endpoint
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
+
+    transactions = db.query(models.Transaction).all()
+    return transactions
+
     
 #Returning all transactions.
 @app.get("/transaction-report", response_model=List[TransactionResponse])

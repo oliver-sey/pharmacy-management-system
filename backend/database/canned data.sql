@@ -168,8 +168,8 @@ VALUES (21, 2, null, '2024-09-29', null, 17, 'Dr. Carter', 90);
 
 
 -- user_activities table
-_type
-_type
+
+
 INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (21, 'INVENTORY_UPDATE', '2024-07-18 10:47:00');
 INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (24, 'LOGIN', '2024-08-06 07:55:35');
 INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (5, 'INVENTORY_UPDATE', '2024-08-07 16:05:00');
@@ -210,8 +210,8 @@ INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (20, 'LOG
 INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (19, 'INVENTORY_UPDATE', '2024-10-01 09:32:00');
 INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (16, 'INVENTORY_UPDATE', '2024-10-01 09:57:00');
 INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (17, 'INVENTORY_UPDATE', '2024-10-02 14:12:00');
+-- transactions table
 
--- transactions table_type
 INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (5, 1, '2024-09-30 14:35:18', 'credit card');
 INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (6, 2, '2024-09-13 12:23:57', 'cash');
 INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (7, 3, '2024-08-07 16:05:32', 'debit card');

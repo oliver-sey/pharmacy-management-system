@@ -326,7 +326,37 @@ function ViewOfMedications() {
 		// Save the generated PDF
 		doc.save('medication_inventory_report.pdf');
 	  };
-		  
+	
+	  const generateFinancialReport = () => {
+        const doc = new jsPDF();
+
+        // Set title for the PDF
+        doc.setFontSize(20);
+        doc.text('Financial Report', 10, 20);
+
+        // Set table headers for financial data
+        doc.setFontSize(12);
+        let yPosition = 30;
+        doc.text('Medication Name', 10, yPosition);
+        doc.text('Dollars per Unit', 60, yPosition);
+        doc.text('Quantity', 100, yPosition);
+        doc.text('Total Value', 140, yPosition);
+
+        yPosition += 10; // Space after header row
+
+        // Loop through rows and add each medication financial detail
+        rows.forEach((medication) => {
+            const totalValue = (medication.dollars_per_unit * medication.quantity).toFixed(2); // Calculate total value
+            doc.text(medication.name, 10, yPosition);
+            doc.text(medication.dollars_per_unit.toFixed(2), 60, yPosition);
+            doc.text(medication.quantity.toString(), 100, yPosition);
+            doc.text(totalValue, 140, yPosition);
+            yPosition += 10; // Move to the next row
+        });
+
+        // Save the generated PDF
+        doc.save('financial_report.pdf');
+    }
 	return (
 		<div>
 			<h2>Medication Inventory Table</h2>
@@ -336,6 +366,9 @@ function ViewOfMedications() {
 			<Button variant="contained" onClick={generatePDF}>
 				Generate Medication Inventory Report
 			</Button>
+			<Button variant="contained" onClick={generateFinancialReport} style={{ marginLeft: '10px' }}>
+                Generate Financial Report
+            </Button>
 
     {localStorage.getItem("role") === "Pharmacy Manager" &&
 			<Button

@@ -24,7 +24,6 @@ import ViewOfPrescriptionFillHistory from './Pages/ViewOfPrescriptionFillHistory
 import NotificationProvider from './Components/NotificationProvider';
 import NotificationManager from './Components/NotificationManager'; // Import NotificationManager
 import UserActivitiesTable from './Pages/ViewOfUserActivities';
-import ReportEngine from './Pages/ReportEngine';
 
 function App() {
   const [userRole, setUserRole] = useState(localStorage.getItem('role'));
@@ -60,7 +59,6 @@ function App() {
             <Route path='/viewofpatients/:patientId/prescriptions' element={<ViewOfPatientPrescriptions />} />
             <Route path='/notifications' element={<NotificationsPage />} />
             <Route path ='/useractivities' element={<UserActivitiesTable/>} />
-            <Route path ='/reportengine' element={<ReportEngine/>} />
           </Routes>
         </Router>
       </NotificationProvider>

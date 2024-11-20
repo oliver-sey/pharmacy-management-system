@@ -61,16 +61,16 @@ function SetFirstPassword() {
 		try {
 			console.log("fetching users with no password yet");
 			// no token needed on this specific endpoint
-			const response = await fetch("http://localhost:8000/userslist/new/", {
-				method: "GET",
-			});
+			const response = await fetch(
+				"http://localhost:8000/userslist/new/",
+				{
+					method: "GET",
+				}
+			);
 			const data = await response.json(); // Convert response to JSON
 			const emailsList = {};
 
 			for (let user of data) {
-				console.log("user in loop, has password: " + user.password);
-				console.log(user);
-				
 				// also store the user ID
 				emailsList[user.email] = user.id;
 			}
@@ -117,7 +117,6 @@ function SetFirstPassword() {
 
 		// store whatever errors (none, or some) in the state to display
 		setEmailErrors(newEmailErrors);
-
 
 		// return false if we caught any errors
 		if (newEmailErrors.length > 0) {
@@ -228,8 +227,8 @@ function SetFirstPassword() {
 					"Successfully set password! Redirecting you to the login page in a moment", "success"
 				);
 
-				// wait 2 seconds then redirect them to the login page
-				await new Promise((resolve) => setTimeout(resolve, 2000));
+				// wait 3 seconds then redirect them to the login page
+				await new Promise((resolve) => setTimeout(resolve, 3000));
 				navigate("../login", { replace: true });
 			} else {
 				const errorData = await response.json();
@@ -258,7 +257,6 @@ function SetFirstPassword() {
 	return (
 		<div className="login-container">
 			<h1>Set Your First Password Here</h1>
-
 			<form className="login-box" onSubmit={handleSubmit}>
 				<div className="form-group">
 					<label>Email:</label>
@@ -272,11 +270,7 @@ function SetFirstPassword() {
 						}}
 						// set that the user has interacted with the email field, and now we can display the errors
 						onBlur={() => {
-							setEmailTouched(true)
-							console.log("emailTouched: " + emailTouched);
-							console.log("isAllowedEmail: " + isAllowedEmail);
-							console.log("userEmails: ");
-							console.log(userEmails);
+							setEmailTouched(true);
 						}}
 						className={emailErrors.length > 0 ? "error-input" : ""}
 					/>
@@ -303,7 +297,10 @@ function SetFirstPassword() {
 							let newFirstPassword = e.target.value;
 							setFirstPassword(newFirstPassword);
 							// use the updated firstPassword, but here we can only access the (possibly out of date) confirmPassword
-							validatePasswords(newFirstPassword, confirmPassword);
+							validatePasswords(
+								newFirstPassword,
+								confirmPassword
+							);
 						}}
 						// set that the user has interacted with one of the password fields, and now we can display the errors
 						onBlur={() => setEitherPasswordTouched(true)}
@@ -325,12 +322,18 @@ function SetFirstPassword() {
 							let newConfirmPassword = e.target.value;
 							setConfirmPassword(newConfirmPassword);
 							// use the updated confirmPassword, but here we can only access the (possibly out of date) firstPassword
-							validatePasswords(firstPassword, newConfirmPassword);
+							validatePasswords(
+								firstPassword,
+								newConfirmPassword
+							);
 						}}
 						// set that the user has interacted with one of the password fields, and now we can display the errors
 						onBlur={() => {
-							setEitherPasswordTouched(true)
-							console.log("eitherPasswordTouched: " + eitherPasswordTouched);	
+							setEitherPasswordTouched(true);
+							// console.log(
+							// 	"eitherPasswordTouched: " +
+							// 		eitherPasswordTouched
+							// );
 						}}
 						className={
 							passwordsErrors.length > 0 ? "error-input" : ""
@@ -348,9 +351,12 @@ function SetFirstPassword() {
 				)}
 
 				{/* submit button
-				disable it if the form has any validation errors */}
+				disable it if still loading, or if either the email or passwords have any validation errors */}
 				<div>
-					<button type="submit" disabled={loading || !isFormValid}>
+					<button
+						type="submit"
+						disabled={loading || !(emailValid && passwordsValid)}
+					>
 						{loading ? "Setting password..." : "Submit"}
 					</button>
 					{/* {error && <p className="error-message">{error}</p>} */}

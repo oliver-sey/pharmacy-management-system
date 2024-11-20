@@ -24,6 +24,8 @@ import ViewOfPrescriptionFillHistory from './Pages/ViewOfPrescriptionFillHistory
 import NotificationProvider from './Components/NotificationProvider';
 import NotificationManager from './Components/NotificationManager'; // Import NotificationManager
 import UserActivitiesTable from './Pages/ViewOfUserActivities';
+import ViewOfInventoryChanges from "./Pages/ViewOfInventoryChanges";
+
 
 function App() {
   const [userRole, setUserRole] = useState(localStorage.getItem('role'));
@@ -47,18 +49,20 @@ function App() {
             <Route exact path='/PharmTechHome' element={<PharmTechHome />} />
             <Route exact path='/CashierHome' element={<CashierHome />} />
             <Route exact path="/Login" element={<Login updateUserRole={updateUserRole} />} />
+            <Route path ='/inventorychanges' element={<ViewOfInventoryChanges />} />
             <Route path='/viewofpatients' element={<ViewOfPatients />} />
             <Route path='/viewofmedications' element={<ViewOfMedications />} />
             <Route path='/viewofusers' element={<ViewOfUsers />} />
             <Route path='/viewofprescriptions' element={<ViewOfPrescriptions />} />
             <Route path='/viewofprescriptionfillhistory' element={<ViewOfPrescriptionFillHistory/>}/>
-          <Route path='/prescriptionstofill' element={<PrescriptionsToFill />} />
+            <Route path='/prescriptionstofill' element={<PrescriptionsToFill />} />
             <Route path='/resetpassword' element={<ResetPassword />} />
             <Route path='/viewofemployees' element={<ViewOfEmployees />} />
             <Route path='/fill' element={<FillPrescriptionForm />} />
             <Route path='/viewofpatients/:patientId/prescriptions' element={<ViewOfPatientPrescriptions />} />
             <Route path='/notifications' element={<NotificationsPage />} />
             <Route path ='/useractivities' element={<UserActivitiesTable/>} />
+            
           </Routes>
         </Router>
       </NotificationProvider>

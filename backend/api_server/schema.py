@@ -58,7 +58,7 @@ class UserCreate(BaseModel):
     # optional password so a manager can create an user account for an employee
     # and the employee will add a password later
     password: Optional[str] = None
-    is_locked_out: bool = True
+    is_locked_out: bool = False
 
 # only for use by the route that lets you create a password for a user account that doesn't already have one
 class UserSetPassword(BaseModel):

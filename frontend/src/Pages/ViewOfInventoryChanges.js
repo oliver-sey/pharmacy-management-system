@@ -124,6 +124,8 @@ const loadRows = async () =>{
 
           user_name: user ? user.first_name + ' ' + user.last_name : null,
 
+		  activity_type: userActivity ? userActivity.activity : null,
+
 			date: createdAt.toLocaleDateString('en-US'),
 
 			time: createdAt.toLocaleTimeString('en-US'),
@@ -171,7 +173,7 @@ const loadRows = async () =>{
 			<BaseTable
 				columns={columns}
 				rows={rows}
-				actionButtons={actionButtons}
+				
 			/>
 		  
 		  {/* Snackbar for error messages */}

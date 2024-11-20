@@ -72,121 +72,121 @@ def determine_activity_type(request: Request):
     else:
         return models.UserActivityType.OTHER   
 
-# # middleware for logging 
-# @app.middleware("http")
-# async def log_requests(request: Request, call_next):
-#     '''
-#     middleware for logging. 
-#     '''
-#     # these types of requests dont need to be logged. 
-#     # only requests that change something should be logged in
-#     # as well as login and logout
+# middleware for logging 
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    '''
+    middleware for logging. 
+    '''
+    # these types of requests dont need to be logged. 
+    # only requests that change something should be logged in
+    # as well as login and logout
     
     
-#     db: Session = SessionLocal()
-#     logger.info(f"Request Path: {request.url.path}")
-#     if request.url.path in ("/token"):
-#         # check if a user is loggin in 
-#         logger.info(f"logging in: {request.url.path}")
-#          # Read the request body only once and store it
-#         request_body = await request.body()
-#         parsed_data = urllib.parse.parse_qs(request_body.decode())
-#         email = parsed_data.get("username", [None])[0]
-#         user = db.query(models.User).filter(models.User.email == email).first()
-#         request = Request(request.scope, receive=lambda: request_body)
-#         response = await call_next(request)
-#         if request.url.path == "/token" and response.status_code == 200:
+    db: Session = SessionLocal()
+    logger.info(f"Request Path: {request.url.path}")
+    if request.url.path in ("/token"):
+        # check if a user is loggin in 
+        logger.info(f"logging in: {request.url.path}")
+         # Read the request body only once and store it
+        request_body = await request.body()
+        parsed_data = urllib.parse.parse_qs(request_body.decode())
+        email = parsed_data.get("username", [None])[0]
+        user = db.query(models.User).filter(models.User.email == email).first()
+        request = Request(request.scope, receive=lambda: request_body)
+        response = await call_next(request)
+        if request.url.path == "/token" and response.status_code == 200:
 
-#             db_user_activity = models.UserActivity(
-#                 user_id=user.id,
-#                 activity=models.UserActivityType.LOGIN,
-#                 timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
-#             )
+            db_user_activity = models.UserActivity(
+                user_id=user.id,
+                activity=models.UserActivityType.LOGIN,
+                timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
+            )
 
-#             db.add(db_user_activity)
-#             db.commit()
-#             db.refresh(db_user_activity)
+            db.add(db_user_activity)
+            db.commit()
+            db.refresh(db_user_activity)
             
-#         return response
-#     elif "/verify-token/" in request.url.path:
-#         # check if a user is verifying their token
-#         logger.info(f"verifying token: {request.url.path}")
-#         response = await call_next(request)
-#         return response
-#     elif request.method == "GET":
-#         response = await call_next(request)
-#         return response
-#     else:
-#         logger.info(f"request.headers: {request.headers.keys()}") 
-#         token = request.headers.get("Authorization")
-#         logger.info(f"token: {token}")
-#         if token:
-#             token = token.split(" ")[1]  # Remove 'Bearer' prefix
-#         current_user = get_current_user(token, db)
-#         logger.info(f"User (id={current_user.id}): {current_user.email} is making a request to {request.url.path} as a {current_user.user_type} ")
-#         if request.method == "GET" :
-#             # check if the request is a get. i.e. not changing anything
-#             logger.info(f"GET request: {request.url.path}")
-#             # rebuild request
-#             request = Request(request.scope, receive=request.body)
+        return response
+    elif "/verify-token/" in request.url.path:
+        # check if a user is verifying their token
+        logger.info(f"verifying token: {request.url.path}")
+        response = await call_next(request)
+        return response
+    elif request.method == "GET":
+        response = await call_next(request)
+        return response
+    else:
+        logger.info(f"request.headers: {request.headers.keys()}") 
+        token = request.headers.get("Authorization")
+        logger.info(f"token: {token}")
+        if token:
+            token = token.split(" ")[1]  # Remove 'Bearer' prefix
+        current_user = get_current_user(token, db)
+        logger.info(f"User (id={current_user.id}): {current_user.email} is making a request to {request.url.path} as a {current_user.user_type} ")
+        if request.method == "GET" :
+            # check if the request is a get. i.e. not changing anything
+            logger.info(f"GET request: {request.url.path}")
+            # rebuild request
+            request = Request(request.scope, receive=request.body)
 
-#             response = call_next(request)
-#             return response
+            response = call_next(request)
+            return response
 
-#         try:
-#             # Log incoming request details
-#             logger.info(f"Received request: {request.method} {request.url}")
+        try:
+            # Log incoming request details
+            logger.info(f"Received request: {request.method} {request.url}")
 
-#             response = await call_next(request)
+            response = await call_next(request)
 
-#             # Log successful response
-#             logger.info(f"Completed request with status code: {response.status_code}")
-#             activity_type = determine_activity_type(request)
-#             logger.info(f"Activity Type: {activity_type}")
+            # Log successful response
+            logger.info(f"Completed request with status code: {response.status_code}")
+            activity_type = determine_activity_type(request)
+            logger.info(f"Activity Type: {activity_type}")
             
-#             # Log this information to the database
-#             db_user_activity = models.UserActivity(
-#                 user_id=current_user.id,
-#                 activity_type=activity_type,
-#                 timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
-#             )
+            # Log this information to the database
+            db_user_activity = models.UserActivity(
+                user_id=current_user.id,
+                activity_type=activity_type,
+                timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
+            )
 
-#             db.add(db_user_activity)
-#             db.commit()
-#             db.refresh(db_user_activity)
+            db.add(db_user_activity)
+            db.commit()
+            db.refresh(db_user_activity)
 
-#             return response
-#         except SQLAlchemyError as e: # if there is an error with the database / ORM
-#             logger.error(f"Database error occurred: {str(e)}")
+            return response
+        except SQLAlchemyError as e: # if there is an error with the database / ORM
+            logger.error(f"Database error occurred: {str(e)}")
 
-#             # Insert log entry to database for DB errors
-#             db_user_activity = models.UserActivity(
-#                 user_id=current_user.id,
-#                 activity_type=determine_activity_type(request),
-#                 timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
-#             )
+            # Insert log entry to database for DB errors
+            db_user_activity = models.UserActivity(
+                user_id=current_user.id,
+                activity_type=determine_activity_type(request),
+                timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
+            )
 
-#             db.add(db_user_activity)
-#             db.commit()
-#             db.refresh(db_user_activity)
-#             # Re-raise error after logging
-#             raise e  
-#         except Exception as e: # if there is any other error
-#             logger.error(f"An error occurred: {str(e)}")
+            db.add(db_user_activity)
+            db.commit()
+            db.refresh(db_user_activity)
+            # Re-raise error after logging
+            raise e  
+        except Exception as e: # if there is any other error
+            logger.error(f"An error occurred: {str(e)}")
 
-#             # Insert log entry to database for other errors
-#             db_user_activity = models.UserActivity(
-#                 user_id=current_user.id,
-#                 activity_type=determine_activity_type(request),
-#                 timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
-#             )
+            # Insert log entry to database for other errors
+            db_user_activity = models.UserActivity(
+                user_id=current_user.id,
+                activity_type=determine_activity_type(request),
+                timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
+            )
 
-#             db.add(db_user_activity)
-#             db.commit()
-#             db.refresh(db_user_activity)
+            db.add(db_user_activity)
+            db.commit()
+            db.refresh(db_user_activity)
 
-#             # Re-raise error after logging
-#             raise e
+            # Re-raise error after logging
+            raise e
 
 
 # Create the database tables

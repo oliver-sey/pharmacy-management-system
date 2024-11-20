@@ -387,9 +387,14 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
             detail="Email already registered"
         )
     # if not create a new user
-    hashed_password = pwd_context.hash(user.password)
     user_data = user.model_dump()  # Get user data as dict
-    user_data['password'] = hashed_password  # Set the hashed password
+
+    # only set a password if one was passed
+    # should mostly not get passed (like a manager making a password-less account for an employee)
+    if user.password is not None:
+        hashed_password = pwd_context.hash(user.password)
+        user_data['password'] = hashed_password  # Set the hashed password
+
     db_user = models.User(**user_data)  # Now unpack user_data
 
     db.add(db_user)

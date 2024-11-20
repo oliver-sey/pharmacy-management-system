@@ -44,6 +44,7 @@ function SetFirstPassword() {
 
 	// to open the snackbar component with a little alert to the user
 	const [openSnackbar, setOpenSnackbar] = useState(false);
+	const [openErrorSnackbar, setOpenErrorSnackbar] = useState(false);
 	const [snackbarMessage, setSnackbarMessage] = useState("");
 
 	const navigate = useNavigate();
@@ -77,7 +78,7 @@ function SetFirstPassword() {
 			console.error("Error fetching users:", error);
 			// Set the error to display it
 			setSnackbarMessage("Error from the server: " + error);
-			setOpenSnackbar(true);
+			setOpenErrorSnackbar(true);
 		}
 	};
 
@@ -225,6 +226,7 @@ function SetFirstPassword() {
 				setSnackbarMessage(
 					"Successfully set password! Redirecting you to the login page in a moment"
 				);
+				// the Snackbar that is not for errors
 				setOpenSnackbar(true);
 
 				// wait 2 seconds then redirect them to the login page
@@ -236,13 +238,18 @@ function SetFirstPassword() {
 					errorData.detail ||
 						"Error setting new password. Please try again in a moment."
 				);
-				setOpenSnackbar(true);
+				setOpenErrorSnackbar(true);
 			}
 		} catch (error) {
 			setLoading(false);
 			setSnackbarMessage("An error occurred. Please try again later.");
-			setOpenSnackbar(true);
+			setOpenErrorSnackbar(true);
 		}
+	};
+
+	// Handle closing of the Snackbar for errors
+	const handleCloseErrorSnackbar = () => {
+		setOpenErrorSnackbar(false);
 	};
 
 	// Handle closing of the Snackbar
@@ -353,13 +360,22 @@ function SetFirstPassword() {
 			</form>
 			{/* Snackbar for error messages */}
 			<Snackbar
+				open={openErrorSnackbar}
+				autoHideDuration={6000}
+				onClose={handleCloseErrorSnackbar}
+			>
+				<Alert onClose={handleCloseErrorSnackbar} severity="error">
+					{snackbarMessage}
+				</Alert>
+			</Snackbar>
+
+			{/* Snackbar for messages that are not errors */}
+			<Snackbar
 				open={openSnackbar}
 				autoHideDuration={6000}
 				onClose={handleCloseSnackbar}
 			>
-				<Alert onClose={handleCloseSnackbar} severity="error">
 					{snackbarMessage}
-				</Alert>
 			</Snackbar>
 		</div>
 	);

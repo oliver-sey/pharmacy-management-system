@@ -41,11 +41,13 @@ function SetFirstPassword() {
 	// (you can only do this for new accounts with no passwords)
 	const [isAllowedEmail, setIsAllowedEmail] = useState(false);
 
-
 	// to open the snackbar component with a little alert to the user
-	const [openSnackbar, setOpenSnackbar] = useState(false);
-	const [openErrorSnackbar, setOpenErrorSnackbar] = useState(false);
-	const [snackbarMessage, setSnackbarMessage] = useState("");
+	// Snackbar handler state
+	const [snackbar, setSnackbar] = useState({
+		open: false,
+		message: "",
+		severity: "info", // Can be "success", "error", "warning", "info"
+	});
 
 	const navigate = useNavigate();
 
@@ -77,8 +79,7 @@ function SetFirstPassword() {
 		} catch (error) {
 			console.error("Error fetching users:", error);
 			// Set the error to display it
-			setSnackbarMessage("Error from the server: " + error);
-			setOpenErrorSnackbar(true);
+			showSnackbar("Error from the server: " + error, "error");
 		}
 	};
 
@@ -223,38 +224,35 @@ function SetFirstPassword() {
 
 			if (response.ok) {
 				console.log("Successfully set password!");
-				setSnackbarMessage(
-					"Successfully set password! Redirecting you to the login page in a moment"
+				showSnackbar(
+					"Successfully set password! Redirecting you to the login page in a moment", "success"
 				);
-				// the Snackbar that is not for errors
-				setOpenSnackbar(true);
 
 				// wait 2 seconds then redirect them to the login page
 				await new Promise((resolve) => setTimeout(resolve, 2000));
 				navigate("../login", { replace: true });
 			} else {
 				const errorData = await response.json();
-				setSnackbarMessage(
+				showSnackbar(
 					errorData.detail ||
-						"Error setting new password. Please try again in a moment."
+						"Error setting new password. Please try again in a moment.", "error"
 				);
-				setOpenErrorSnackbar(true);
 			}
 		} catch (error) {
 			setLoading(false);
-			setSnackbarMessage("An error occurred. Please try again later.");
-			setOpenErrorSnackbar(true);
+			showSnackbar("An error occurred. Please try again later.", "error");
 		}
 	};
 
-	// Handle closing of the Snackbar for errors
-	const handleCloseErrorSnackbar = () => {
-		setOpenErrorSnackbar(false);
+	// Show Snackbar
+	// default parameter for severity (possible values are 'error', 'info', 'success', or 'warning')
+	const showSnackbar = (message, severity = "info") => {
+		setSnackbar({ open: true, message, severity });
 	};
 
-	// Handle closing of the Snackbar
+	// Close Snackbar
 	const handleCloseSnackbar = () => {
-		setOpenSnackbar(false);
+		setSnackbar((prev) => ({ ...prev, open: false }));
 	};
 
 	return (
@@ -358,24 +356,19 @@ function SetFirstPassword() {
 					{/* {error && <p className="error-message">{error}</p>} */}
 				</div>
 			</form>
-			{/* Snackbar for error messages */}
+			{/* Snackbar for error messages/messages to the user */}
+			{/* get details from what is stored in the state */}
 			<Snackbar
-				open={openErrorSnackbar}
-				autoHideDuration={6000}
-				onClose={handleCloseErrorSnackbar}
-			>
-				<Alert onClose={handleCloseErrorSnackbar} severity="error">
-					{snackbarMessage}
-				</Alert>
-			</Snackbar>
-
-			{/* Snackbar for messages that are not errors */}
-			<Snackbar
-				open={openSnackbar}
+				open={snackbar.open}
 				autoHideDuration={6000}
 				onClose={handleCloseSnackbar}
 			>
-					{snackbarMessage}
+				<Alert
+					onClose={handleCloseSnackbar}
+					severity={snackbar.severity}
+				>
+					{snackbar.message}
+				</Alert>
 			</Snackbar>
 		</div>
 	);

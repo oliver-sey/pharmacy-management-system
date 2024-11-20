@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from passlib.context import CryptContext
 from typing import Optional
 from .database import SessionLocal, engine, Base
-from .schema import Token, TokenData, UserActivityCreate, UserCreate, UserResponse, UserLogin, UserToReturn, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, InventoryUpdateCreate,  InventoryUpdateResponse, UserActivityResponse
+from .schema import Token, TokenData, UserActivityCreate, UserCreate, UserResponse, UserLogin, UserToReturn, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, InventoryUpdateCreate,  InventoryUpdateResponse, UserActivityResponse,  TransactionResponse
 from . import models  # Ensure this is the SQLAlchemy model
 from .models import UserActivity
 from sqlalchemy.orm import Session
@@ -920,3 +920,12 @@ def sell_non_prescription_item(id: int, medication_update: schema.MedicationUpda
     ), db=db, current_user=current_user)
     return inventory_update
     
+#Returning all transactions.
+@app.get("/transaction-report", response_model=List[TransactionResponse])
+def get_transaction_report(db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+    # Restrict access to authorized roles
+    validate_user_type(current_user, ["Finance Manager", "Pharmacy Manager"])
+
+    # Query all transactions
+    transactions = db.query(Transaction).all()
+    return transactions

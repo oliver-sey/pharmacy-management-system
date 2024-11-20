@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from passlib.context import CryptContext
 from typing import Optional
 from .database import SessionLocal, engine, Base
-from .schema import Token, TokenData, UserActivityCreate, UserCreate, UserResponse, UserLogin, UserToReturn, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, InventoryUpdateCreate,  InventoryUpdateResponse, UserActivityResponse,  TransactionResponse
+from .schema import Token, TokenData, UserActivityCreate, UserCreate, UserEmailResponse, UserResponse, UserLogin, UserSetPassword, UserToReturn, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, InventoryUpdateCreate,  InventoryUpdateResponse, UserActivityResponse,  TransactionResponse
 from . import models  # Ensure this is the SQLAlchemy model
 from .models import UserActivity
 from sqlalchemy.orm import Session
@@ -461,7 +461,23 @@ def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db), c
     return db_user
 
 
-@app.get("/userslist/", response_model=List[UserResponse])
+# *****an endpoint that doesn't need any authorization, since users who are in the process of setting
+# their password (can't make a token yet) need to be able to call it
+
+# get all users that don't have a password yet
+# this gives a list of valid emails that can be entered on the setpassword page
+@app.get("/userslist/new/", response_model=List[UserEmailResponse])
+def list_new_users(db: Session = Depends(get_db)):
+
+    # Query the database for all users with no password yet
+    users = db.query(models.User).filter(models.User.password == None).all()
+    
+
+    return users
+
+
+
+@app.get("/userslist", response_model=List[UserResponse])
 def list_users(db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
 
     validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])

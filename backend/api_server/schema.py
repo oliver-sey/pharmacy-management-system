@@ -38,6 +38,14 @@ class UserResponse(BaseModel):
     user_type: UserType
     email: str
 
+# only for use by the route that lets you see users with no password yet,
+# and doesn't require a token to call
+# we don't want to give out a lot of details to people with no token
+
+class UserEmailResponse(BaseModel):
+    id: int
+    email: str    
+
 class UserLogin(BaseModel):
     email: str
     password: str

@@ -251,7 +251,7 @@ class UserActivityCreate(BaseModel):
 class UserActivityResponse(BaseModel):
     id: int
     user_id: int
-    activity: UserActivityType # the activity type, an enum
+    activity_type: UserActivityType # the activity type, an enum
     timestamp: datetime
 
 class TransactionResponse(BaseModel):

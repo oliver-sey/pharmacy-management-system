@@ -99,7 +99,7 @@ async def log_requests(request: Request, call_next):
 
             db_user_activity = models.UserActivity(
                 user_id=user.id,
-                activity=models.UserActivityType.LOGIN,
+                activity_type=models.UserActivityType.LOGIN,
                 timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
             )
 

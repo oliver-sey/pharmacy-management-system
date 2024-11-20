@@ -54,12 +54,10 @@ function SetFirstPassword() {
 	// Function to fetch all user emails
 	const fetchUserEmails = async () => {
 		try {
-			// TODO: need to figure out how to do this without the token!!
-			const token = localStorage.getItem("token");
-
-			const response = await fetch("http://localhost:8000/userslist/", {
+			console.log("fetching users with no password yet");
+			// no token needed on this specific endpoint
+			const response = await fetch("http://localhost:8000/userslist/new/", {
 				method: "GET",
-				headers: { Authorization: "Bearer " + token },
 			});
 			const data = await response.json(); // Convert response to JSON
 			const emailsList = {};
@@ -68,11 +66,8 @@ function SetFirstPassword() {
 				console.log("user in loop, has password: " + user.password);
 				console.log(user);
 				
-				// we only want emails that have no password yet, since this page is to set your first password
-				if (!user.password) {
-					// also store the user ID
-					emailsList[user.email] = user.id;
-				}
+				// also store the user ID
+				emailsList[user.email] = user.id;
 			}
 
 			setUserEmails(emailsList);
@@ -201,8 +196,9 @@ function SetFirstPassword() {
 
 		try {
 			// call to update the user's password
+			// no token needed on this specific endpoint
 			const response = await fetch(
-				`http://localhost:8000/users/${userID}`,
+				`http://localhost:8000/users/${userID}/setpassword`,
 				{
 					method: "PUT",
 					headers: {

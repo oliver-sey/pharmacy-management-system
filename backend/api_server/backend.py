@@ -118,11 +118,28 @@ async def log_requests(request: Request, call_next):
         return response
     else:
         logger.info(f"request.headers: {request.headers.keys()}") 
-        token = request.headers.get("Authorization")
-        logger.info(f"token: {token}")
-        if token:
-            token = token.split(" ")[1]  # Remove 'Bearer' prefix
-        current_user = get_current_user(token, db)
+
+        # for the route where a token is not required
+        # "/users/{user_id}/setpassword"
+        # (/userslist/new/ also gets called and doesn't need a token, but that's a GET and gets taken care of up above)
+        if "/setpassword" in request.url.path:
+            logger.info(f"/setpassword route, not requiring their token")
+            # don't get their token, just assume the user ID of the user they are setting a password on, is their user ID
+            
+            # set current_user without the get_current_user() function since we can't pass a token
+            # get the user from the DB that has the ID in the "/users/{user_id}/setpassword" request
+            current_user = db.query(models.User).filter(models.User.id == int(request.url.path.split("/")[2])).first()
+
+
+        # for all routes besides "/users/{user_id}/setpassword"
+        else:
+            token = request.headers.get("Authorization")
+            logger.info(f"token: {token}")
+            if token:
+                token = token.split(" ")[1]  # Remove 'Bearer' prefix
+            current_user = get_current_user(token, db)
+
+
         logger.info(f"User (id={current_user.id}): {current_user.email} is making a request to {request.url.path} as a {current_user.user_type} ")
         if request.method == "GET" :
             # check if the request is a get. i.e. not changing anything

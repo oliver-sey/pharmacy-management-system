@@ -211,12 +211,12 @@ function SetFirstPassword() {
 				{
 					method: "PUT",
 					headers: {
-						"Content-Type": "application/x-www-form-urlencoded",
+						"Content-Type": "application/json",
 					},
 					// doesn't matter which one we use since the passwords are the same
-					body: {
+					body: JSON.stringify({
 						password: firstPassword,
-					},
+					}),
 				}
 			);
 

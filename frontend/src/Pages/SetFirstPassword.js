@@ -21,7 +21,8 @@ function SetFirstPassword() {
 	// it's passwords since the user has to type in the password twice to confirm
 	const [passwordsErrors, setPasswordsErrors] = useState([]);
 	
-	const [isFormValid, setIsFormValid] = useState(false);
+	const [emailValid, setEmailValid] = useState(false);
+	const [passwordsValid, setPasswordsValid] = useState(false);
 
 
 	// whether or not the email field, or either of the password fields, have been "touched"
@@ -80,7 +81,7 @@ function SetFirstPassword() {
 		}
 	};
 
-	const validateEmail = () => {
+	const validateEmail = (passedEmail) => {
 		// don't need to reset emailErrors here, it will get set to the proper value
 
 		// reset the user ID since we're checking a new email
@@ -89,25 +90,27 @@ function SetFirstPassword() {
 		let newEmailErrors = [];
 
 		// check that the email is valid at least at a basic level
-		if (!email.includes("@")) {
+		if (!passedEmail.includes("@")) {
 			newEmailErrors.push("Email must contain an '@'.");
 		}
 
-		if (!email.includes(".")) {
+		if (!passedEmail.includes(".")) {
 			newEmailErrors.push("Email must contain a '.'.");
 		}
 
 		// check if the email is in our list of emails that don't have passwords yet
-		if (userEmails.hasOwnProperty(email)) {
+		if (userEmails.hasOwnProperty(passedEmail)) {
 			// store the email and the user ID
-			setUserID(userEmails[email]);
+			setUserID(userEmails[passedEmail]);
 			setIsAllowedEmail(true);
 		} else {
-			newEmailErrors.push(
-				"This email address is either not in our system or has already set a password."
-			);
+			// only show this error if the user has already typed in a valid email so far
+			if (newEmailErrors.length === 0) {
+				newEmailErrors.push(
+					"This email address is either not in our system or has already set a password."
+				);
+			}
 			setIsAllowedEmail(false);
-			return false;
 		}
 
 		// store whatever errors (none, or some) in the state to display
@@ -116,51 +119,54 @@ function SetFirstPassword() {
 
 		// return false if we caught any errors
 		if (newEmailErrors.length > 0) {
+			setEmailValid(false);
 			return false;
 		}
 
+		setEmailValid(true);
 		return true;
 	};
 
-	const validatePasswords = () => {
+	// using the e.target.value values that get passed, not what's in the state
+	const validatePasswords = (passedFirstPW, passedConfirmPW) => {
 		// don't need to reset errors, passwordErrors will get set to the correct value
 
 		const newPasswordsErrors = [];
 
 		// perform validation on the first password, and then for the second just check if they match
 		// at least 8 characters long
-		if (!firstPassword.length >= 8) {
+		if (!passedFirstPW.length >= 8) {
 			newPasswordsErrors.push(
 				"Password must be at least 8 characters long."
 			);
 		}
 		// at least 1 uppercase
-		if (!/[A-Z]/.test(firstPassword)) {
+		if (!/[A-Z]/.test(passedFirstPW)) {
 			newPasswordsErrors.push(
 				"Password must contain at least one uppercase letter."
 			);
 		}
 		// at least 1 lowercase
-		if (!/[a-z]/.test(firstPassword)) {
+		if (!/[a-z]/.test(passedFirstPW)) {
 			newPasswordsErrors.push(
 				"Password must contain at least one lowercase letter."
 			);
 		}
 		// at least 1 digit (number)
-		if (!/\d/.test(firstPassword)) {
+		if (!/\d/.test(passedFirstPW)) {
 			newPasswordsErrors.push(
 				"Password must contain at least one number."
 			);
 		}
 		// at least 1 of these symbols
-		if (!/[!@#$%^&*()_+]/.test(firstPassword)) {
+		if (!/[!@#$%^&*()_+]/.test(passedFirstPW)) {
 			newPasswordsErrors.push(
 				"Password must contain at least one special character."
 			);
 		}
 
 		// now check if the second password matches
-		if (firstPassword !== confirmPassword) {
+		if (passedFirstPW !== passedConfirmPW) {
 			newPasswordsErrors.push("Passwords do not match.");
 		}
 
@@ -169,10 +175,12 @@ function SetFirstPassword() {
 
 		// return false if we caught any errors
 		if (newPasswordsErrors.length > 0) {
+			setPasswordsValid(false);
 			return false;
 		}
 
 		// no errors if we reached here
+		setPasswordsValid(true);
 		return true;
 	};
 
@@ -180,11 +188,9 @@ function SetFirstPassword() {
 	const validateForm = () => {
 		// check if both the email is a valid format and allowed, and the passwords are valid and match
 		if (validateEmail() && validatePasswords()) {
-			setIsFormValid(true);
 			return true;
 		}
 
-		setIsFormValid(false);
 		return false;
 	};
 
@@ -192,7 +198,7 @@ function SetFirstPassword() {
 		event.preventDefault();
 
 		// ensures form is filled
-		if (!validateForm()) return;
+		// if (!validateForm()) return;
 		setLoading(true);
 
 		try {
@@ -289,8 +295,10 @@ function SetFirstPassword() {
 						disabled={!isAllowedEmail}
 						// validate both passwords if either password changes
 						onChange={(e) => {
-							setFirstPassword(e.target.value);
-							validatePasswords();
+							let newFirstPassword = e.target.value;
+							setFirstPassword(newFirstPassword);
+							// use the updated firstPassword, but here we can only access the (possibly out of date) confirmPassword
+							validatePasswords(newFirstPassword, confirmPassword);
 						}}
 						// set that the user has interacted with one of the password fields, and now we can display the errors
 						onBlur={() => setEitherPasswordTouched(true)}
@@ -309,8 +317,10 @@ function SetFirstPassword() {
 						disabled={!isAllowedEmail}
 						// validate both passwords if either password changes
 						onChange={(e) => {
-							setConfirmPassword(e.target.value);
-							validatePasswords();
+							let newConfirmPassword = e.target.value;
+							setConfirmPassword(newConfirmPassword);
+							// use the updated confirmPassword, but here we can only access the (possibly out of date) firstPassword
+							validatePasswords(firstPassword, newConfirmPassword);
 						}}
 						// set that the user has interacted with one of the password fields, and now we can display the errors
 						onBlur={() => {

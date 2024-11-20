@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import "../Styles/Login.css"; // import the specific stylesheet for this page
+// this stylesheet imports the Login.css stylesheet for almost everything
+import "../Styles/SetFirstPassword.css"; 
 import { useNavigate } from "react-router-dom";
 
 import { Snackbar, Alert } from "@mui/material";

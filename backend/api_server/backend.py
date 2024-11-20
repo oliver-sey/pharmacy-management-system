@@ -99,7 +99,7 @@ async def log_requests(request: Request, call_next):
 
             db_user_activity = models.UserActivity(
                 user_id=user.id,
-                activity_type=models.UserActivityType.LOGIN,
+                activity=models.UserActivityType.LOGIN,
                 timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
             )
 
@@ -249,6 +249,7 @@ def verify_token(token: Annotated[str, Depends(oauth2_scheme)]):
         username: str = payload.get("sub")
         if username is None:
             raise HTTPException(status_code=403, detail="Token is invalid or expired")
+        print(payload)
         return payload
         
     except JWTError:
@@ -920,8 +921,13 @@ def create_user_activity(user_activity: UserActivityCreate, db: Session, current
     return db_user_activity
 
 @app.get("/user-activities", response_model=List[UserActivityResponse])
-def get_all_user_activities(db: Session = Depends(get_db)):
+def get_all_user_activities(db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+
+    # make sure only pharmacy managers or pharmacists can call this endpoint
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
+
     activities = db.query(UserActivity).all()
+
     if not activities:
         raise HTTPException(status_code=404, detail="No activities found")
     return activities

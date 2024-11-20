@@ -433,6 +433,28 @@ def delete_user(user_id: int, db: Session = Depends(get_db), current_user: UserT
     return SimpleResponse(message="User deleted successfully")
 
 
+# *****an endpoint that doesn't need any authorization, since users who are in the process of setting
+# their password (can't make a token yet) need to be able to call it
+
+# only give the ability to set a password on a user that doesn't have a password yet
+@app.put("/users/{user_id}/setpassword")
+def set_user_password(user_id: int, user: UserSetPassword, db: Session = Depends(get_db)):
+    # find the user by ID
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    if db_user.password is not None:
+        raise HTTPException(status_code=409, detail="User already has a password")
+    
+    # hash the password they provided
+    db_user.password = pwd_context.hash(user.password)
+
+    db.commit()
+    db.refresh(db_user)
+    return {"message": "Password successfully set, you can now log in", "user_id": user_id}
+
+
 @app.put("/users/{user_id}", response_model=UserResponse)
 def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
 

@@ -58,6 +58,10 @@ class UserCreate(BaseModel):
     password: str
     is_locked_out: bool = True
 
+# only for use by the route that lets you create a password for a user account that doesn't already have one
+class UserSetPassword(BaseModel):
+    password: str
+
 class UserUpdate(BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None

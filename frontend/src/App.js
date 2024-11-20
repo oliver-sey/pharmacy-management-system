@@ -4,6 +4,7 @@ import './Styles/App.css';
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import GeneralProtected from './Pages/GeneralProtected';
 import Login from './Pages/Login';
+import SetFirstPassword from './Pages/SetFirstPassword';
 import ManagerHome from './Pages/ManagerHome';
 import PharmacistHome from './Pages/PharmacistHome';
 import ViewOfPatients from './Pages/ViewOfPatients';
@@ -47,6 +48,7 @@ function App() {
             <Route exact path='/PharmTechHome' element={<PharmTechHome />} />
             <Route exact path='/CashierHome' element={<CashierHome />} />
             <Route exact path="/Login" element={<Login updateUserRole={updateUserRole} />} />
+            <Route path='/setpassword' element={<SetFirstPassword />} />
             <Route path='/viewofpatients' element={<ViewOfPatients />} />
             <Route path='/viewofmedications' element={<ViewOfMedications />} />
             <Route path='/viewofusers' element={<ViewOfUsers />} />

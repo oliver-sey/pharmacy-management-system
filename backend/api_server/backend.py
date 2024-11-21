@@ -19,7 +19,7 @@ from .schema import (
 )
 from . import models  # Ensure this is the SQLAlchemy model
 from .models import UserActivity
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from typing import List
 from . import schema
 from sqlalchemy.exc import SQLAlchemyError
@@ -936,7 +936,25 @@ def get_inventory_updates(activity_type: Optional[models.InventoryUpdateType] = 
         inventory_updates = db.query(models.InventoryUpdate).filter(models.InventoryUpdate.activity_type == activity_type).all()
     # else return all inventory_updates
     else:
-        inventory_updates = db.query(models.InventoryUpdate).all()
+        # inventory_updates = db.query(models.InventoryUpdate).all()
+        # Query inventory updates and load related medication
+        inventory_updates = db.query(models.InventoryUpdate).options(selectinload(models.InventoryUpdate.medication)).all()
+
+        # Convert to response format with medication names
+        inventory_update_responses = [
+            InventoryUpdateResponse(
+                id=update.id,
+                medication_id=update.medication_id,
+                user_activity_id=update.user_activity_id,
+                transaction_id=update.transaction_id,
+                quantity_changed_by=update.quantity_changed_by,
+                activity_type=update.activity_type,
+                timestamp=update.timestamp,
+                medication_name=update.medication.name if update.medication else None  # Medication name
+            )
+            for update in inventory_updates
+        ]
+        return inventory_update_responses
     return inventory_updates
 
 

@@ -170,6 +170,6 @@ class Transaction(Base):
     timestamp = Column(DateTime, default=func.now())
     payment_method = Column(String)
 
-    # patient = relationship("Patient", back_populates="transactions")
-    # user = relationship("User", back_populates="transactions")
+    patient = relationship("Patient", back_populates="transactions")
+    user = relationship("User", back_populates="transactions")
     # inventory_update = relationship("InventoryUpdate", back_populates="transaction")  # This should link to the correct attribute

@@ -38,6 +38,14 @@ class UserResponse(BaseModel):
     user_type: UserType
     email: str
 
+# only for use by the route that lets you see users with no password yet,
+# and doesn't require a token to call
+# we don't want to give out a lot of details to people with no token
+
+class UserEmailResponse(BaseModel):
+    id: int
+    email: str    
+
 class UserLogin(BaseModel):
     email: str
     password: str
@@ -47,8 +55,14 @@ class UserCreate(BaseModel):
     last_name: str
     user_type: UserType
     email: EmailStr
+    # optional password so a manager can create an user account for an employee
+    # and the employee will add a password later
+    password: Optional[str] = None
+    is_locked_out: bool = False
+
+# only for use by the route that lets you create a password for a user account that doesn't already have one
+class UserSetPassword(BaseModel):
     password: str
-    is_locked_out: bool = True
 
 class UserUpdate(BaseModel):
     first_name: Optional[str] = None
@@ -237,7 +251,7 @@ class UserActivityCreate(BaseModel):
 class UserActivityResponse(BaseModel):
     id: int
     user_id: int
-    activity: UserActivityType # the activity type, an enum
+    activity_type: UserActivityType # the activity type, an enum
     timestamp: datetime
 
 class TransactionResponse(BaseModel):

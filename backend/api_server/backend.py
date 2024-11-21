@@ -24,6 +24,24 @@ import urllib
 
 app = FastAPI()
 
+# Create the database tables
+Base.metadata.create_all(bind=engine)
+# setup middleware
+# app.middleware("http")(log_requests)
+
+
+# this is to allow our react app to make requests to our fastapi app
+origins = [
+    'http://localhost:3000',
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # Allow your frontend URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # test endpoint
 @app.get("/test") # this is a decorator that tells fastapi to run the function below when a GET request is made to http://localhost:8000/test
 def read_root():
@@ -189,23 +207,6 @@ async def log_requests(request: Request, call_next):
             raise e
 
 
-# Create the database tables
-Base.metadata.create_all(bind=engine)
-# setup middleware
-# app.middleware("http")(log_requests)
-
-
-# this is to allow our react app to make requests to our fastapi app
-origins = [
-    'http://localhost:3000',
-]
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Allow your frontend URL
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 # Dependency to get the database session
 def get_db():

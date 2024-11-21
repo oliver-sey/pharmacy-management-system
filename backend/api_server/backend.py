@@ -11,7 +11,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from passlib.context import CryptContext
 from typing import Optional
 from .database import SessionLocal, engine, Base
-from .schema import Token, TokenData, UserActivityCreate, UserCreate, UserResponse, UserLogin, UserToReturn, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, InventoryUpdateCreate,  InventoryUpdateResponse, UserActivityResponse,  TransactionResponse, TransactionCreate
+from .schema import (
+    Token, TokenData, UserActivityCreate, UserCreate, UserEmailResponse, UserResponse, 
+    UserLogin, UserSetPassword, UserToReturn, UserUpdate, PatientCreate, PatientUpdate, 
+    PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, InventoryUpdateCreate, 
+    InventoryUpdateResponse, UserActivityResponse, TransactionResponse, TransactionCreate
+)
 from . import models  # Ensure this is the SQLAlchemy model
 from .models import UserActivity
 from sqlalchemy.orm import Session
@@ -90,6 +95,7 @@ def verify_token(token: Annotated[str, Depends(oauth2_scheme)]):
         username: str = payload.get("sub")
         if username is None:
             raise HTTPException(status_code=403, detail="Token is invalid or expired")
+        print(payload)
         return payload
         
     except JWTError:
@@ -391,9 +397,14 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
             detail="Email already registered"
         )
     # if not create a new user
-    hashed_password = pwd_context.hash(user.password)
     user_data = user.model_dump()  # Get user data as dict
-    user_data['password'] = hashed_password  # Set the hashed password
+
+    # only set a password if one was passed
+    # should mostly not get passed (like a manager making a password-less account for an employee)
+    if user.password is not None:
+        hashed_password = pwd_context.hash(user.password)
+        user_data['password'] = hashed_password  # Set the hashed password
+
     db_user = models.User(**user_data)  # Now unpack user_data
 
     db.add(db_user)
@@ -437,6 +448,28 @@ def delete_user(user_id: int, db: Session = Depends(get_db), current_user: UserT
     return SimpleResponse(message="User deleted successfully")
 
 
+# *****an endpoint that doesn't need any authorization, since users who are in the process of setting
+# their password (can't make a token yet) need to be able to call it
+
+# only give the ability to set a password on a user that doesn't have a password yet
+@app.put("/users/{user_id}/setpassword")
+def set_user_password(user_id: int, user: UserSetPassword, db: Session = Depends(get_db)):
+    # find the user by ID
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    if db_user.password is not None:
+        raise HTTPException(status_code=409, detail="User already has a password")
+    
+    # hash the password they provided
+    db_user.password = pwd_context.hash(user.password)
+
+    db.commit()
+    db.refresh(db_user)
+    return {"message": "Password successfully set, you can now log in", "user_id": user_id}
+
+
 @app.put("/users/{user_id}", response_model=UserResponse)
 def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
 
@@ -465,7 +498,23 @@ def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db), c
     return db_user
 
 
-@app.get("/userslist/", response_model=List[UserResponse])
+# *****an endpoint that doesn't need any authorization, since users who are in the process of setting
+# their password (can't make a token yet) need to be able to call it
+
+# get all users that don't have a password yet
+# this gives a list of valid emails that can be entered on the setpassword page
+@app.get("/userslist/new/", response_model=List[UserEmailResponse])
+def list_new_users(db: Session = Depends(get_db)):
+
+    # Query the database for all users with no password yet
+    users = db.query(models.User).filter(models.User.password == None).all()
+    
+
+    return users
+
+
+
+@app.get("/userslist", response_model=List[UserResponse])
 def list_users(db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
 
     validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
@@ -909,8 +958,13 @@ def create_user_activity(user_activity: UserActivityCreate, db: Session, current
     return db_user_activity
 
 @app.get("/user-activities", response_model=List[UserActivityResponse])
-def get_all_user_activities(db: Session = Depends(get_db)):
+def get_all_user_activities(db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+
+    # make sure only pharmacy managers or pharmacists can call this endpoint
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
+
     activities = db.query(UserActivity).all()
+
     if not activities:
         raise HTTPException(status_code=404, detail="No activities found")
     return activities

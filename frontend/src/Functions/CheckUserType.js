@@ -13,7 +13,7 @@ async function CheckUserType (role, navigate)  {
         }
 
         //fetch current user data
-        const userResponse = await fetch('http://localhost:8000/currentuser/me', {
+        const userResponse = await fetch('http://localhost:8000/currentuser/me/', {
           method: 'GET',
           headers: {'Authorization': 'Bearer ' + token}
 

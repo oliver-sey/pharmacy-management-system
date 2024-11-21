@@ -55,20 +55,20 @@ function ViewOfMedications() {
 	// width is the default width of the column, user can adjust it
 	const columns = [
 		// { field: "id", headerName: "ID", width: 70 },
-		{ field: "name", headerName: "Medication Name", width: 200 },
-		{ field: "dosage", headerName: "Dosage", width: 100 },
-		{ field: "quantity", headerName: "Quantity", width: 100 },
+		{ field: "name", headerName: "Medication Name"},
+		{ field: "dosage", headerName: "Dosage"},
+		{ field: "quantity", headerName: "Quantity"},
 		{
 			field: "prescription_required",
-			headerName: "Prescription Required",
-			width: 100,
+			headerName: "Prescription Required"
+			
 		},
-		{ field: "expiration_date", headerName: "Expiration Date", width: 100 },
-		{ field: "dollars_per_unit", headerName: "$ Per Unit", width: 100 },
+		{ field: "expiration_date", headerName: "Expiration Date"},
+		{ field: "dollars_per_unit", headerName: "$ Per Unit"},
 		{
 			field: "alerts",
 			headerName: "Alerts",
-			width: 200,
+			
 			// calculate time between now and the expiration date, to see what alert icons we should show
 			renderCell: (params) => {
 				// TODO: fix some weird stuff with time zones??? dates still print weird
@@ -112,7 +112,7 @@ function ViewOfMedications() {
 					// );
 					icons.push(
 						// empty hourglass icon, says "Expired" when you hover
-						<IconButton>
+						<IconButton sx={{maxWidth: 43}}>
 							<Tooltip id="expired" title="Expired">
 								<HourglassEmptyIcon color="error" />
 							</Tooltip>
@@ -132,7 +132,7 @@ function ViewOfMedications() {
 						// TODO: fix style?
 						// <div style={[{"display": "flex"}, { "align-items": "center" }]}>
 						// half-empty hourglass icon, says the warning when you hover
-						<IconButton>
+						<IconButton sx={{maxWidth: 43}}>
 							<Tooltip
 								id="warning"
 								title="Warning - expires within 30 days"
@@ -159,7 +159,7 @@ function ViewOfMedications() {
 				if (params.row.quantity < 120) {
 					// console.log("Less than 120 units/doses, giving a warning");
 					icons.push(
-						<IconButton>
+						<IconButton sx={{maxWidth: 43}}>
 							<Tooltip
 								id="inventoryWarning"
 								title="Warning - less than 120 units/doses left"
@@ -357,11 +357,11 @@ function ViewOfMedications() {
         // Save the generated PDF
         doc.save('financial_report.pdf');
     }
+
+
 	return (
 		<div>
 			<h2>Medication Inventory Table</h2>
-
-			
 
 			<Button variant="contained" onClick={generatePDF}>
 				Generate Medication Inventory Report
@@ -395,6 +395,11 @@ function ViewOfMedications() {
 				}}
 				onEdit={addEditMedication}
 				onConfirmDelete={deleteMedication}
+				autosizeOptions={{
+					
+					includeOutliers: false,
+					includeHeaders: true,
+				  }}
 			></EditDeleteTable>
 			{/* Snackbar for error messages */}
 			<Snackbar 

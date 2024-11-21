@@ -470,17 +470,18 @@ def list_users(db: Session = Depends(get_db), current_user: UserToReturn = Depen
     
     return users
 
-# recovery lock account
-@app.put("/users/unlock/{user_id}", response_model=UserResponse)
-def unlock_user(user_id: int, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+# lock or recovery lock account, include a boolean query parameter to set lock or unlock
+@app.put("/users/lock_status/{user_id}", response_model=UserResponse)
+def change_user_lock_status(user_id: int, is_locked: bool, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
     '''
-    unlocks a user account
+    Locks or unlocks a user account based on the query parameter is_locked.
     '''
     validate_user_type(current_user, ["Pharmacy Manager"])
     db_user = db.query(models.User).filter(models.User.id == user_id).first()
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
-    db_user.is_locked_out = False # set is lock out = false
+    
+    db_user.is_locked_out = is_locked  # Set is_locked_out based on query parameter
     db.commit()
     db.refresh(db_user)
     return db_user

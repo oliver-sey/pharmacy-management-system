@@ -4,6 +4,7 @@ import './Styles/App.css';
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import GeneralProtected from './Pages/GeneralProtected';
 import Login from './Pages/Login';
+import SetFirstPassword from './Pages/SetFirstPassword';
 import ManagerHome from './Pages/ManagerHome';
 import PharmacistHome from './Pages/PharmacistHome';
 import ViewOfPatients from './Pages/ViewOfPatients';
@@ -25,6 +26,8 @@ import Checkout from './Pages/Checkout';
 import NotificationProvider from './Components/NotificationProvider';
 import NotificationManager from './Components/NotificationManager'; // Import NotificationManager
 import UserActivitiesTable from './Pages/ViewOfUserActivities';
+import ViewOfInventoryChanges from "./Pages/ViewOfInventoryChanges";
+
 
 function App() {
   const [userRole, setUserRole] = useState(localStorage.getItem('role'));
@@ -48,6 +51,8 @@ function App() {
             <Route exact path='/PharmTechHome' element={<PharmTechHome />} />
             <Route exact path='/CashierHome' element={<CashierHome />} />
             <Route exact path="/Login" element={<Login updateUserRole={updateUserRole} />} />
+            <Route path='/setpassword' element={<SetFirstPassword />} />
+            <Route path ='/inventorychanges' element={<ViewOfInventoryChanges />} />
             <Route path='/viewofpatients' element={<ViewOfPatients />} />
             <Route path='/viewofmedications' element={<ViewOfMedications />} />
             <Route path='/viewofusers' element={<ViewOfUsers />} />
@@ -61,6 +66,7 @@ function App() {
             <Route exact path='/checkout' element ={<Checkout/>}/>
             <Route path='/notifications' element={<NotificationsPage />} />
             <Route path ='/useractivities' element={<UserActivitiesTable/>} />
+            
           </Routes>
         </Router>
       </NotificationProvider>

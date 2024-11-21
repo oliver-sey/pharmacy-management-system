@@ -11,7 +11,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from passlib.context import CryptContext
 from typing import Optional
 from .database import SessionLocal, engine, Base
-from .schema import Token, TokenData, UserActivityCreate, UserCreate, UserResponse, UserLogin, UserToReturn, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, InventoryUpdateCreate,  InventoryUpdateResponse, UserActivityResponse
+from .schema import (
+    Token, TokenData, UserActivityCreate, UserCreate, UserEmailResponse, UserResponse, 
+    UserLogin, UserSetPassword, UserToReturn, UserUpdate, PatientCreate, PatientUpdate, 
+    PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, InventoryUpdateCreate, 
+    InventoryUpdateResponse, UserActivityResponse, TransactionResponse, TransactionCreate
+)
 from . import models  # Ensure this is the SQLAlchemy model
 from .models import UserActivity
 from sqlalchemy.orm import Session
@@ -118,11 +123,28 @@ async def log_requests(request: Request, call_next):
         return response
     else:
         logger.info(f"request.headers: {request.headers.keys()}") 
-        token = request.headers.get("Authorization")
-        logger.info(f"token: {token}")
-        if token:
-            token = token.split(" ")[1]  # Remove 'Bearer' prefix
-        current_user = get_current_user(token, db)
+
+        # for the route where a token is not required
+        # "/users/{user_id}/setpassword"
+        # (/userslist/new/ also gets called and doesn't need a token, but that's a GET and gets taken care of up above)
+        if "/setpassword" in request.url.path:
+            logger.info(f"/setpassword route, not requiring their token")
+            # don't get their token, just assume the user ID of the user they are setting a password on, is their user ID
+            
+            # set current_user without the get_current_user() function since we can't pass a token
+            # get the user from the DB that has the ID in the "/users/{user_id}/setpassword" request
+            current_user = db.query(models.User).filter(models.User.id == int(request.url.path.split("/")[2])).first()
+
+
+        # for all routes besides "/users/{user_id}/setpassword"
+        else:
+            token = request.headers.get("Authorization")
+            logger.info(f"token: {token}")
+            if token:
+                token = token.split(" ")[1]  # Remove 'Bearer' prefix
+            current_user = get_current_user(token, db)
+
+
         logger.info(f"User (id={current_user.id}): {current_user.email} is making a request to {request.url.path} as a {current_user.user_type} ")
         if request.method == "GET" :
             # check if the request is a get. i.e. not changing anything
@@ -249,6 +271,7 @@ def verify_token(token: Annotated[str, Depends(oauth2_scheme)]):
         username: str = payload.get("sub")
         if username is None:
             raise HTTPException(status_code=403, detail="Token is invalid or expired")
+        print(payload)
         return payload
         
     except JWTError:
@@ -387,9 +410,14 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
             detail="Email already registered"
         )
     # if not create a new user
-    hashed_password = pwd_context.hash(user.password)
     user_data = user.model_dump()  # Get user data as dict
-    user_data['password'] = hashed_password  # Set the hashed password
+
+    # only set a password if one was passed
+    # should mostly not get passed (like a manager making a password-less account for an employee)
+    if user.password is not None:
+        hashed_password = pwd_context.hash(user.password)
+        user_data['password'] = hashed_password  # Set the hashed password
+
     db_user = models.User(**user_data)  # Now unpack user_data
 
     db.add(db_user)
@@ -433,6 +461,28 @@ def delete_user(user_id: int, db: Session = Depends(get_db), current_user: UserT
     return SimpleResponse(message="User deleted successfully")
 
 
+# *****an endpoint that doesn't need any authorization, since users who are in the process of setting
+# their password (can't make a token yet) need to be able to call it
+
+# only give the ability to set a password on a user that doesn't have a password yet
+@app.put("/users/{user_id}/setpassword")
+def set_user_password(user_id: int, user: UserSetPassword, db: Session = Depends(get_db)):
+    # find the user by ID
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    if db_user.password is not None:
+        raise HTTPException(status_code=409, detail="User already has a password")
+    
+    # hash the password they provided
+    db_user.password = pwd_context.hash(user.password)
+
+    db.commit()
+    db.refresh(db_user)
+    return {"message": "Password successfully set, you can now log in", "user_id": user_id}
+
+
 @app.put("/users/{user_id}", response_model=UserResponse)
 def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
 
@@ -461,7 +511,23 @@ def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db), c
     return db_user
 
 
-@app.get("/userslist/", response_model=List[UserResponse])
+# *****an endpoint that doesn't need any authorization, since users who are in the process of setting
+# their password (can't make a token yet) need to be able to call it
+
+# get all users that don't have a password yet
+# this gives a list of valid emails that can be entered on the setpassword page
+@app.get("/userslist/new/", response_model=List[UserEmailResponse])
+def list_new_users(db: Session = Depends(get_db)):
+
+    # Query the database for all users with no password yet
+    users = db.query(models.User).filter(models.User.password == None).all()
+    
+
+    return users
+
+
+
+@app.get("/userslist", response_model=List[UserResponse])
 def list_users(db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
 
     validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
@@ -469,6 +535,22 @@ def list_users(db: Session = Depends(get_db), current_user: UserToReturn = Depen
     users = db.query(models.User).all()
     
     return users
+
+# lock or recovery lock account, include a boolean query parameter to set lock or unlock
+@app.put("/users/lock_status/{user_id}", response_model=UserResponse)
+def change_user_lock_status(user_id: int, is_locked: bool, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+    '''
+    Locks or unlocks a user account based on the query parameter is_locked.
+    '''
+    validate_user_type(current_user, ["Pharmacy Manager"])
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    db_user.is_locked_out = is_locked  # Set is_locked_out based on query parameter
+    db.commit()
+    db.refresh(db_user)
+    return db_user
 
 # endregion
 # region Patient CRUD
@@ -879,8 +961,13 @@ def create_user_activity(user_activity: UserActivityCreate, db: Session, current
     return db_user_activity
 
 @app.get("/user-activities", response_model=List[UserActivityResponse])
-def get_all_user_activities(db: Session = Depends(get_db)):
+def get_all_user_activities(db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+
+    # make sure only pharmacy managers or pharmacists can call this endpoint
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
+
     activities = db.query(UserActivity).all()
+
     if not activities:
         raise HTTPException(status_code=404, detail="No activities found")
     return activities
@@ -915,4 +1002,51 @@ def sell_non_prescription_item(id: int, medication_update: schema.MedicationUpda
         activity_type=models.InventoryUpdateType.SELLNONPRESC
     ), db=db, current_user=current_user)
     return inventory_update
+
+# transaction crud for checkout, don't have update or delete since we are not deleting or updating transaction
+# createa a transaction
+@app.post("/transaction", response_model=TransactionResponse)
+def create_transaction(transaction: TransactionCreate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+    # make sure only pharmacy managers or pharmacists can call this endpoint
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
+
+    # create a new transaction
+    db_transaction = models.Transaction(**transaction.dict())
+    db.add(db_transaction)
+    db.commit()
+    db.refresh(db_transaction)
+    return db_transaction
+
+# get a transaction
+@app.get("/transaction/{transaction_id}", response_model=TransactionResponse)
+def get_transaction(transaction_id: int, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+    # make sure only pharmacy managers or pharmacists can call this endpoint
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
+
+    # there will only be one transaction with the matching id (since the id is unique), so using first() is fine
+    db_transaction = db.query(models.Transaction).filter(models.Transaction.id == transaction_id).first()
+
+    if db_transaction is None:
+        raise HTTPException(status_code=404, detail="Transaction not found")
     
+    return db_transaction
+
+# get all transactions
+@app.get("/transactions", response_model=List[TransactionResponse])
+def get_transactions(db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+    # make sure only pharmacy managers or pharmacists can call this endpoint
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
+
+    transactions = db.query(models.Transaction).all()
+    return transactions
+
+    
+#Returning all transactions.
+@app.get("/transaction-report", response_model=List[TransactionResponse])
+def get_transaction_report(db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+    # Restrict access to authorized roles
+    validate_user_type(current_user, ["Finance Manager", "Pharmacy Manager"])
+
+    # Query all transactions
+    transactions = db.query(Transaction).all()
+    return transactions

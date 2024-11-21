@@ -484,6 +484,18 @@ def change_user_lock_status(user_id: int, is_locked: bool, db: Session = Depends
     db_user.is_locked_out = is_locked  # Set is_locked_out based on query parameter
     db.commit()
     db.refresh(db_user)
+
+    # create user activity if account is unlocked
+    if is_locked == False:
+        db_user_activity = models.UserActivity(
+            user_id=user_id,
+            activity_type=models.UserActivityType.UNLOCK_ACCOUNT,
+            timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it  
+        )
+        db.add(db_user_activity)
+        db.commit()
+        db.refresh(db_user_activity)
+
     return db_user
 
 # endregion

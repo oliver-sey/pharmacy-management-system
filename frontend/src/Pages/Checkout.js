@@ -20,7 +20,8 @@ import {
 	MenuItem,
 	FormControl,
 	Select,
-	Snackbar
+	Snackbar,
+	Alert
 } from "@mui/material";
 
 
@@ -52,8 +53,14 @@ function Checkout() {
 	const [nonPrescriptionItems, setNonPrescriptionItems] = useState([]);
 
 
-	const [errorMessage, setErrorMessage] = useState(null);
-	const [openSnackbar, setOpenSnackbar] = useState(false);
+	// to open the snackbar component with a little alert to the user
+	// Snackbar handler state
+	const [snackbar, setSnackbar] = useState({
+		open: false,
+		message: "",
+		severity: "info", // Can be "success", "error", "warning", "info"
+	});
+
 
 	// to see if the data is still loading for patients, non-prescription items, and prescriptions
 	const [patientsLoading, setPatientsLoading] = useState(false);
@@ -117,10 +124,7 @@ function Checkout() {
 			// error handling
 			// setErrorMessage("Failed to fetch non-prescription items");
 			// use the error message from the Error that gives some more details
-			// TODO: is this right?
-			setErrorMessage(error.message);
-
-			setOpenSnackbar(true); // Show Snackbar when error occurs
+			showSnackbar(error.message, "error");
 		} finally {
 			// done loading non-prescription items data
 			// wait 5 seconds
@@ -188,8 +192,7 @@ function Checkout() {
 				`Error fetching prescriptions for patient_id ${patientId}: ${error}`
 			);
 			// error handling
-			setErrorMessage("Failed to fetch prescriptions");
-			setOpenSnackbar(true); // Show Snackbar when error occurs
+			showSnackbar("Failed to fetch prescriptions", "error");
 		} finally {
 			// done loading prescriptions data
 			// wait 5 seconds
@@ -227,8 +230,7 @@ function Checkout() {
 		} catch (error) {
 			console.error("Error fetching patient:", error);
 			// error handling
-			setErrorMessage(error.message);
-			setOpenSnackbar(true); // Show Snackbar when error occurs
+			showSnackbar(error.message, "error");
 		}
 	};
 
@@ -261,8 +263,7 @@ function Checkout() {
 		} catch (error) {
 			console.error("Error fetching patient:", error);
 			// error handling
-			setErrorMessage("Failed to fetch patient");
-			setOpenSnackbar(true); // Show Snackbar when error occurs
+			showSnackbar("Failed to fetch patient", "error");
 		} finally {
 			setPatientsLoading(false);
 		}
@@ -303,7 +304,7 @@ function Checkout() {
 				[type]: [...prevCart[type], { ...item, quantity }]
 			}));
 		} else {
-			openSnackbar("Quantity exceeds available stock.");
+			showSnackbar("Quantity exceeds available stock.", "error");
 		}
 	};
 	
@@ -345,7 +346,7 @@ function Checkout() {
 			setCart((prev) => ({ ...prev, [itemId]: quantity }));
 		} else {
 			// Show Snackbar error
-			openSnackbar("Quantity exceeds available stock.");
+			showSnackbar("Quantity exceeds available stock.", "error");
 		}
 	};
 	
@@ -362,9 +363,8 @@ function Checkout() {
 			}));
 
 			// it's not really an error message, but the Snackbar always just displays the text in errorMessage
-			setErrorMessage("Cleared prescription items from cart since patient changed");
+			showSnackbar("Cleared prescription items from cart since patient changed", "error");
 			// show the snackbar with the message
-			setOpenSnackbar(true);
 		}
 
 		const patient = await fetchOnePatient(patientID);
@@ -377,6 +377,18 @@ function Checkout() {
 		await fetchPrescriptionsForPatient(patientID)
 
 	};
+
+	// Show Snackbar
+	// default parameter for severity (possible values are 'error', 'info', 'success', or 'warning')
+	const showSnackbar = (message, severity = "info") => {
+		setSnackbar({ open: true, message, severity });
+	};
+
+	// Close Snackbar
+	const handleCloseSnackbar = () => {
+		setSnackbar((prev) => ({ ...prev, open: false }));
+	};
+
 
 	const calculateTotal = (items) =>
 		items.reduce(
@@ -806,12 +818,20 @@ function Checkout() {
 					</Paper>
 				</div>
 			</div>
+			{/* Snackbar for error messages/messages to the user */}
+			{/* get details from what is stored in the state */}
 			<Snackbar
-				open={openSnackbar}
-				message={errorMessage}
+				open={snackbar.open}
 				autoHideDuration={6000}
-				onClose={() => setOpenSnackbar(false)}
-			/>
+				onClose={handleCloseSnackbar}
+			>
+				<Alert
+					onClose={handleCloseSnackbar}
+					severity={snackbar.severity}
+				>
+					{snackbar.message}
+				</Alert>
+			</Snackbar>
 		</div>
 	);
 }

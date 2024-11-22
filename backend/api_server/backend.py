@@ -29,188 +29,6 @@ import urllib
 
 app = FastAPI()
 
-# test endpoint
-@app.get("/test") # this is a decorator that tells fastapi to run the function below when a GET request is made to http://localhost:8000/test
-def read_root():
-    return "this is an epic gamer moment!"
-
-
-# configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("pharmacy_logger")
-
-def determine_activity_type(request: Request):
-    '''
-    Determines the type of activity based on the endpoint that was called
-    '''
-    logger.info(f"Request Path: {request.url.path}, Request Method: {request.method}")
-    logger.info(f"patients in path {'patients' in request.url.path}")
-    logger.info(f"method == post: {request.method == 'POST'}")
-    if "user" in request.url.path:
-        if request.method == "POST":
-            return models.UserActivityType.CREATE_USER
-        elif request.method == "PUT":
-            return models.UserActivityType.UPDATE_USER
-        elif request.method == "DELETE":
-            return models.UserActivityType.DELETE_USER
-        
-    elif "patient" in request.url.path:
-        if request.method == "POST":
-            return models.UserActivityType.CREATE_PATIENT
-        elif request.method == "PUT":
-            return models.UserActivityType.UPDATE_PATIENT
-        elif request.method == "DELETE":
-            return models.UserActivityType.DELETE_PATIENT
-    
-    elif "prescription" in request.url.path:
-        if request.method == "POST":
-            return models.UserActivityType.CREATE_PRESCRIPTION
-    
-    elif "medication" in request.url.path:
-        if request.method == "POST":
-            return models.UserActivityType.CREATE_MEDICATION
-        elif request.method == "PUT":
-            return models.UserActivityType.UPDATE_MEDICATION
-        elif request.method == "DELETE":
-            return models.UserActivityType.DELETE_MEDICATION
-
-    else:
-        return models.UserActivityType.OTHER   
-
-# middleware for logging 
-@app.middleware("http")
-async def log_requests(request: Request, call_next):
-    '''
-    middleware for logging. 
-    '''
-    # these types of requests dont need to be logged. 
-    # only requests that change something should be logged in
-    # as well as login and logout
-    
-    
-    db: Session = SessionLocal()
-    logger.info(f"Request Path: {request.url.path}")
-    if request.url.path in ("/token"):
-        # check if a user is loggin in 
-        logger.info(f"logging in: {request.url.path}")
-         # Read the request body only once and store it
-        request_body = await request.body()
-        parsed_data = urllib.parse.parse_qs(request_body.decode())
-        email = parsed_data.get("username", [None])[0]
-        user = db.query(models.User).filter(models.User.email == email).first()
-        request = Request(request.scope, receive=lambda: request_body)
-        response = await call_next(request)
-        if request.url.path == "/token" and response.status_code == 200:
-
-            db_user_activity = models.UserActivity(
-                user_id=user.id,
-                activity_type=models.UserActivityType.LOGIN,
-                timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
-            )
-
-            db.add(db_user_activity)
-            db.commit()
-            db.refresh(db_user_activity)
-            
-        return response
-    elif "/verify-token/" in request.url.path:
-        # check if a user is verifying their token
-        logger.info(f"verifying token: {request.url.path}")
-        response = await call_next(request)
-        return response
-    elif request.method == "GET":
-        response = await call_next(request)
-        return response
-    else:
-        logger.info(f"request.headers: {request.headers.keys()}") 
-
-        # for the route where a token is not required
-        # "/users/{user_id}/setpassword"
-        # (/userslist/new/ also gets called and doesn't need a token, but that's a GET and gets taken care of up above)
-        if "/setpassword" in request.url.path:
-            logger.info(f"/setpassword route, not requiring their token")
-            # don't get their token, just assume the user ID of the user they are setting a password on, is their user ID
-            
-            # set current_user without the get_current_user() function since we can't pass a token
-            # get the user from the DB that has the ID in the "/users/{user_id}/setpassword" request
-            current_user = db.query(models.User).filter(models.User.id == int(request.url.path.split("/")[2])).first()
-
-
-        # for all routes besides "/users/{user_id}/setpassword"
-        else:
-            token = request.headers.get("Authorization")
-            logger.info(f"token: {token}")
-            if token:
-                token = token.split(" ")[1]  # Remove 'Bearer' prefix
-            current_user = get_current_user(token, db)
-
-
-        logger.info(f"User (id={current_user.id}): {current_user.email} is making a request to {request.url.path} as a {current_user.user_type} ")
-        if request.method == "GET" :
-            # check if the request is a get. i.e. not changing anything
-            logger.info(f"GET request: {request.url.path}")
-            # rebuild request
-            request = Request(request.scope, receive=request.body)
-
-            response = call_next(request)
-            return response
-
-        try:
-            # Log incoming request details
-            logger.info(f"Received request: {request.method} {request.url}")
-
-            response = await call_next(request)
-
-            # Log successful response
-            logger.info(f"Completed request with status code: {response.status_code}")
-            activity_type = determine_activity_type(request)
-            logger.info(f"Activity Type: {activity_type}")
-            
-            # Log this information to the database
-            db_user_activity = models.UserActivity(
-                user_id=current_user.id,
-                activity_type=activity_type,
-                timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
-            )
-
-            db.add(db_user_activity)
-            db.commit()
-            db.refresh(db_user_activity)
-
-            return response
-        except SQLAlchemyError as e: # if there is an error with the database / ORM
-            logger.error(f"Database error occurred: {str(e)}")
-
-            # Insert log entry to database for DB errors
-            db_user_activity = models.UserActivity(
-                user_id=current_user.id,
-                activity_type=determine_activity_type(request),
-                timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
-            )
-
-            db.add(db_user_activity)
-            db.commit()
-            db.refresh(db_user_activity)
-            # Re-raise error after logging
-            raise e  
-        except Exception as e: # if there is any other error
-            logger.error(f"An error occurred: {str(e)}")
-
-            # Insert log entry to database for other errors
-            db_user_activity = models.UserActivity(
-                user_id=current_user.id,
-                activity_type=determine_activity_type(request),
-                timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
-            )
-
-            db.add(db_user_activity)
-            db.commit()
-            db.refresh(db_user_activity)
-
-            # Re-raise error after logging
-            raise e
-
-
 # Create the database tables
 Base.metadata.create_all(bind=engine)
 # setup middleware
@@ -218,9 +36,9 @@ Base.metadata.create_all(bind=engine)
 
 
 # this is to allow our react app to make requests to our fastapi app
-origins = [
-    'http://localhost:3000',
-]
+# origins = [
+#     'http://localhost:3000',
+# ]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],  # Allow your frontend URL
@@ -228,6 +46,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# test endpoint
+@app.get("/test") # this is a decorator that tells fastapi to run the function below when a GET request is made to http://localhost:8000/test
+def read_root():
+    return "this is an epic gamer moment!"
+
 
 # Dependency to get the database session
 def get_db():
@@ -293,11 +117,12 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)],
             raise credentials_exception
         token_data = TokenData(username=username)
     except InvalidTokenError:
-        raise credentials_exception
+        print("Invalid token", token)
+        raise HTTPException(status_code=400, detail="token is invalid")
     user = db.query(models.User).filter(models.User.email == token_data.username).first()
     current_user = UserToReturn(id=user.id, email=user.email, user_type=user.user_type)
     if user is None:
-        raise credentials_exception
+        raise HTTPException(status_code=404, detail="get_current_user user not found")
     
     return current_user
 
@@ -392,6 +217,168 @@ async def reset_password(
     return {"message": "Password has been successfully reset."}
 
 
+# # configure logging
+# logging.basicConfig(level=logging.INFO)
+# logger = logging.getLogger("pharmacy_logger")
+
+# def determine_activity_type(request: Request):
+#     '''
+#     Determines the type of activity based on the endpoint that was called
+#     '''
+#     logger.info(f"Request Path: {request.url.path}, Request Method: {request.method}")
+#     logger.info(f"patients in path {'patients' in request.url.path}")
+#     logger.info(f"method == post: {request.method == 'POST'}")
+#     if "user" in request.url.path:
+#         if request.method == "POST":
+#             return models.UserActivityType.CREATE_USER
+#         elif request.method == "PUT":
+#             return models.UserActivityType.UPDATE_USER
+#         elif request.method == "DELETE":
+#             return models.UserActivityType.DELETE_USER
+        
+#     elif "patient" in request.url.path:
+#         if request.method == "POST":
+#             return models.UserActivityType.CREATE_PATIENT
+#         elif request.method == "PUT":
+#             return models.UserActivityType.UPDATE_PATIENT
+#         elif request.method == "DELETE":
+#             return models.UserActivityType.DELETE_PATIENT
+    
+#     elif "prescription" in request.url.path:
+#         if request.method == "POST":
+#             return models.UserActivityType.CREATE_PRESCRIPTION
+    
+#     elif "medication" in request.url.path:
+#         if request.method == "POST":
+#             return models.UserActivityType.CREATE_MEDICATION
+#         elif request.method == "PUT":
+#             return models.UserActivityType.UPDATE_MEDICATION
+#         elif request.method == "DELETE":
+#             return models.UserActivityType.DELETE_MEDICATION
+
+#     else:
+#         return models.UserActivityType.OTHER   
+
+# # middleware for logging 
+# @app.middleware("http")
+# async def log_requests(request: Request, call_next):
+#     '''
+#     middleware for logging. 
+#     '''
+#     # these types of requests dont need to be logged. 
+#     # only requests that change something should be logged in
+#     # as well as login and logout
+    
+    
+#     db: Session = SessionLocal()
+#     logger.info(f"Request Path: {request.url.path}")
+#     if request.url.path in ("/token"):
+#         # check if a user is loggin in 
+#         logger.info(f"logging in: {request.url.path}")
+#          # Read the request body only once and store it
+#         request_body = await request.body()
+#         parsed_data = urllib.parse.parse_qs(request_body.decode())
+#         email = parsed_data.get("username", [None])[0]
+#         user = db.query(models.User).filter(models.User.email == email).first()
+#         request = Request(request.scope, receive=lambda: request_body)
+#         response = await call_next(request)
+#         if request.url.path == "/token" and response.status_code == 200:
+
+#             db_user_activity = models.UserActivity(
+#                 user_id=user.id,
+#                 activity_type=models.UserActivityType.LOGIN,
+#                 timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
+#             )
+
+#             db.add(db_user_activity)
+#             db.commit()
+#             db.refresh(db_user_activity)
+            
+#         return response
+#     elif "/verify-token/" in request.url.path:
+#         # check if a user is verifying their token
+#         logger.info(f"verifying token: {request.url.path}")
+#         response = await call_next(request)
+#         return response
+#     elif "/currentuser/me/" in request.url.path:
+#         #skip the log
+#         logger.info(f"current user: {request.url.path}")
+#         response = await call_next(request)
+#         return response
+#     elif request.method == "GET":
+#         response = await call_next(request)
+#         return response
+#     else:
+#         logger.info(f"request.headers: {request.headers.keys()}") 
+#         token = request.headers.get("Authorization")
+#         logger.info(f"token: {token}")
+#         if token:
+#             token = token.split(" ")[1]  # Remove 'Bearer' prefix
+#         current_user = get_current_user(token, db)
+#         logger.info(f"User (id={current_user.id}): {current_user.email} is making a request to {request.url.path} as a {current_user.user_type} ")
+#         if request.method == "GET" :
+#             # check if the request is a get. i.e. not changing anything
+#             logger.info(f"GET request: {request.url.path}")
+#             # rebuild request
+#             request = Request(request.scope, receive=request.body)
+
+#             response = call_next(request)
+#             return response
+
+#         try:
+#             # Log incoming request details
+#             logger.info(f"Received request: {request.method} {request.url}")
+
+#             response = await call_next(request)
+
+#             # Log successful response
+#             logger.info(f"Completed request with status code: {response.status_code}")
+#             activity_type = determine_activity_type(request)
+#             logger.info(f"Activity Type: {activity_type}")
+            
+#             # Log this information to the database
+#             db_user_activity = models.UserActivity(
+#                 user_id=current_user.id,
+#                 activity_type=activity_type,
+#                 timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
+#             )
+
+#             db.add(db_user_activity)
+#             db.commit()
+#             db.refresh(db_user_activity)
+
+#             return response
+#         except SQLAlchemyError as e: # if there is an error with the database / ORM
+#             logger.error(f"Database error occurred: {str(e)}")
+
+#             # Insert log entry to database for DB errors
+#             db_user_activity = models.UserActivity(
+#                 user_id=current_user.id,
+#                 activity_type=determine_activity_type(request),
+#                 timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
+#             )
+
+#             db.add(db_user_activity)
+#             db.commit()
+#             db.refresh(db_user_activity)
+#             # Re-raise error after logging
+#             raise e  
+#         except Exception as e: # if there is any other error
+#             logger.error(f"An error occurred: {str(e)}")
+
+#             # Insert log entry to database for other errors
+#             db_user_activity = models.UserActivity(
+#                 user_id=current_user.id,
+#                 activity_type=determine_activity_type(request),
+#                 timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
+#             )
+
+#             db.add(db_user_activity)
+#             db.commit()
+#             db.refresh(db_user_activity)
+
+#             # Re-raise error after logging
+#             raise e
 
 
 
@@ -550,6 +537,18 @@ def change_user_lock_status(user_id: int, is_locked: bool, db: Session = Depends
     db_user.is_locked_out = is_locked  # Set is_locked_out based on query parameter
     db.commit()
     db.refresh(db_user)
+
+    # create user activity if account is unlocked
+    if is_locked == False:
+        db_user_activity = models.UserActivity(
+            user_id=user_id,
+            activity_type=models.UserActivityType.UNLOCK_ACCOUNT,
+            timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it  
+        )
+        db.add(db_user_activity)
+        db.commit()
+        db.refresh(db_user_activity)
+
     return db_user
 
 # endregion

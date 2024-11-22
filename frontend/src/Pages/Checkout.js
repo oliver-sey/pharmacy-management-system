@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from 'react-router-dom';
+import VerifyToken from '../Functions/VerifyToken';
 import '../Styles/Checkout.css';
 
 import {
@@ -63,6 +64,13 @@ function Checkout() {
 	const navigate = useNavigate();
 	const role = ["Pharmacist"];
 	const token = localStorage.getItem("token");
+
+
+    useEffect(() => {
+        
+        VerifyToken(navigate);
+
+    }, [navigate]);
 
 
 	const fetchNonPrescriptionItems = useCallback(async () => {

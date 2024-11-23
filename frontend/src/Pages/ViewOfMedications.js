@@ -340,26 +340,12 @@ function ViewOfMedications() {
 	  
 		// Set title for the PDF
 		doc.setFontSize(20);
-		doc.text('Medication Inventory Updates Report', 10, 20);
+		doc.text(`Inventory Updates Report:`, 10, 20);
 	  
 		// Set table headers for inventory update data
 		doc.setFontSize(12);
 		let yPosition = 30;
-		// doc.text('Medication ID', 10, yPosition);
-		// doc.text('Medication Name', 40, yPosition);
-		// doc.text('Quantity Changed', 90, yPosition);
-		// doc.text('Timestamp', 150, yPosition);
-	  
-		// yPosition += 10; // Space after header row
-	  
-		// // Loop through updates and add each inventory update
-		// inventoryData.updates.forEach((update) => {
-		//   doc.text(update.medication_id.toString(), 10, yPosition);
-		//   doc.text(update.medication_name || 'Unknown Medication', 40, yPosition);
-		//   doc.text(update.quantity_changed_by.toString(), 90, yPosition);
-		//   doc.text(update.timestamp ? new Date(update.timestamp).toLocaleString() : 'N/A', 150, yPosition);
-		//   yPosition += 10; // Move to the next row
-		// });
+
 		// Define maximum lengths for each column (in characters)
 		const maxLength = {
 			medicationId: 15,    // Max length for Medication ID

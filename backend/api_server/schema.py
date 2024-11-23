@@ -238,6 +238,8 @@ class InventoryUpdateResponse(BaseModel):
     transaction_id: Optional[int] = None
     quantity_changed_by: int
     activity_type: InventoryUpdateType
+    medication_name: Optional[str] = None
+    timestamp: Optional[datetime] = None
 
 # **NOTE: we will not be allowing updating or deleting inventory_updates
 

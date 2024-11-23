@@ -145,8 +145,6 @@ function Login({ updateUserRole }) {
 				resetFailedAttempts(username);
 
         localStorage.setItem('token', data.access_token);
-        console.log(localStorage.getItem('token'))
-
         //fetches information about current user
         const userResponse = await fetch('http://localhost:8000/currentuser/me', {
           method: 'GET',
@@ -163,7 +161,6 @@ function Login({ updateUserRole }) {
 
 		  // Update the user role immediately
 		  updateUserRole(userData.user_type); // update the header
-          console.log("User role:", userData.user_type); // Log the user role
 
           //redirects user to homepage for their role
           //more can be added as needed

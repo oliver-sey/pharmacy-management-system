@@ -95,7 +95,6 @@ def verify_token(token: Annotated[str, Depends(oauth2_scheme)]):
         username: str = payload.get("sub")
         if username is None:
             raise HTTPException(status_code=403, detail="Token is invalid or expired")
-        print(payload)
         return payload
         
     except JWTError:
@@ -109,7 +108,6 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)],
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    # print(f"Received token: {token}")  # Print the token
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
@@ -117,7 +115,6 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)],
             raise credentials_exception
         token_data = TokenData(username=username)
     except InvalidTokenError:
-        print("Invalid token", token)
         raise HTTPException(status_code=400, detail="token is invalid")
     user = db.query(models.User).filter(models.User.email == token_data.username).first()
     current_user = UserToReturn(id=user.id, email=user.email, user_type=user.user_type)
@@ -605,7 +602,6 @@ def put_patient(patient_id: int, patient: PatientUpdate, db: Session = Depends(g
 def delete_patient(pid: int, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
     # make a call to our future database to delete the patient with the given patient_id
     patient = db.query(models.Patient).filter(models.Patient.id == pid).first()
-    print(f"patient: {patient}")
     db.query(models.Prescription).filter(models.Prescription.patient_id == pid).update({models.Prescription.patient_id: None})
     
     if patient is None:

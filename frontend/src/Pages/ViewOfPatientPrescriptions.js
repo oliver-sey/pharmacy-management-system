@@ -27,7 +27,6 @@ const ViewOfPatientPrescriptions = () => {
                 throw new Error('Failed to fetch prescriptions');
             }
             const data = await response.json();
-            console.log("Fetched data:", data);
             if (Array.isArray(data)) { //This make sure it's in an array.
                 setPrescriptions(data);
             } else {

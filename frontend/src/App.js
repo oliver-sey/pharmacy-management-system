@@ -1,7 +1,7 @@
 // src/App.js
 import React, { useState } from 'react';
 import './Styles/App.css';
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import GeneralProtected from './Pages/GeneralProtected';
 import Login from './Pages/Login';
 import SetFirstPassword from './Pages/SetFirstPassword';
@@ -64,7 +64,7 @@ function App() {
             <Route path='/viewofpatients/:patientId/prescriptions' element={<ViewOfPatientPrescriptions />} />
             <Route path='/notifications' element={<NotificationsPage />} />
             <Route path ='/useractivities' element={<UserActivitiesTable/>} />
-            
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Router>
       </NotificationProvider>

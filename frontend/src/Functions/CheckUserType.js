@@ -40,7 +40,6 @@ async function CheckUserType (role, navigate)  {
               navigate('../protected', {replace: true})
             }
           } else {
-            console.log("From CheckUser: " + JSON.stringify(userData))
             return userData
           }
         } else {

@@ -15,7 +15,6 @@ const ResetPassword = () => {
 
     try {
       const token = localStorage.getItem('token');
-      console.log(`Token sent to backend: ${token}`);  // Ensure token is stored somewhere accessible like localStorage
       if (!token) {
           throw new Error('No token found. Please log in.');
       }

@@ -49,7 +49,6 @@ const AddEditUserModal = ({open, onClose, row, onSave}) => {
 
     // Handle saving of the updated data
 	const handleSave = () => {
-		console.log("in der")
 		onSave(formData, row?.id); // Pass updated form data to parent component
 		onClose(); // Close the modal
 	};

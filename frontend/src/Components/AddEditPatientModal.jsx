@@ -73,9 +73,7 @@ const AddEditPatientModal = ({ open, onClose, row, onSave }) => {
 	// Handle saving of the updated data
 	const handleSave = async () => {
 		try {
-			console.log("Saving data:", formData);
 			let success = await onSave(formData, row?.id); // Pass updated form data to parent component
-			console.log("Save success:", success);
 			if (success) {
 				onClose(); // Close the modal
 			}

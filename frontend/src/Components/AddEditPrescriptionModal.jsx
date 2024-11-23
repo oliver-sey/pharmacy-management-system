@@ -157,7 +157,6 @@ const AddEditPrescriptionModal = ({ open, onClose, row, onSave }) => {
 
 			setFormData((prev) => ({medication: medication_id, patient: patient_id, ...prev}));
 			
-			console.log(data_to_return)
 			onSave(data_to_return, row?.id); // Pass updated form data to parent component
 			onClose()
 		}

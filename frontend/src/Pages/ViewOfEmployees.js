@@ -9,10 +9,6 @@ function ViewOfEmployees() {
     const [selectedRow, setSelectedRow] = useState(null); // Tracks the selected row for editing
     const openAddEmployeeModal = useRef(null);
 
-  // Debugging console logs to check state
-  // console.log("isEditOpen:", isEditOpen);
-  // console.log("selectedRow:", selectedRow);
-
   // Columns for the table
   const columns = [
     { field: "employeeId", headerName: "Employee ID", width: 100 },
@@ -72,20 +68,17 @@ function ViewOfEmployees() {
 
   // Function to open the Add/Edit modal
   const openAddEmployeeHandler = () => {
-    console.log("Add Employee button clicked");
     setSelectedRow(null); // Clear any selected row (for new employee)
     setIsEditOpen(true); // Open modal
   };
 
   // Close the modal
   const closeEditModal = () => {
-    console.log("Closing modal");
     setIsEditOpen(false);
   };
 
   // Handle saving employee data
   const handleSaveEmployee = (employeeData) => {
-    console.log("Employee saved:", employeeData);
     closeEditModal(); // Close modal after saving
   };
 

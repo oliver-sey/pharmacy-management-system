@@ -922,7 +922,8 @@ def get_inventory_update(id: int, db: Session = Depends(get_db), current_user: U
 # get all inventory_updates - **optional param to filter to one value of 'type'
 @app.get("/inventory-updates", response_model=List[InventoryUpdateResponse])
 # restrict type to the values in InventoryUpdateType
-def get_inventory_updates(activity_type: Optional[models.InventoryUpdateType] = Query(None), db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+def get_inventory_updates(activity_type: Optional[models.InventoryUpdateType] = Query(None), start_date: Optional[datetime] = Query(None),
+    end_date: Optional[datetime] = Query(None), db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
     '''
     endpoint to get inventory_updates with optional type (e.g. add, discard, fillpresc, sellnonpresc).
     If type is provided, only inventory_updates for that type are returned.
@@ -931,17 +932,34 @@ def get_inventory_updates(activity_type: Optional[models.InventoryUpdateType] = 
     # make sure only pharmacy managers or pharmacists can call this endpoint
     validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
 
-    # if type is provided, return all inventory_updates of that type
-    if activity_type:
-        inventory_updates = db.query(models.InventoryUpdate).filter(models.InventoryUpdate.activity_type == activity_type).all()
-    # else return all inventory_updates
-    else:
-        # inventory_updates = db.query(models.InventoryUpdate).all()
-        # Query inventory updates and load related medication
-        inventory_updates = db.query(models.InventoryUpdate).options(selectinload(models.InventoryUpdate.medication)).all()
+    # # if type is provided, return all inventory_updates of that type
+    # if activity_type:
+    #     inventory_updates = db.query(models.InventoryUpdate).filter(models.InventoryUpdate.activity_type == activity_type).all()
+    # # else return all inventory_updates
+    # else:
+    #     # inventory_updates = db.query(models.InventoryUpdate).all()
+    #     # Query inventory updates and load related medication
+    #     inventory_updates = db.query(models.InventoryUpdate).options(selectinload(models.InventoryUpdate.medication)).all()
 
+# Start building the query for inventory updates
+    query = db.query(models.InventoryUpdate).options(selectinload(models.InventoryUpdate.medication))
+
+    # Apply filter for activity_type if provided
+    if activity_type:
+        query = query.filter(models.InventoryUpdate.activity_type == activity_type)
+
+    # Apply date range filter if start_date and end_date are provided
+    if start_date and end_date:
+        query = query.filter(models.InventoryUpdate.timestamp >= start_date, models.InventoryUpdate.timestamp <= end_date)
+    elif start_date:
+        query = query.filter(models.InventoryUpdate.timestamp >= start_date)
+    elif end_date:
+        query = query.filter(models.InventoryUpdate.timestamp <= end_date)
+
+    # Execute the query to retrieve the inventory updates
+    inventory_updates = query.all()
         # Convert to response format with medication names
-        inventory_update_responses = [
+    inventory_update_responses = [
             InventoryUpdateResponse(
                 id=update.id,
                 medication_id=update.medication_id,
@@ -954,8 +972,9 @@ def get_inventory_updates(activity_type: Optional[models.InventoryUpdateType] = 
             )
             for update in inventory_updates
         ]
-        return inventory_update_responses
-    return inventory_updates
+        # return inventory_update_responses
+    # return inventory_updates
+    return inventory_update_responses
 
 
 

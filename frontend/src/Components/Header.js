@@ -82,6 +82,16 @@ const Header = () => {
                     </li>
                 )}
 
+                {/* link to cart/checkout page */}
+                {/* all users can access this */}
+                {token && (
+                    <li>
+                        <Link to="/checkout">
+                            Checkout
+                        </Link>
+                    </li>
+                )}
+
                 {/* logout button only when logged in */}
                 {token && <li className='logout-container'><button onClick={handleLogout}>Logout</button></li>}
             </ul>

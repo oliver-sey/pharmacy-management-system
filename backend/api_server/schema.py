@@ -1,7 +1,7 @@
 # build a schema using pydantic
 
-from typing import Optional
-from pydantic import BaseModel, EmailStr, field_validator
+from typing import Optional, Union
+from pydantic import BaseModel, EmailStr, Field
 from datetime import date, datetime
 from .models import UserType, UserActivityType, InventoryUpdateType
 from enum import Enum as PyEnum
@@ -237,7 +237,11 @@ class InventoryUpdateResponse(BaseModel):
     user_activity_id: int
     transaction_id: Optional[int] = None
     quantity_changed_by: int
-    activity_type: InventoryUpdateType
+    activity_type: Union[InventoryUpdateType, str]
+    medication_name: Optional[str] = None
+    timestamp: Optional[datetime] = None
+    resulting_total_quantity: int = Field(..., example=100) 
+   
 
 # **NOTE: we will not be allowing updating or deleting inventory_updates
 
@@ -253,6 +257,11 @@ class UserActivityResponse(BaseModel):
     user_id: int
     activity_type: UserActivityType # the activity type, an enum
     timestamp: datetime
+
+class TransactionCreate(BaseModel):
+    user_id: int
+    patient_id: Optional[int] = None
+    payment_method: str
 
 class TransactionResponse(BaseModel):
     id: int

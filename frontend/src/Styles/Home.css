@@ -3,25 +3,26 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh; /* Makes sure it takes the full height of the viewport */
-    background-color: #f0f0f0;
+    height: 100vh; 
+    padding: 10px;
 }
 
 .header-section {
     text-align: center;
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
+    padding: 2vw;
+    border-radius: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .content-container {
-    max-width: 600px; /* Controls the width of the content */
+    max-width: 90vw;
+    width: 600px; /* Controls the width of the content */
     margin: 0 auto;  /* Centers the content */
 }
 
 .logo {
-    width: 150px; /* Adjust the logo size */
+    width: 25vw;
+    max-width: 150px;
     height: auto;
     margin-bottom: 20px;
 }

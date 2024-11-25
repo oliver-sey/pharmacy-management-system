@@ -748,6 +748,11 @@ function Checkout() {
 																	"prescription"
 																)
 															}
+															disabled={cart.prescription.some(
+																(item) =>
+																	item.id ===
+																	prescription.id
+															)}
 														>
 															Add
 														</Button>

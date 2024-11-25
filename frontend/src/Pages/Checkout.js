@@ -669,49 +669,17 @@ function Checkout() {
 									</TableRow>
 								</TableHead>
 								<TableBody>
+									{/* 9 Skeletons, one per column in the table */}
 									{prescriptionsLoading ? (
 										// Show skeletons while loading
 										<>
-											<TableRow>
-												<TableCell colSpan={4}>
-													<Skeleton variant="text" />
-												</TableCell>
-											</TableRow>
-											<TableRow>
-												<TableCell colSpan={4}>
-													<Skeleton variant="text" />
-												</TableCell>
-											</TableRow>
-											<TableRow>
-												<TableCell colSpan={4}>
-													<Skeleton variant="text" />
-												</TableCell>
-											</TableRow>
-											<TableRow>
-												<TableCell colSpan={4}>
-													<Skeleton variant="text" />
-												</TableCell>
-											</TableRow>
-											<TableRow>
-												<TableCell colSpan={4}>
-													<Skeleton variant="text" />
-												</TableCell>
-											</TableRow>
-											<TableRow>
-												<TableCell colSpan={4}>
-													<Skeleton variant="text" />
-												</TableCell>
-											</TableRow>
-											<TableRow>
-												<TableCell colSpan={4}>
-													<Skeleton variant="text" />
-												</TableCell>
-											</TableRow>
-											<TableRow>
-												<TableCell colSpan={4}>
-													<Skeleton variant="text" />
-												</TableCell>
-											</TableRow>
+											{[...Array(9)].map((_, index) => (
+												<TableRow key={index}>
+													<TableCell colSpan={4}>
+														<Skeleton variant="text" />
+													</TableCell>
+												</TableRow>
+											))}
 											{/* (these comments are for a few rows below this, but we can't put a comment there) */}
 											{/* handling the case if there is a problem getting the prescriptions */}
 											{/* make sure filteredPrescriptions even exists, then make sure the length is greater than 0 */}

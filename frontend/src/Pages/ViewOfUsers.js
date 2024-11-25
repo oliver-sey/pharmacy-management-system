@@ -7,12 +7,6 @@ import Button from "@mui/material/Button";
 // Stylesheets
 import "../Styles/styles.css";
 
-// COmponents we made
-import BaseTable from "../Components/BaseTable";
-
-// Material UI components
-import { IconButton } from "@mui/material";
-import LockOpenIcon from "@mui/icons-material/LockOpen";
 import { useNavigate } from "react-router-dom";
 import CheckUserType from "../Functions/CheckUserType";
 

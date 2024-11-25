@@ -31,9 +31,11 @@ import {
 // TODO: put the patient at the top and require the patient dropdown before checking out 
 // (need patient_id for the transaction)
 
-
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import RemoveShoppingCartIcon from "@mui/icons-material/RemoveShoppingCart";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
+
 // import Autocomplete from "@mui/lab/Autocomplete";
 
 // Mock data
@@ -466,120 +468,176 @@ function Checkout() {
 						<p>Loading patients...</p>
 					)}
 
-
-
 					{selectedPatient ? (
 						<>
-					<h1 className="prescriptions-title">Non-Prescription Items</h1>
-					<Table>
-						<TableHead>
-							<TableRow>
-								<TableCell>Name</TableCell>
-								<TableCell>Dosage</TableCell>
-								<TableCell>Quantity</TableCell>
-								<TableCell>Unit Price</TableCell>
-								<TableCell>Edit Quantity</TableCell>
-								<TableCell>Add to Cart</TableCell>
-							</TableRow>
-						</TableHead>
-						<TableBody>
-							{/* 5 Skeletons, one per column in the table */}
-							{nonPrescriptionItemsLoading ? (
-								// Show skeletons while loading
-								<>
-									{[...Array(5)].map((_, index) => (
-										<TableRow key={index}>
+							<h1 className="prescriptions-title">
+								Non-Prescription Items
+							</h1>
+							<Table>
+								<TableHead>
+									<TableRow>
+										<TableCell>Name</TableCell>
+										<TableCell>Dosage</TableCell>
+										<TableCell>Quantity Available</TableCell>
+										<TableCell>Unit Price</TableCell>
+										<TableCell>Edit Quantity</TableCell>
+										<TableCell>Total Price</TableCell>
+										<TableCell>Add to Cart</TableCell>
+									</TableRow>
+								</TableHead>
+								<TableBody>
+									{/* 6 Skeletons, one per column in the table */}
+									{nonPrescriptionItemsLoading ? (
+										// Show skeletons while loading
+										<>
+											{[...Array(6)].map((_, index) => (
+												<TableRow key={index}>
+													<TableCell colSpan={4}>
+														<Skeleton variant="text" />
+													</TableCell>
+												</TableRow>
+											))}
+										</>
+									) : nonPrescriptionItems &&
+									  nonPrescriptionItems.length > 0 ? (
+										nonPrescriptionItems.map(
+											(medication) => (
+												<TableRow key={medication.id}>
+													<TableCell>
+														{medication.name}
+													</TableCell>
+													<TableCell>
+														{medication.dosage}
+													</TableCell>
+													<TableCell>
+														{medication.quantity}
+													</TableCell>
+													<TableCell>
+														{/* TODO: how many decimal places here?? */}
+														$
+														{medication.dollars_per_unit.toFixed(
+															4
+														)}
+													</TableCell>
+													<TableCell>
+														<div className="quantity-controls">
+															<Button
+																variant="filled"
+																onClick={() =>
+																	handleQuantityChange(
+																		medication.id,
+																		-1
+																	)
+																}
+																color="primary"
+																startIcon={
+																	<RemoveCircleOutlineIcon />
+																}
+																className="quantity-button"
+																size="small"
+																disabled={
+																	cart
+																		.nonPrescription[
+																		medication
+																			.id
+																	] <= 0
+																}
+															></Button>
+															<TextField
+																type="number"
+																value={
+																	cart
+																		.nonPrescription[
+																		medication
+																			.id
+																	] || 0
+																}
+																onChange={(e) =>
+																	handleManualQuantityChange(
+																		medication.id,
+																		e.target
+																			.value
+																	)
+																}
+																className="quantity-input"
+																inputProps={{
+																	style: {
+																		appearance:
+																			"none",
+																		MozAppearance:
+																			"textfield",
+																	},
+																}}
+															/>
+															<Button
+																variant="filled"
+																onClick={() =>
+																	handleQuantityChange(
+																		medication.id,
+																		1
+																	)
+																}
+																startIcon={
+																	<AddCircleOutlineIcon />
+																}
+																className="quantity-button"
+																size="small"
+																disabled={
+																	cart
+																		.nonPrescription[
+																		medication
+																			.id
+																	] >=
+																	medication.quantity
+																}
+															></Button>
+														</div>
+													</TableCell>
+
+													<TableCell>
+														{/* TODO: how many decimal places here?? */}
+														$
+														{medication.dollars_per_unit.toFixed(
+															4
+														) * medication.quantityInCart}
+													</TableCell>
+
+													<TableCell>
+														<Button
+															variant="contained"
+															color="primary"
+															startIcon={
+																<AddShoppingCartIcon />
+															}
+															onClick={() =>
+																handleAddNonPrescToCart(
+																	medication,
+																	"nonPrescription"
+																)
+															}
+															disabled={cart.nonPrescription.some(
+																(item) =>
+																	item.id ===
+																	medication.id
+															)}
+															className="add-to-cart-button"
+														>
+															Add
+														</Button>
+													</TableCell>
+												</TableRow>
+											)
+										)
+									) : (
+										// Show message if no non-prescription items
+										<TableRow>
 											<TableCell colSpan={4}>
-												<Skeleton variant="text" />
+												No non-prescription items found.
 											</TableCell>
 										</TableRow>
-									))}
-								</>
-							) : nonPrescriptionItems &&
-							  nonPrescriptionItems.length > 0 ? (
-								nonPrescriptionItems.map((medication) => (
-									
-									<TableRow key={medication.id}>
-										<TableCell>{medication.name}</TableCell>
-										<TableCell>
-											{medication.dosage}
-										</TableCell>
-										<TableCell>
-											{medication.quantity}
-										</TableCell>
-										<TableCell>
-											{/* TODO: how many decimal places here?? */}
-											$
-											{medication.dollars_per_unit.toFixed(
-												4
-											)}
-										</TableCell>
-										<TableCell>
-											<Button
-												variant="outlined"
-												onClick={() => handleQuantityChange(medication.id, -1)}
-												className="quantity-button"
-												disabled={cart.nonPrescription[medication.id] <= 0}
-											>
-												-
-											</Button>
-											<TextField
-												type="number"
-												value={cart.nonPrescription[medication.id] || 0}
-												onChange={(e) => handleManualQuantityChange(medication.id, e.target.value)}
-												className="quantity-input"
-											/>
-											<Button
-												variant="outlined"
-												onClick={() => handleQuantityChange(medication.id, 1)}
-												className="quantity-button"
-												disabled={cart.nonPrescription[medication.id] >= medication.quantity}
-											>
-												+
-											</Button>
-											<Button
-												variant="contained"
-												color="primary"
-												startIcon={<AddShoppingCartIcon />}
-												onClick={() => handleAddNonPrescToCart(medication, "nonPrescription")}
-												disabled={cart.nonPrescription.some((item) => item.id === medication.id)}
-												className="add-to-cart-button"
-											>
-												Add
-											</Button>
-										</TableCell>
-
-
-
-										<TableCell>
-											<Button
-												variant="contained"
-												color="primary"
-												startIcon={
-													<AddShoppingCartIcon />
-												}
-												onClick={() =>
-													handleAddToCart(
-														medication,
-														"nonPrescription"
-													)
-												}
-											>
-												Add
-											</Button>
-										</TableCell>
-									</TableRow>
-								))
-							) : (
-								// Show message if no non-prescription items
-								<TableRow>
-									<TableCell colSpan={4}>
-										No non-prescription items found.
-									</TableCell>
-								</TableRow>
-							)}
-						</TableBody>
-					</Table>
+									)}
+								</TableBody>
+							</Table>
 
 					<h1 className="prescriptions-title">Prescription Items</h1>
 					{/* <Autocomplete */}
@@ -602,10 +660,11 @@ function Checkout() {
 										<TableCell>Name</TableCell>
 										<TableCell>Dosage</TableCell>
 										<TableCell>Quantity</TableCell>
+										<TableCell>Unit Price</TableCell>
 										<TableCell>Date Prescribed</TableCell>
 										<TableCell>Date Filled</TableCell>
 										<TableCell>Doctor Name</TableCell>
-										<TableCell>Unit Price</TableCell>
+										<TableCell>Total Price</TableCell>
 										<TableCell>Add to Cart</TableCell>
 									</TableRow>
 								</TableHead>
@@ -675,6 +734,13 @@ function Checkout() {
 														{prescription.quantity}
 													</TableCell>
 													<TableCell>
+														{/* TODO: how many decimal places here?? */}
+														$
+														{prescription.dollars_per_unit.toFixed(
+															4
+														)}
+													</TableCell>
+													<TableCell>
 														{
 															prescription.date_prescribed
 														}
@@ -691,10 +757,13 @@ function Checkout() {
 													</TableCell>
 													<TableCell>
 														{/* TODO: how many decimal places here?? */}
+														{/* here use the quantity not quantityInCart, since quantity in cart will be 0 or 1
+														and doesn't really make sense. We want the price that the patient will pay 
+														for just this item */}
 														$
 														{prescription.dollars_per_unit.toFixed(
 															4
-														)}
+														) * prescription.quantity}
 													</TableCell>
 													<TableCell>
 														<Button

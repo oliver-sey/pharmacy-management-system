@@ -50,7 +50,6 @@ function Checkout() {
 	const [cart, setCart] = useState({ nonPrescription: [], prescription: [] });
 	const [patients, setPatients] = useState([]);
 	const [selectedPatient, setSelectedPatient] = useState(null);
-	const [searchTerm, setSearchTerm] = useState("");
 	const [filteredPrescriptions, setFilteredPrescriptions] = useState([]);
 	const [nonPrescriptionItems, setNonPrescriptionItems] = useState([]);
 
@@ -71,7 +70,6 @@ function Checkout() {
 
 
 	const navigate = useNavigate();
-	const role = ["Pharmacist"];
 	const token = localStorage.getItem("token");
 
 

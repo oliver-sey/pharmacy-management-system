@@ -639,16 +639,18 @@ function Checkout() {
 								</TableBody>
 							</Table>
 
-					<h1 className="prescriptions-title">Prescription Items</h1>
-					{/* <Autocomplete */}
-					{/* options={patients}
+							<h1 className="prescriptions-title">
+								Prescription Items
+							</h1>
+							{/* <Autocomplete */}
+							{/* options={patients}
 						inputValue={searchTerm}
 						onInputChange={(e, newInputValue) => setSearchTerm(newInputValue)}
 						onChange={(e, value) => handlePatientSelect(value)}
 						renderInput={(params) => <TextField {...params} label="Patient Name" />}
 					/> */}
 
-					{/* use the skeleton from Material UI to show a placeholder while data is loading */}
+							{/* use the skeleton from Material UI to show a placeholder while data is loading */}
 
 							<h3 className="prescriptions-title">
 								Prescriptions for {selectedPatient.first_name}{" "}
@@ -764,9 +766,11 @@ function Checkout() {
 									)}
 								</TableBody>
 							</Table>
-							</>
+						</>
 					) : (
-					<p className="select-patient-message">Please select a patient before proceeding.</p>
+						<p className="select-patient-message">
+							Please select a patient before proceeding.
+						</p>
 					)}
 				</div>
 				<div className="cart-container">
@@ -858,9 +862,9 @@ function Checkout() {
 								<p className="cart-summary">
 									Tax (8%): ${tax.toFixed(2)}
 								</p>
-								<h4 className="cart-total">
+								<p className="cart-total">
 									Grand Total: ${grandTotal.toFixed(2)}
-								</h4>
+								</p>
 							</>
 						)}
 					</Paper>

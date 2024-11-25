@@ -192,13 +192,24 @@
 }
 
 
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Space between buttons and input */
+}
+
 .quantity-button {
-    margin: 0 5px;
+  min-width: 32px; /* Smaller button width */
+  height: 32px;    /* Smaller button height */
+  padding: 4px;    /* Reduce padding for compact size */
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .quantity-input {
-    width: 50px;
-    text-align: center;
+  width: 80px;  /* Adjust input width */
+  text-align: center;
 }
 
 /* .add-to-cart-button:disabled {

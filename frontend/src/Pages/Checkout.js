@@ -116,6 +116,12 @@ function Checkout() {
 				(medication) => !medication.prescription_required
 			);
 
+			nonPrescriptionMedications.map((item) => ({
+				...item,
+				// set a default value of 0 in cart
+				quantityInCart: 0,
+			}));
+
 			setNonPrescriptionItems(nonPrescriptionMedications); // Store the fetched data in state
 		} catch (error) {
 			console.error(
@@ -166,6 +172,8 @@ function Checkout() {
 						medication_name: medicationData.name,
 						dosage: medicationData.dosage,
 						dollars_per_unit: medicationData.dollars_per_unit,
+						// set a default value of 0 in cart
+						quantityInCart: 0,
 					};
 				}
 			);
@@ -180,6 +188,8 @@ function Checkout() {
 				PrescriptionsWithMedNames.map((prescription) => ({
 					...prescription,
 					medication_name: prescription.medication_name,
+					// set a default value of 0 in cart
+					quantityInCart: 0,
 				})).filter(
 					(prescription) =>
 						prescription.filled_timestamp &&
@@ -290,18 +300,19 @@ function Checkout() {
 	const handleAddToCart = (item, type) => {
 		setCart((prevCart) => ({
 			...prevCart,
-			[type]: [...prevCart[type], { ...item, quantity: 1 }],
+			// [type]: [...prevCart[type], { ...item, quantity: 1 }],
+			[type]: [...prevCart[type], { ...item }],
 		}));
 	};
 
 
 	const handleAddNonPrescToCart = (item, type) => {
-		const quantity = cart.nonPrescription[item.id] || 1;
-		if (quantity <= item.quantity) {
+		const quantityInCart = cart.nonPrescription[item.id] || 1;
+		if (quantityInCart <= item.quantityInCart) {
 			// Add item to cart with selected quantity
 			setCart((prevCart) => ({
 				...prevCart,
-				[type]: [...prevCart[type], { ...item, quantity }]
+				[type]: [...prevCart[type], { ...item, quantityInCart }]
 			}));
 		} else {
 			showSnackbar("Quantity exceeds available stock.", "error");
@@ -340,10 +351,10 @@ function Checkout() {
 	};
 	
 	const handleManualQuantityChange = (itemId, value) => {
-		const quantity = parseInt(value, 10);
+		const quantityInCart = parseInt(value, 10);
 		const maxQuantity = nonPrescriptionItems.find(item => item.id === itemId).quantity;
-		if (!isNaN(quantity) && quantity >= 0 && quantity <= maxQuantity) {
-			setCart((prev) => ({ ...prev, [itemId]: quantity }));
+		if (!isNaN(quantityInCart) && quantityInCart >= 0 && quantityInCart <= maxQuantity) {
+			setCart((prev) => ({ ...prev, [itemId]: quantityInCart }));
 		} else {
 			// Show Snackbar error
 			showSnackbar("Quantity exceeds available stock.", "error");
@@ -740,10 +751,10 @@ function Checkout() {
 										<ListItem key={item.id}>
 											{item.name} - $
 											{item.dollars_per_unit} x{" "}
-											{item.quantity} = $
+											{item.quantityInCart} = $
 											{(
 												item.dollars_per_unit *
-												item.quantity
+												item.quantityInCart
 											).toFixed(2)}
 											<Button
 												size="small"
@@ -776,10 +787,10 @@ function Checkout() {
 											when we add the name (from Medication) into the list of Prescriptions */}
 											{item.medication_name} - $
 											{item.dollars_per_unit} x{" "}
-											{item.quantity} = $
+											{item.quantityInCart} = $
 											{(
 												item.dollars_per_unit *
-												item.quantity
+												item.quantityInCart
 											).toFixed(2)}
 
 											

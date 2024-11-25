@@ -58,28 +58,35 @@
 }
 
 .cart-section-title {
-    /* font-size: 16px; */
-    margin-top: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 10px;
+  margin-bottom: 0.5rem;
 }
 
 .cart-summary {
-    /* font-size: 14px; */
-    margin-top: 10px;
+  font-size: 14px;
+  margin-top: 10px;
+  font-weight: bold;
 }
 
 .cart-total {
-    /* font-size: 18px; */
-    margin-top: 10px;
-    font-weight: bold;
+  font-size: 18px;
+  margin-top: 10px;
+  font-weight: bold;
+  color: var(--main-color);
 }
 
+
 .prescriptions-title {
-    /* font-size: 18px; */
-    margin-top: 20px;
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 20px;
+  margin-bottom: 0.5rem;
 }
 
 .add-to-cart-button {
-    color: var(--accent-color)!important;
+    /* color: var(--accent-color)!important; */
 }
 
 .remove-from-cart-button {
@@ -171,12 +178,6 @@
     margin: 0.5rem 0;
   }
   
-  /* Summary styling to highlight subtotal information */
-  .cart-summary {
-    font-size: 1.1rem;
-    font-weight: bold;
-    margin-top: 1rem;
-  }
   
   /* Button alignment and consistent padding/margin for remove-from-cart button */
   .remove-from-cart-button {

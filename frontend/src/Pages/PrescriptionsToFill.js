@@ -162,22 +162,53 @@ const deletePrescription = async (id) => {
 
 	const FillPrescription = async (row) => {
 		try {
-			
-			const response = await fetch(`http://localhost:8000/prescription/${row.id}/fill`, {
-				method: 'PUT',
-				headers: {'Authorization': 'Bearer ' + token}
-			});
-			if (!response.ok) {
-				throw new Error('Failed to fill prescription');
-			}
-			loadRows()
-		} catch (error) {
-			console.error('Error filling prescription:', error);
-			setErrorMessage('Failed to fill prescription' + error);
+		  // Fetch the medication details first
+		  const medicationResponse = await fetch(`http://localhost:8000/medication/${row.id}`, {
+			headers: { 'Authorization': 'Bearer ' + token },
+		  });
+	  
+		  if (!medicationResponse.ok) {
+			throw new Error('Failed to fetch medication data');
+		  }
+	  
+		  const medicationData = await medicationResponse.json();
+	  
+		  // Get the current date and expiration date
+		  const currentDate = new Date();
+		  const expirationDate = new Date(medicationData.expiration_date);
+	  
+		  console.log("Current Date: " + currentDate.toISOString());
+		  console.log("Expiration Date: " + expirationDate.toISOString());
+	  
+		  // Check if the medication is expired
+		  if (currentDate > expirationDate) {
+			// Medication is expired, show error message
+			setErrorMessage('Cannot fill prescription: Medication is expired');
 			setOpenSnackbar(true);
+			return; // Exit the function early, don't proceed with filling the prescription
+		  }
+	  
+		  // If medication is not expired, proceed with filling the prescription
+		  const fillResponse = await fetch(`http://localhost:8000/prescription/${row.id}/fill`, {
+			method: 'PUT',
+			headers: { 'Authorization': 'Bearer ' + token },
+		  });
+	  
+		  if (!fillResponse.ok) {
+			throw new Error('Failed to fill prescription');
+		  }
+	  
+		  // Reload the data after a successful fill
+		  loadRows();
+		} catch (error) {
+		  console.error('Error filling prescription:', error);
+		  setErrorMessage('Failed to fill prescription: ' + error.message);
+		  setOpenSnackbar(true);
 		}
-	}
-
+	  };
+	  
+	  
+	  
 	const HandleDelete = async (row) => {
 		//TO DO: confirmation message
 		deletePrescription(row.id)

@@ -15,10 +15,11 @@ from .schema import (
     Token, TokenData, UserActivityCreate, UserCreate, UserEmailResponse, UserResponse, 
     UserLogin, UserSetPassword, UserToReturn, UserUpdate, PatientCreate, PatientUpdate, 
     PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, InventoryUpdateCreate, 
-    InventoryUpdateResponse, UserActivityResponse, TransactionResponse, TransactionCreate
+    InventoryUpdateResponse, UserActivityResponse, TransactionResponse, TransactionCreate, MedicationUpdate
 )
 from . import models  # Ensure this is the SQLAlchemy model
-from .models import UserActivity
+from .models import UserActivity,InventoryUpdateType
+from enum import Enum as PyEnum
 from sqlalchemy.orm import Session, selectinload
 from typing import List
 from . import schema
@@ -651,9 +652,14 @@ def get_medication(medication_id: int, db: Session = Depends(get_db), current_us
 
 # update medication by id
 @app.put("/medication/{medication_id}", response_model=schema.MedicationResponse)
-def update_medication(medication_id: int, new_medication: schema.MedicationUpdate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
-
+def update_medication(
+    medication_id: int,
+    new_medication: schema.MedicationUpdate,
+    db: Session = Depends(get_db),
+    current_user: UserToReturn = Depends(get_current_user),
+):
     validate_user_type(current_user, ["Pharmacy Manager"])
+
     # Retrieve the existing medication from the database
     db_medication = db.query(models.Medication).filter(models.Medication.id == medication_id).first()
 
@@ -664,6 +670,11 @@ def update_medication(medication_id: int, new_medication: schema.MedicationUpdat
     # Dump the data from the medication model
     medication_data = new_medication.model_dump()
 
+    # Check for quantity change and create inventory update if applicable
+    quantity_changed_by = None
+    if "quantity" in medication_data and medication_data["quantity"] is not None:
+        quantity_changed_by = medication_data["quantity"] - db_medication.quantity
+
     # Update the fields of the existing medication
     for key, value in medication_data.items():
         if value is not None:
@@ -673,7 +684,28 @@ def update_medication(medication_id: int, new_medication: schema.MedicationUpdat
     db.commit()
     db.refresh(db_medication)
 
+    # If the quantity changed, create an inventory update
+    if quantity_changed_by is not None and quantity_changed_by != 0:
+        # Determine activity type
+        activity_type = (
+            InventoryUpdateType.RESTOCK.value if quantity_changed_by > 0 else InventoryUpdateType.DISCARD.value
+        )
+
+        # Create inventory update data
+        inventory_update_data = InventoryUpdateCreate(
+            medication_id=medication_id,
+            quantity_changed_by=quantity_changed_by,
+            activity_type=activity_type,
+            transaction_id=None,  # Set this to the appropriate transaction ID if applicable
+        )
+
+        # Pass the calculated resulting_total_quantity explicitly
+        create_inventory_update_with_quantity(
+            inventory_update_data, db_medication.quantity, db, current_user
+        )
+
     return db_medication
+
 
 # delete medication
 @app.delete("/medication/{medication_id}")
@@ -875,6 +907,22 @@ def fill_prescription(prescription_id: int, db: Session = Depends(get_db), curre
 def create_inventory_update(inventory_update: InventoryUpdateCreate, db: Session, current_user: UserToReturn):
     # Catch possible exceptions when creating the DB entries
     try:
+        # Fetch the current medication
+        medication = db.query(models.Medication).filter(models.Medication.id == inventory_update.medication_id).first()
+        if not medication:
+            raise HTTPException(status_code=404, detail="Medication not found")
+
+        # Calculate the resulting total quantity
+        resulting_total_quantity = medication.quantity + inventory_update.quantity_changed_by
+
+        # Validate for negative inventory (optional, depending on your business rules)
+        if resulting_total_quantity < 0:
+            raise HTTPException(status_code=400, detail="Resulting total quantity cannot be negative")
+
+        # Update the medication quantity
+        medication.quantity = resulting_total_quantity
+        db.add(medication)
+
         # create a user_activities entry for this
         # need to do this first so we can reference the user_activity_id in the inventory_update
         # any type of updating the inventory (add, discard, filling, selling), the user_activity entry for it will be "Inventory Update"
@@ -889,6 +937,8 @@ def create_inventory_update(inventory_update: InventoryUpdateCreate, db: Session
             # might be None if there is no transaction associated with this update
             transaction_id=inventory_update.transaction_id,
             quantity_changed_by=inventory_update.quantity_changed_by,
+            # Store the resulting quantity
+            resulting_total_quantity=resulting_total_quantity, 
             # set the timestamp in UTC so timezones don't affect it
             timestamp=datetime.now(timezone.utc),
             activity_type=inventory_update.activity_type
@@ -903,6 +953,45 @@ def create_inventory_update(inventory_update: InventoryUpdateCreate, db: Session
     db.refresh(db_inventory_update)
     return db_inventory_update
 
+def create_inventory_update_with_quantity(
+    inventory_update: InventoryUpdateCreate,
+    resulting_total_quantity: int,
+    db: Session,
+    current_user: UserToReturn,
+):
+    try:
+        # Fetch the current medication
+        medication = db.query(models.Medication).filter(models.Medication.id == inventory_update.medication_id).first()
+        if not medication:
+            raise HTTPException(status_code=404, detail="Medication not found")
+
+        # Create a user activity entry for this
+        user_activity_create = UserActivityCreate(activity_type=models.UserActivityType.INVENTORY_UPDATE)
+        new_user_activity = create_user_activity(user_activity_create, db, current_user)
+
+        # Create the inventory update record with the provided resulting_total_quantity
+        db_inventory_update = models.InventoryUpdate(
+            medication_id=inventory_update.medication_id,
+            user_activity_id=new_user_activity.id,
+            transaction_id=inventory_update.transaction_id,
+            quantity_changed_by=inventory_update.quantity_changed_by,
+            resulting_total_quantity=resulting_total_quantity,  # Use the explicitly passed value
+            timestamp=datetime.now(timezone.utc),  # Set timestamp in UTC
+            activity_type=inventory_update.activity_type,
+        )
+
+        # Add the inventory_update to the database
+        db.add(db_inventory_update)
+        db.commit()
+        db.refresh(db_inventory_update)
+
+        # Optionally print the update for debugging
+        print("Created Inventory Update:", db_inventory_update)
+
+        return db_inventory_update
+
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 # get one inventory_update
 @app.get("/inventory-updates/{id}", response_model=InventoryUpdateResponse)

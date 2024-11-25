@@ -1,6 +1,6 @@
 import { React, useRef, useState, useEffect } from "react";
 
-import EditDeleteTable from "../Components/EditDeleteTable";
+import EditDeleteTable from "../Components/EditDeleteTable"
 import AddEditMedicationModal from "../Components/AddEditMedicationModal";
 import DeleteModal from "../Components/DeleteModal";
 
@@ -476,7 +476,8 @@ function ViewOfMedications() {
 				}}
 				onEdit={addEditMedication}
 				onConfirmDelete={deleteMedication}
-			></EditDeleteTable>
+				fetchMedications={fetchMedications} // Pass fetchMedications as a prop
+				/>
 			{/* Snackbar for error messages */}
 			<Snackbar 
 				open={openSnackbar} 

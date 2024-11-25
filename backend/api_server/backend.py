@@ -556,13 +556,15 @@ def change_user_lock_status(user_id: int, is_locked: bool, db: Session = Depends
 # region Patient CRUD
 #--------PATIENT CRUD OPERATIONS--------
 
-@app.get("/get/patient/{patient_id}", response_model=PatientResponse)
+@app.get("/patient/{patient_id}", response_model=PatientResponse)
 def get_patient(patient_id: int, db: Session = Depends(get_db),current_user: UserToReturn = Depends(get_current_user)):
     patient = db.query(models.Patient).filter(models.Patient.id == patient_id).first()
     if patient is None:
         raise HTTPException(status_code=404, detail="Medication not found")
     
-    return patient
+    # fix the date_of_birth to be a string
+    patient_to_return = PatientResponse.from_orm(patient)
+    return patient_to_return
 
 @app.get("/patients", response_model=List[PatientResponse])
 def get_patients(db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):

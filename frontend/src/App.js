@@ -22,6 +22,7 @@ import HomePage from './Pages/Home';
 import NotificationsPage from './Pages/NotificationsPage';
 import Header from "./Components/Header"; 
 import ViewOfPrescriptionFillHistory from './Pages/ViewOfPrescriptionFillHistory';
+import Checkout from './Pages/Checkout';
 import NotificationProvider from './Components/NotificationProvider';
 import NotificationManager from './Components/NotificationManager'; // Import NotificationManager
 import UserActivitiesTable from './Pages/ViewOfUserActivities';
@@ -62,6 +63,7 @@ function App() {
             <Route path='/viewofemployees' element={<ViewOfEmployees />} />
             <Route path='/fill' element={<FillPrescriptionForm />} />
             <Route path='/viewofpatients/:patientId/prescriptions' element={<ViewOfPatientPrescriptions />} />
+            <Route exact path='/checkout' element ={<Checkout/>}/>
             <Route path='/notifications' element={<NotificationsPage />} />
             <Route path ='/useractivities' element={<UserActivitiesTable/>} />
             

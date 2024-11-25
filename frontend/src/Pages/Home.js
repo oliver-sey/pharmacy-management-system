@@ -19,7 +19,7 @@ const HomePage = () => {
               })
 
               if (!userResponse.ok) {
-                if (userResponse.status === 401) {
+                if (userResponse.status === 401 || userResponse.status === 400) {
                     navigate('/Login')
                 }
               } else if (userResponse.ok) {

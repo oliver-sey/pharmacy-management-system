@@ -26,6 +26,7 @@ import NotificationProvider from './Components/NotificationProvider';
 import NotificationManager from './Components/NotificationManager'; // Import NotificationManager
 import UserActivitiesTable from './Pages/ViewOfUserActivities';
 import ViewOfInventoryChanges from "./Pages/ViewOfInventoryChanges";
+import ViewOfLockedAccounts from './Pages/ViewOfLockedAccounts';
 
 
 function App() {
@@ -64,6 +65,7 @@ function App() {
             <Route path='/viewofpatients/:patientId/prescriptions' element={<ViewOfPatientPrescriptions />} />
             <Route path='/notifications' element={<NotificationsPage />} />
             <Route path ='/useractivities' element={<UserActivitiesTable/>} />
+            <Route path='/viewoflockedaccounts' element={<ViewOfLockedAccounts />} />
             
           </Routes>
         </Router>

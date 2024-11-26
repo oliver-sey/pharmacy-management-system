@@ -143,7 +143,7 @@ The project follows a **full-stack/client-server** architecture with the followi
 
 ### Architecture Diagram
 
-```
+```text
 +---------------------+      +---------------------+
 |    React Frontend   | <--> |   FastAPI Backend   |
 |    (User Interface) |      |    (API Server)     |
@@ -215,13 +215,13 @@ The backend is built using **FastAPI**, with a **PostgreSQL** database managed t
 
 ---
 
-## Key Components
+### Key Components
 
-## 1. **Database Connectivity**
+### 1. **Database Connectivity**
 
 The application uses **SQLAlchemy** for interacting with a PostgreSQL database. The `SessionLocal` object is used to manage database sessions.
 
-#### Database Session Dependency
+##### Database Session Dependency
 
 ```python
 def get_db():
@@ -232,25 +232,25 @@ def get_db():
         db.close()
 ```
 
-## 2. **Authentication Endpoints**
+### 2. **Authentication Endpoints**
 
 The authentication system in the backend is based on JSON Web Tokens (JWT). The following endpoints are responsible for handling user authentication, token issuance, and token verification:
 
-### **POST /token**
+#### **POST `/token`**
 
 This endpoint is used for user authentication. It accepts the username (email) and password, verifies the credentials, and returns a JWT access token. This token is then used for subsequent requests to authenticate the user.
 
 - **Input**: Username (email) and password.
 - **Output**: A JWT token that the user can use for authorization in future requests.
 
-### **GET `/verify-token/{token}`**
+#### **GET `/verify-token/{token}`**
 
 This endpoint allows a user to verify whether their JWT token is valid. It decodes the token and checks its expiration time. If the token is valid, it returns a success message.
 
 - **Input**: JWT token.
 - **Output**: A message indicating if the token is valid.
 
-## 3. **User Management Endpoints**
+### 3. **User Management Endpoints**
 
 These endpoints manage user accounts and their details:
 
@@ -272,7 +272,7 @@ We found these endpoints to be necessary to the proper function of our system an
 
 ---
 
-## 4. **Patient Management Endpoints**
+### 4. **Patient Management Endpoints**
 
 These endpoints handle patient records:
 
@@ -284,7 +284,7 @@ These endpoints handle patient records:
 
 ---
 
-## 5. **Medication CRUD Endpoints**
+### 5. **Medication CRUD Endpoints**
 
 These endpoints are used to manage medications in the system:
 
@@ -296,7 +296,7 @@ These endpoints are used to manage medications in the system:
 
 ---
 
-## 6. **Prescription CRUD Endpoints**
+### 6. **Prescription CRUD Endpoints**
 
 These endpoints handle prescription management, including creation, updating, deletion, and filling:
 
@@ -309,7 +309,7 @@ These endpoints handle prescription management, including creation, updating, de
 
 ---
 
-## 7. **Inventory Update Endpoints**
+### 7. **Inventory Update Endpoints**
 
 These endpoints manage changes to medication inventory, such as adding, filling, or selling medications:
 
@@ -319,7 +319,7 @@ These endpoints manage changes to medication inventory, such as adding, filling,
 
 ---
 
-## 8. **User Activities CRUD Endpoints**
+### 8. **User Activities CRUD Endpoints**
 
 These endpoints track user activities, such as inventory updates and prescription fillings:
 
@@ -328,7 +328,7 @@ These endpoints track user activities, such as inventory updates and prescriptio
 
 ---
 
-## 9. **Transaction CRUD Endpoints**
+### 9. **Transaction CRUD Endpoints**
 
 These endpoints manage transactions in the pharmacy system:
 
@@ -338,7 +338,7 @@ These endpoints manage transactions in the pharmacy system:
 
 ---
 
-## **Models**
+## **Database Models**
 
 These describe our database tables
 
@@ -455,6 +455,8 @@ Represents a transaction involving a user and a patient (e.g., payment for medic
 ---
 
 ### Enums
+
+These restrict the possible values that can be stored in certain database columns.
 
 #### UserType
 

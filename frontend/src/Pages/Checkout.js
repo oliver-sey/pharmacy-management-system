@@ -313,11 +313,15 @@ function Checkout() {
 
 
 	const handleAddToCart = (item, type) => {
-		setCart((prevCart) => ({
-			...prevCart,
-			// [type]: [...prevCart[type], { ...item, quantity: 1 }],
-			[type]: [...prevCart[type], { ...item }],
-		}));
+		
+			setCart((prevCart) => ({
+				...prevCart,
+				[type]: [...prevCart[type], { ...item, quantityInCart: item.quantity}],
+				
+			}));
+		
+
+	
 	};
 
 	// TODO: can we combine handleAddToCart and handleAddNonPrescToCart into one function?
@@ -616,14 +620,15 @@ function Checkout() {
 																	)
 																}
 																className="quantity-input"
-																inputProps={{
-																	style: {
-																		appearance:
-																			"none",
-																		MozAppearance:
-																			"textfield",
-																	},
-																}}
+																style={{minWidth: 80}}
+																// inputProps={{
+																// 	style: {
+																// 		appearance:
+																// 			"none",
+																// 		MozAppearance:
+																// 			"textfield",
+																// 	},
+																// }}
 															/>
 															<Button
 																variant="filled"
@@ -810,7 +815,8 @@ function Checkout() {
 																(item) =>
 																	item.id ===
 																	prescription.id
-															)}
+															)
+															}
 														>
 															Add
 														</Button>
@@ -839,7 +845,7 @@ function Checkout() {
 				<div className="cart-container">
 					<Paper
 						elevation={3}
-						sx={{ padding: 2, position: "sticky", top: 20 }}
+						sx={{ padding: 2, position: "sticky", top: 20, minWidth: 250 }}
 					>
 						<h2>Shopping Cart</h2>
 						{cart.nonPrescription.length === 0 &&
@@ -873,6 +879,7 @@ function Checkout() {
 														"nonPrescription"
 													)
 												}
+												style={{minWidth: 110}}
 											>
 												Remove
 											</Button>
@@ -909,6 +916,7 @@ function Checkout() {
 														"prescription"
 													)
 												}
+												style={{minWidth: 110}}
 											>
 												Remove
 											</Button>

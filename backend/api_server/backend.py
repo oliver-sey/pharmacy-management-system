@@ -526,7 +526,7 @@ def list_users(db: Session = Depends(get_db), current_user: UserToReturn = Depen
 
 # lock or recovery lock account, include a boolean query parameter to set lock or unlock
 @app.put("/users/lock_status/{user_id}", response_model=UserResponse)
-def change_user_lock_status(user_id: int, is_locked: bool, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+def change_user_lock_status(user_id: int, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
     '''
     Locks or unlocks a user account based on the query parameter is_locked.
     '''
@@ -534,6 +534,8 @@ def change_user_lock_status(user_id: int, is_locked: bool, db: Session = Depends
     db_user = db.query(models.User).filter(models.User.id == user_id).first()
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
+    
+    is_locked = not db_user.is_locked_out
     
     db_user.is_locked_out = is_locked  # Set is_locked_out based on query parameter
     db.commit()
@@ -543,7 +545,7 @@ def change_user_lock_status(user_id: int, is_locked: bool, db: Session = Depends
     if is_locked == False:
         db_user_activity = models.UserActivity(
             user_id=user_id,
-            activity_type=models.UserActivityType.UNLOCK_ACCOUNT,
+            activity=models.UserActivityType.UNLOCK_ACCOUNT,
             timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it  
         )
         db.add(db_user_activity)
@@ -644,7 +646,7 @@ def create_medication(medication: schema.MedicationCreate, db: Session = Depends
 @app.get("/medication/{medication_id}", response_model=schema.MedicationResponse)
 def get_medication(medication_id: int, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
 
-    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist", "Cashier"])
 
     db_medication = db.query(models.Medication).filter(models.Medication.id == medication_id).first()
     if db_medication is None:
@@ -727,7 +729,7 @@ def delete_medication(medication_id: int, db: Session = Depends(get_db), current
 @app.get("/medicationlist/")
 def list_medication(db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
 
-    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist", "Pharmacy Technician"])
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist", "Pharmacy Technician", "Cashier"])
 
     # Query the database for all medications
     medications = db.query(models.Medication).all()

@@ -6,8 +6,30 @@
 import React from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import { Paper } from "@mui/material";
+import { useGridApiRef } from "@mui/x-data-grid";
+
+
 
 const BaseTable = ({ columns, rows, actionButtons }) => {
+	const apiRef = useGridApiRef();
+	const [isLoading, setIsLoading] = React.useState(false);
+
+	React.useEffect(() => {
+		setIsLoading(true);
+		const timeoutId = setTimeout(() => {
+			
+			setIsLoading(false);
+			setTimeout(() => {
+				apiRef.current.autosizeColumns({ includeOutliers: false, includeHeaders: true });
+			}, 200)
+
+		}, 1000);
+		return () => {
+			clearInterval(timeoutId);
+		};
+	}, [apiRef]);
+
+
 	// Conditionally add the actions column if actionButtons is provided
 	const modifiedColumns = [
 		...columns,
@@ -48,6 +70,8 @@ const BaseTable = ({ columns, rows, actionButtons }) => {
 				gap: '4px', // Adjust space between buttons
 			},
 			}}
+			apiRef={apiRef}
+			loading={isLoading}
 		/>
 		</Paper>
 	);

@@ -900,6 +900,40 @@ def fill_prescription(prescription_id: int, db: Session = Depends(get_db), curre
     return db_prescription
 
 
+# endregion
+# region Non-Prescription items
+
+# selling non-prescription items
+@app.put("/non-prescription/{id}", response_model=InventoryUpdateResponse)
+def sell_non_prescription_item(id: int, medication_update: schema.MedicationUpdate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+    # make sure only pharmacy managers or pharmacists can call this endpoint
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
+
+    # query medication with id and make sure it's prescription-required is False
+    db_medication = db.query(models.Medication).filter(models.Medication.id == id).first()
+    if db_medication is None:
+        raise HTTPException(status_code=404, detail="Medication not found")
+    elif db_medication.prescription_required:
+        raise HTTPException(status_code=400, detail="This medication requires a prescription to be sold")
+    
+    # update the medication
+    for key, value in medication_update.model_dump().items():
+        if value is not None:
+            setattr(db_medication, key, value)
+
+    # commit the changes
+    db.commit()
+    db.refresh(db_medication)
+
+    #create inventory update
+    inventory_update = create_inventory_update(inventory_update=InventoryUpdateCreate(
+        medication_id=id,
+        quantity_changed_by= - medication_update.quantity,
+        activity_type=models.InventoryUpdateType.SELLNONPRESC
+    ), db=db, current_user=current_user)
+    return inventory_update
+
+
 
 # endregion
 # region Inventory Updates
@@ -1100,35 +1134,8 @@ def get_all_user_activities(db: Session = Depends(get_db), current_user: UserToR
     return activities
 
 
-# selling non-prescription items
-@app.put("/non-prescription/{id}", response_model=InventoryUpdateResponse)
-def sell_non_prescription_item(id: int, medication_update: schema.MedicationUpdate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
-    # make sure only pharmacy managers or pharmacists can call this endpoint
-    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
-
-    # query medication with id and make sure it's prescription-required is False
-    db_medication = db.query(models.Medication).filter(models.Medication.id == id).first()
-    if db_medication is None:
-        raise HTTPException(status_code=404, detail="Medication not found")
-    elif db_medication.prescription_required:
-        raise HTTPException(status_code=400, detail="This medication requires a prescription to be sold")
-    
-    # update the medication
-    for key, value in medication_update.model_dump().items():
-        if value is not None:
-            setattr(db_medication, key, value)
-
-    # commit the changes
-    db.commit()
-    db.refresh(db_medication)
-
-    #create inventory update
-    inventory_update = create_inventory_update(inventory_update=InventoryUpdateCreate(
-        medication_id=id,
-        quantity_changed_by= - medication_update.quantity,
-        activity_type=models.InventoryUpdateType.SELLNONPRESC
-    ), db=db, current_user=current_user)
-    return inventory_update
+# endregion
+# region Transaction CRUD
 
 # transaction crud for checkout, don't have update or delete since we are not deleting or updating transaction
 # createa a transaction

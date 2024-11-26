@@ -688,12 +688,20 @@ function Checkout() {
 													</TableCell>
 
 													<TableCell>
-														{/* TODO: how many decimal places here?? */}
 														$
-														{medication.dollars_per_unit.toFixed(
-															4
-														) *
-															medication.quantityInCart}
+														{(
+															medication.dollars_per_unit *
+															(cart.nonPrescription.find(
+																(item) =>
+																	item.id ===
+																	medication.id
+															)?.quantityInCart ||
+																quantitiesInTable[
+																	medication
+																		.id
+																] ||
+																0)
+														).toFixed(2)}
 													</TableCell>
 
 													<TableCell>

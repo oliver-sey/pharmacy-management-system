@@ -201,10 +201,16 @@
 }
 
 .quantity-input {
-  width: 80px;  /* Adjust input width */
+  width: 400px;  /* Adjust input width */
   text-align: center;
 }
 
 /* .add-to-cart-button:disabled {
     background-color: #cccccc;
 } */
+/* Center table headers */
+th {
+  text-align: center!important;
+  font-size: 1rem;
+  font-weight: 600;
+}

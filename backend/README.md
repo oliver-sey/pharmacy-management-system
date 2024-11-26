@@ -21,7 +21,7 @@ def get_db():
         yield db
     finally:
         db.close()
-
+```
 ## 2. **Authentication Endpoints**
 
 The authentication system in the backend is based on JSON Web Tokens (JWT). The following endpoints are responsible for handling user authentication, token issuance, and token verification:
@@ -32,7 +32,7 @@ This endpoint is used for user authentication. It accepts the username (email) a
 - **Input**: Username (email) and password.
 - **Output**: A JWT token that the user can use for authorization in future requests.
 
-### **GET /verify-token/{token}**
+### **GET `/verify-token/{token}`**
 This endpoint allows a user to verify whether their JWT token is valid. It decodes the token and checks its expiration time. If the token is valid, it returns a success message.
 
 - **Input**: JWT token.
@@ -42,12 +42,12 @@ This endpoint allows a user to verify whether their JWT token is valid. It decod
 
 These endpoints manage user accounts and their details:
 
-- **POST /users/**: Creates a new user.
-- **GET /users/{user_id}**: Retrieves details of a specific user.
-- **DELETE /users/{user_id}**: Deletes a user if no prescriptions are associated.
-- **PUT /users/{user_id}**: Updates the details of an existing user.
-- **GET /userslist/**: Lists all users in the system.
-- **PUT /users/unlock/{user_id}**: Unlocks a user account.
+- **POST `/users/`**: Creates a new user.
+- **GET `/users/{user_id}`**: Retrieves details of a specific user.
+- **DELETE `/users/{user_id}`**: Deletes a user if no prescriptions are associated.
+- **PUT `/users/{user_id}`**: Updates the details of an existing user.
+- **GET `/userslist/`**: Lists all users in the system.
+- **PUT `/users/unlock/{user_id}`**: Unlocks a user account after it has been locked due to too many incorrect login attempts.
 
 ---
 
@@ -55,11 +55,11 @@ These endpoints manage user accounts and their details:
 
 These endpoints handle patient records:
 
-- **POST /patient**: Creates a new patient.
-- **GET /patient/{patient_id}**: Retrieves details of a specific patient.
-- **GET /patients**: Lists all patients in the system.
-- **PUT /patient/{patient_id}**: Updates a patient’s information.
-- **DELETE /patient/{patient_id}**: Deletes a patient and updates any associated prescriptions.
+- **POST `/patient`**: Creates a new patient.
+- **GET `/patient/{patient_id}`**: Retrieves details of a specific patient.
+- **GET `/patients`**: Lists all patients in the system.
+- **PUT `/patient/{patient_id}`**: Updates a patient’s information.
+- **DELETE `/patient/{patient_id}`**: Deletes a patient and updates any associated prescriptions.
 
 ---
 
@@ -67,11 +67,11 @@ These endpoints handle patient records:
 
 These endpoints are used to manage medications in the system:
 
-- **POST /medication/**: Adds a new medication to the database.
-- **GET /medication/{medication_id}**: Retrieves details of a specific medication.
-- **PUT /medication/{medication_id}**: Updates details of an existing medication.
-- **DELETE /medication/{medication_id}**: Deletes a specific medication from the system.
-- **GET /medicationlist/**: Lists all medications in the system.
+- **POST `/medication/`**: Adds a new medication to the database.
+- **GET `/medication/{medication_id}`**: Retrieves details of a specific medication.
+- **PUT `/medication/{medication_id}`**: Updates details of an existing medication.
+- **DELETE `/medication/{medication_id}`**: Deletes a specific medication from the system.
+- **GET `/medicationlist/`**: Lists all medications in the system.
 
 ---
 
@@ -79,12 +79,12 @@ These endpoints are used to manage medications in the system:
 
 These endpoints handle prescription management, including creation, updating, deletion, and filling:
 
-- **GET /prescriptions**: Retrieves all prescriptions, optionally filtered by patient ID.
-- **GET /prescription/{prescription_id}**: Retrieves a specific prescription.
-- **POST /prescription**: Creates a new prescription.
-- **PUT /prescription/{prescription_id}**: Updates an existing prescription (unless it has been filled).
-- **DELETE /prescription/{prescription_id}**: Deletes a prescription.
-- **PUT /prescription/{prescription_id}/fill**: Marks a prescription as filled and updates inventory accordingly.
+- **GET `/prescriptions`**: Retrieves all prescriptions, optionally filtered by patient ID.
+- **GET `/prescription/{prescription_id}`**: Retrieves a specific prescription.
+- **POST `/prescription`**: Creates a new prescription.
+- **PUT `/prescription/{prescription_id}`**: Updates an existing prescription (unless it has been filled).
+- **DELETE `/prescription/{prescription_id}`**: Deletes a prescription.
+- **PUT `/prescription/{prescription_id}/fill`**: Marks a prescription as filled and updates inventory accordingly.
 
 ---
 
@@ -92,9 +92,9 @@ These endpoints handle prescription management, including creation, updating, de
 
 These endpoints manage changes to medication inventory, such as adding, filling, or selling medications:
 
-- **POST /inventory-updates**: Creates an inventory update (used internally).
-- **GET /inventory-updates/{id}**: Retrieves a specific inventory update.
-- **GET /inventory-updates**: Lists all inventory updates, optionally filtered by activity type (e.g., "add", "fillpresc", "sellnonpresc").
+- **POST `/inventory-updates`**: Creates an inventory update (used internally).
+- **GET `/inventory-updates/{id}`**: Retrieves a specific inventory update.
+- **GET `/inventory-updates`**: Lists all inventory updates, optionally filtered by activity type (e.g., "add", "fillpresc", "sellnonpresc").
 
 ---
 
@@ -102,8 +102,8 @@ These endpoints manage changes to medication inventory, such as adding, filling,
 
 These endpoints track user activities, such as inventory updates and prescription fillings:
 
-- **POST /user-activities**: Creates a new user activity (used internally).
-- **GET /user-activities**: Lists all user activities recorded in the system.
+- **POST `/user-activities`**: Creates a new user activity (used internally).
+- **GET `/user-activities`**: Lists all user activities recorded in the system.
 
 ---
 
@@ -111,15 +111,16 @@ These endpoints track user activities, such as inventory updates and prescriptio
 
 These endpoints manage transactions in the pharmacy system:
 
-- **POST /transaction**: Creates a new transaction.
-- **GET /transaction/{transaction_id}**: Retrieves a specific transaction.
-- **GET /transactions**: Lists all transactions in the system.
+- **POST `/transaction`**: Creates a new transaction.
+- **GET `/transaction/{transaction_id}`**: Retrieves a specific transaction.
+- **GET `/transactions`**: Lists all transactions in the system.
 
+---
+## **Models**
 
-## 10. **Models**
-
+These describe our database tables
 ### 1. **User**
-Represents a user in the system (e.g., Pharmacy Manager, Technician, etc.).
+Represents a user (employee) in the system (e.g., Pharmacy Manager, Technician, etc.). Patients (customers) do not get a user account and cannot login.
 
 | Column Name     | Data Type            |
 |-----------------|----------------------|

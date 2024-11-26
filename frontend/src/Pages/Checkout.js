@@ -116,13 +116,16 @@ function Checkout() {
 				(medication) => !medication.prescription_required
 			);
 
-			nonPrescriptionMedications.map((item) => ({
-				...item,
-				// set a default value of 0 in cart
-				quantityInCart: 0,
+			const newNonPrescriptionMeds = nonPrescriptionMedications.map((item => {
+				return {
+					...item,
+					// set a default value of 0 in cart
+					quantityInCart: 0
+				}
 			}));
 
-			setNonPrescriptionItems(nonPrescriptionMedications); // Store the fetched data in state
+			setNonPrescriptionItems(newNonPrescriptionMeds); // Store the fetched data in state
+
 		} catch (error) {
 			console.error(
 				`Error fetching non-prescription items (medications): ${error}`
@@ -298,21 +301,26 @@ function Checkout() {
 
 
 	const handleAddToCart = (item, type) => {
-		setCart((prevCart) => ({
-			...prevCart,
-			// [type]: [...prevCart[type], { ...item, quantity: 1 }],
-			[type]: [...prevCart[type], { ...item }],
-		}));
+		
+			setCart((prevCart) => ({
+				...prevCart,
+				[type]: [...prevCart[type], { ...item, quantityInCart: item.quantity}],
+				
+			}));
+		
+
+	
 	};
 
 
 	const handleAddNonPrescToCart = (item, type) => {
 		const quantityInCart = cart.nonPrescription[item.id] || 1;
-		if (quantityInCart <= item.quantityInCart) {
+		
+		if (item.quantity >= parseInt(item.quantityInCart, 10)) {
 			// Add item to cart with selected quantity
 			setCart((prevCart) => ({
 				...prevCart,
-				[type]: [...prevCart[type], { ...item, quantityInCart }]
+				[type]: [...prevCart[type], item]
 			}));
 		} else {
 			showSnackbar("Quantity exceeds available stock.", "error");
@@ -327,39 +335,26 @@ function Checkout() {
 		}));
 	};
 
-	// const handleQuantityChange = (id, type, quantity) => {
-	// 	setCart((prevCart) => ({
-	// 		...prevCart,
-	// 		[type]: prevCart[type].map((item) =>
-	// 			item.id === id
-	// 				? { ...item, quantity: quantity < 1 ? 1 : quantity }
-	// 				: item
-	// 		),
-	// 	}));
-	// };
-
-
 
 	const handleQuantityChange = (itemId, change) => {
-		setCart((prev) => {
-			const newQty = (prev[itemId] || 0) + change;
-			if (newQty >= 0 && newQty <= nonPrescriptionItems.find(item => item.id === itemId).quantity) {
-				return { ...prev, [itemId]: newQty };
-			}
-			return prev;
-		});
-	};
-	
-	const handleManualQuantityChange = (itemId, value) => {
-		const quantityInCart = parseInt(value, 10);
-		const maxQuantity = nonPrescriptionItems.find(item => item.id === itemId).quantity;
-		if (!isNaN(quantityInCart) && quantityInCart >= 0 && quantityInCart <= maxQuantity) {
-			setCart((prev) => ({ ...prev, [itemId]: quantityInCart }));
+		if (change > 0){
+			setNonPrescriptionItems(nonPrescriptionItems.map(item =>
+				item.id === itemId ? { ...item, quantityInCart: item.quantityInCart + 1} : item
+			))
 		} else {
-			// Show Snackbar error
-			showSnackbar("Quantity exceeds available stock.", "error");
+			setNonPrescriptionItems(nonPrescriptionItems.map(item =>
+				item.id === itemId ? { ...item, quantityInCart: (item.quantityInCart > 0 ? item.quantityInCart - 1 : 0)} : item
+			))
 		}
-	};
+	}
+
+	const handleManualQuantityChange = (itemId, value) => {
+		
+		setNonPrescriptionItems(nonPrescriptionItems.map(item =>
+			item.id === itemId ? { ...item, quantityInCart: value} : item
+		))
+		
+	}
 	
 
 	const handlePatientSelect = async (patientID) => {
@@ -534,21 +529,13 @@ function Checkout() {
 																className="quantity-button"
 																size="small"
 																disabled={
-																	cart
-																		.nonPrescription[
-																		medication
-																			.id
-																	] <= 0
+																	parseInt(medication.quantityInCart, 10) <= 0
 																}
 															></Button>
 															<TextField
 																type="number"
 																value={
-																	cart
-																		.nonPrescription[
-																		medication
-																			.id
-																	] || 0
+																	medication.quantityInCart ? parseInt(medication.quantityInCart, 10) : 0
 																}
 																onChange={(e) =>
 																	handleManualQuantityChange(
@@ -558,14 +545,15 @@ function Checkout() {
 																	)
 																}
 																className="quantity-input"
-																inputProps={{
-																	style: {
-																		appearance:
-																			"none",
-																		MozAppearance:
-																			"textfield",
-																	},
-																}}
+																style={{minWidth: 80}}
+																// inputProps={{
+																// 	style: {
+																// 		appearance:
+																// 			"none",
+																// 		MozAppearance:
+																// 			"textfield",
+																// 	},
+																// }}
 															/>
 															<Button
 																variant="filled"
@@ -581,11 +569,7 @@ function Checkout() {
 																className="quantity-button"
 																size="small"
 																disabled={
-																	cart
-																		.nonPrescription[
-																		medication
-																			.id
-																	] >=
+																	parseInt(medication.quantityInCart, 10) >=
 																	medication.quantity
 																}
 															></Button>
@@ -597,7 +581,7 @@ function Checkout() {
 														$
 														{medication.dollars_per_unit.toFixed(
 															4
-														) * medication.quantityInCart}
+														) * parseInt(medication.quantityInCart, 10)}
 													</TableCell>
 
 													<TableCell>
@@ -613,11 +597,12 @@ function Checkout() {
 																	"nonPrescription"
 																)
 															}
-															disabled={cart.nonPrescription.some(
+															disabled={(cart.nonPrescription.some(
 																(item) =>
 																	item.id ===
 																	medication.id
-															)}
+															)) || parseInt(medication.quantityInCart, 10) >=
+															medication.quantity}
 															className="add-to-cart-button"
 														>
 															Add
@@ -750,7 +735,8 @@ function Checkout() {
 																(item) =>
 																	item.id ===
 																	prescription.id
-															)}
+															)
+															}
 														>
 															Add
 														</Button>
@@ -779,7 +765,7 @@ function Checkout() {
 				<div className="cart-container">
 					<Paper
 						elevation={3}
-						sx={{ padding: 2, position: "sticky", top: 20 }}
+						sx={{ padding: 2, position: "sticky", top: 20, minWidth: 250 }}
 					>
 						<h2>Shopping Cart</h2>
 						{cart.nonPrescription.length === 0 &&
@@ -813,6 +799,7 @@ function Checkout() {
 														"nonPrescription"
 													)
 												}
+												style={{minWidth: 110}}
 											>
 												Remove
 											</Button>
@@ -851,6 +838,7 @@ function Checkout() {
 														"prescription"
 													)
 												}
+												style={{minWidth: 110}}
 											>
 												Remove
 											</Button>

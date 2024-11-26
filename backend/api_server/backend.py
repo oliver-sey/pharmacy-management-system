@@ -646,7 +646,7 @@ def create_medication(medication: schema.MedicationCreate, db: Session = Depends
 @app.get("/medication/{medication_id}", response_model=schema.MedicationResponse)
 def get_medication(medication_id: int, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
 
-    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist", "Cashier"])
 
     db_medication = db.query(models.Medication).filter(models.Medication.id == medication_id).first()
     if db_medication is None:

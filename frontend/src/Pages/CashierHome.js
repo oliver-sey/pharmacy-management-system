@@ -28,6 +28,7 @@ function CashierHome() {
 
     //Change this variable based on what type of user the page is for
     const role = ["Cashier"]
+    const token = localStorage.getItem('token');
 
     useEffect(() => {
         CheckUserType(role, navigate);

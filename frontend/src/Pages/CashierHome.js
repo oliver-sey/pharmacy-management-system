@@ -4,6 +4,22 @@ import { useNavigate } from 'react-router-dom';
 import AddCircleOutlinedIcon from '@mui/icons-material/AddCircleOutlined';
 import PointOfSaleOutlinedIcon from '@mui/icons-material/PointOfSaleOutlined';
 import AddEditPrescriptionModal from '../Components/AddEditPrescriptionModal';
+import { styled, makeStyles } from '@mui/material/styles';
+import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
+import Grid from '@mui/material/Grid2';
+import IconButton from '@mui/material/IconButton';
+
+const Item = styled(Paper)(({ theme }) => ({
+  backgroundColor: '#fff',
+  ...theme.typography.body2,
+  padding: theme.spacing(8),
+  textAlign: 'center',
+  color: theme.palette.text.secondary,
+  ...theme.applyStyles('dark', {
+    backgroundColor: '#1A2027',
+  }),
+}));
 
 function CashierHome() {
     const navigate = useNavigate();

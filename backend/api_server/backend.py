@@ -727,7 +727,7 @@ def delete_medication(medication_id: int, db: Session = Depends(get_db), current
 @app.get("/medicationlist/")
 def list_medication(db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
 
-    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist", "Pharmacy Technician"])
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist", "Pharmacy Technician", "Cashier"])
 
     # Query the database for all medications
     medications = db.query(models.Medication).all()

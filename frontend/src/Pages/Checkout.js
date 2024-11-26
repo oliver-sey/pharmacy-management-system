@@ -357,23 +357,69 @@ function Checkout() {
 
 
 	const handleQuantityChange = (itemId, change) => {
+		// console.log("in handleQuantityChange, itemId: " + itemId + ", change: " + change);
 		setCart((prev) => {
-			const newQty = (prev[itemId] || 0) + change;
-			if (newQty >= 0 && newQty <= nonPrescriptionItems.find(item => item.id === itemId).quantity) {
-				return { ...prev, [itemId]: newQty };
+		  const updatedNonPrescription = prev.nonPrescription.map(item => {
+			if (item.id === itemId) {
+			  const newQty = item.quantityInCart + change;
+			  if (newQty >= 0 && newQty <= item.quantity) {
+				return { ...item, quantityInCart: newQty };
+			  }
 			}
-			return prev;
+			return item;
+		  });
+		  return { ...prev, nonPrescription: updatedNonPrescription };
 		});
-	};
+
+		// update quantitiesInTable
+		setQuantitiesInTable((prev) => ({
+			...prev,
+			[itemId]: (prev[itemId] || 0) + change
+		  }));
+	  };
 	
-	const handleManualQuantityChange = (itemId, value) => {
-		const quantityInCart = parseInt(value, 10);
+	const handleManualQuantityChange = (itemId, newQuantityString) => {
+		// parse the parameter as an integer in base 10
+		let newQuantityInCart = parseInt(newQuantityString, 10);
 		const maxQuantity = nonPrescriptionItems.find(item => item.id === itemId).quantity;
-		if (!isNaN(quantityInCart) && quantityInCart >= 0 && quantityInCart <= maxQuantity) {
-			setCart((prev) => ({ ...prev, [itemId]: quantityInCart }));
+		
+		// if the text field is empty, set the quantity to 0
+		// TODO: which I guess just means remove it??
+		if (newQuantityString === "") {
+			// handleRemoveFromCart(itemId, "nonPrescription");
+			newQuantityInCart = 0;
+		}
+		else if (isNaN(newQuantityInCart)) {
+			// Show Snackbar error
+			showSnackbar("Error reading a quantity from the input box. Input must be a whole number.", "error");
+		}
+		else if (newQuantityInCart <= 0) {
+			// remove the item from the cart
+			handleRemoveFromCart(itemId, "nonPrescription");
+		}
+		else if (newQuantityInCart <= maxQuantity) {
+			console.log("calling setCart in handleManualQuantityChange, with newQuantityInCart: " + newQuantityInCart);
+
+			setCart((prev) => {
+				// find the item in the nonPrescription array that has the same id as the item we are changing
+				// and update the quantityInCart property to the new value
+				const updatedNonPrescriptionCart = prev.nonPrescription.map(item => 
+				  item.id === itemId ? { ...item, quantityInCart: newQuantityInCart } : item
+				);
+				return {
+				  ...prev,
+				  nonPrescription: updatedNonPrescriptionCart
+				};
+			  });
+
+			// update quantitiesInTable
+			  setQuantitiesInTable((prev) => ({
+				...prev,
+				[itemId]: newQuantityInCart
+			  }));
 		} else {
 			// Show Snackbar error
-			showSnackbar("Quantity exceeds available stock.", "error");
+			showSnackbar("Quantity exceeds available stock for this item, or there was an error.", "error");
 		}
 	};
 	
@@ -548,11 +594,19 @@ function Checkout() {
 															<TextField
 																type="number"
 																value={
-																	cart
-																		.nonPrescription[
+																	// either display the quantity in the cart currently, or the value in quantitiesInTable
+																	cart.nonPrescription.find(
+																		(
+																			item
+																		) =>
+																			item.id ===
+																			medication.id
+																	)
+																		?.quantityInCart ||
+																	quantitiesInTable[
 																		medication
 																			.id
-																	] || 0
+																	]
 																}
 																onChange={(e) =>
 																	handleManualQuantityChange(
@@ -623,11 +677,16 @@ function Checkout() {
 																	]
 																)}
 															}
-															disabled={cart.nonPrescription.some(
-																(item) =>
-																	item.id ===
-																	medication.id
-															)}
+															disabled={
+																Array.isArray(
+																	cart.nonPrescription
+																) &&
+																cart.nonPrescription.some(
+																	(item) =>
+																		item.id ===
+																		medication.id
+																)
+															}
 															className="add-to-cart-button"
 														>
 															Add

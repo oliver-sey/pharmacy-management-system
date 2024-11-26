@@ -769,7 +769,7 @@ function Checkout() {
 														{/* TODO: how many decimal places here?? */}
 														$
 														{prescription.dollars_per_unit.toFixed(
-															4
+															2
 														)}
 													</TableCell>
 													<TableCell>
@@ -794,7 +794,7 @@ function Checkout() {
 														for just this item */}
 														$
 														{prescription.dollars_per_unit.toFixed(
-															4
+															2
 														) *
 															prescription.quantity}
 													</TableCell>

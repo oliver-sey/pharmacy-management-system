@@ -635,15 +635,9 @@ function Checkout() {
 																	)
 																}
 																className="quantity-input"
-																style={{minWidth: 80}}
-																// inputProps={{
-																// 	style: {
-																// 		appearance:
-																// 			"none",
-																// 		MozAppearance:
-																// 			"textfield",
-																// 	},
-																// }}
+																style={{
+																	minWidth: 80,
+																}}
 															/>
 															<Button
 																variant="filled"
@@ -711,17 +705,23 @@ function Checkout() {
 															startIcon={
 																<AddShoppingCartIcon />
 															}
-															onClick={() =>
-																{
-																console.log("trying to add non-prescription item to cart, quantity in table: " + quantitiesInTable[medication.id]);
+															onClick={() => {
+																console.log(
+																	"trying to add non-prescription item to cart, quantity in table: " +
+																		quantitiesInTable[
+																			medication
+																				.id
+																		]
+																);
 																handleAddNonPrescToCart(
 																	medication,
 																	"nonPrescription",
 																	quantitiesInTable[
-																		medication.id
+																		medication
+																			.id
 																	]
-																)}
-															}
+																);
+															}}
 															disabled={
 																Array.isArray(
 																	cart.nonPrescription
@@ -806,7 +806,6 @@ function Checkout() {
 														{prescription.quantity}
 													</TableCell>
 													<TableCell>
-														{/* TODO: how many decimal places here?? */}
 														$
 														{prescription.dollars_per_unit.toFixed(
 															2
@@ -828,7 +827,6 @@ function Checkout() {
 														}
 													</TableCell>
 													<TableCell>
-														{/* TODO: how many decimal places here?? */}
 														{/* here use the quantity not quantityInCart, since quantity in cart will be 0 or 1
 														and doesn't really make sense. We want the price that the patient will pay 
 														for just this item */}
@@ -855,8 +853,7 @@ function Checkout() {
 																(item) =>
 																	item.id ===
 																	prescription.id
-															)
-															}
+															)}
 														>
 															Add
 														</Button>
@@ -885,7 +882,12 @@ function Checkout() {
 				<div className="cart-container">
 					<Paper
 						elevation={3}
-						sx={{ padding: 2, position: "sticky", top: 20, minWidth: 250 }}
+						sx={{
+							padding: 2,
+							position: "sticky",
+							top: 20,
+							minWidth: 250,
+						}}
 					>
 						<h2>Shopping Cart</h2>
 						{cart.nonPrescription.length === 0 &&
@@ -919,7 +921,7 @@ function Checkout() {
 														"nonPrescription"
 													)
 												}
-												style={{minWidth: 110}}
+												style={{ minWidth: 110 }}
 											>
 												Remove
 											</Button>
@@ -956,7 +958,7 @@ function Checkout() {
 														"prescription"
 													)
 												}
-												style={{minWidth: 110}}
+												style={{ minWidth: 110 }}
 											>
 												Remove
 											</Button>

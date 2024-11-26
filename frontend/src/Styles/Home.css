@@ -3,46 +3,47 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh; 
-    padding: 10px;
+    height: 100vh;
+    padding: 2%; /* Adjusted padding to a percentage */
 }
 
 .header-section {
     text-align: center;
-    padding: 2vw;
-    border-radius: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 5%; /* Padding adjusted to be relative */
+    border-radius: 2rem;
+    box-shadow: 0 0.4vw 0.8vw rgba(0, 0, 0, 0.1); /* Shadow with relative units */
 }
 
 .content-container {
     max-width: 90vw;
-    width: 600px; /* Controls the width of the content */
-    margin: 0 auto;  /* Centers the content */
+    width: 60%; /* Width now in percentages */
+    margin: 0 auto; /* Centers the content */
 }
 
 .logo {
-    width: 25vw;
-    max-width: 150px;
+    width: 20%; /* Relative width for responsiveness */
+    max-width: 15vw; /* Ensures the logo doesn’t get too large */
     height: auto;
-    margin-bottom: 20px;
+    margin-bottom: 5%; /* Adjusted spacing */
 }
 
 .login-button {
-    padding: 10px 20px;
-    font-size: 1.1em;
+    padding: 2% 5%; /* Responsive padding */
+    font-size: 1.2em; /* Keeps font size flexible */
     background-color: #007bff;
     color: white;
     border: none;
     cursor: pointer;
-    border-radius: 5px;
-    margin-top: 20px;
+    border-radius: 0.5rem;
+    margin-top: 5%;
 }
 
 .login-button:hover {
     background-color: #0056b3;
 }
+
 .pharmacy-info ul {
-    list-style-type: none;  /* This removes the dots */
+    list-style-type: none; /* Removes the dots */
     padding: 0;
-    margin: 0;  /* Ensures no extra margin is added */
+    margin: 0; /* Ensures no extra margin is added */
 }

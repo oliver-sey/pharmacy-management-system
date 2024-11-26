@@ -53,6 +53,10 @@ function Checkout() {
 	const [nonPrescriptionItemsLoading, setNonPrescriptionItemsLoading] = useState(false);
 	const [prescriptionsLoading, setPrescriptionsLoading] = useState(false);
 
+	// quantities for the non prescription items in the table
+	// either the quantityInCart or this gets displayed in the text input in the table
+	const [quantitiesInTable, setQuantitiesInTable] = useState({});
+
 	const [subtotal, setSubtotal] = useState(0);
 	const [tax, setTax] = useState(0);
 	const [grandTotal, setGrandTotal] = useState(0);
@@ -120,15 +124,25 @@ function Checkout() {
 
 			// filter out medications that require a prescription
 			// since this is for the non-prescription items
-			const nonPrescriptionMedications = originalMedications.filter(
+			let nonPrescriptionMedications = originalMedications.filter(
 				(medication) => !medication.prescription_required
 			);
 
-			nonPrescriptionMedications.map((item) => ({
+			// add a quantityInCart property to each item in the nonPrescriptionMedications array
+			nonPrescriptionMedications = nonPrescriptionMedications.map((item) => ({
 				...item,
 				// set a default value of 0 in cart
 				quantityInCart: 0,
 			}));
+
+			// set values for the quantities which will get displayed in the table
+			// either 100 units, or if there are less than 100 units, all of the quantity available
+			const quantities = {};
+			nonPrescriptionMedications.forEach((item) => {
+				const quantityToStore = item.quantity >= 100 ? 100 : item.quantity;
+				quantities[item.id] = quantityToStore;
+			});
+			setQuantitiesInTable(quantities);
 
 			setNonPrescriptionItems(nonPrescriptionMedications); // Store the fetched data in state
 		} catch (error) {

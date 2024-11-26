@@ -53,16 +53,39 @@ function Checkout() {
 	const [nonPrescriptionItemsLoading, setNonPrescriptionItemsLoading] = useState(false);
 	const [prescriptionsLoading, setPrescriptionsLoading] = useState(false);
 
+	const [subtotal, setSubtotal] = useState(0);
+	const [tax, setTax] = useState(0);
+	const [grandTotal, setGrandTotal] = useState(0);
 
 	const navigate = useNavigate();
 	const token = localStorage.getItem("token");
 
 
     useEffect(() => {
-        
-        VerifyToken(navigate);
+		VerifyToken(navigate);
 
-    }, [navigate]);
+		const calculateTotals = () => {
+			const nonPrescriptionSubtotal = cart.nonPrescription.reduce(
+				(acc, item) =>
+					acc + item.quantityInCart * item.dollars_per_unit,
+				0
+			);
+			const prescriptionSubtotal = cart.prescription.reduce(
+				(acc, item) =>
+					acc + item.quantityInCart * item.dollars_per_unit,
+				0
+			);
+			const newSubtotal = nonPrescriptionSubtotal + prescriptionSubtotal;
+			const newTax = newSubtotal * 0.08; // Assuming 8% tax rate
+			const newGrandTotal = newSubtotal + newTax;
+
+			setSubtotal(newSubtotal);
+			setTax(newTax);
+			setGrandTotal(newGrandTotal);
+		};
+
+		calculateTotals();
+	}, [navigate, cart]);
 
 
 	const fetchNonPrescriptionItems = useCallback(async () => {
@@ -385,18 +408,6 @@ function Checkout() {
 		setSnackbar((prev) => ({ ...prev, open: false }));
 	};
 
-
-	const calculateTotal = (items) =>
-		items.reduce(
-			(total, item) => total + item.dollars_per_unit * item.quantity,
-			0
-		);
-
-	const nonPrescriptionTotal = calculateTotal(cart.nonPrescription);
-	const prescriptionTotal = calculateTotal(cart.prescription);
-	const subtotal = nonPrescriptionTotal + prescriptionTotal;
-	const tax = subtotal * 0.08;
-	const grandTotal = subtotal + tax;
 
 	return (
 		<div className="checkout-page">

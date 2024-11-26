@@ -37,6 +37,7 @@ class UserResponse(BaseModel):
     last_name: str
     user_type: UserType
     email: str
+    is_locked_out: bool
 
 # only for use by the route that lets you see users with no password yet,
 # and doesn't require a token to call
@@ -249,13 +250,13 @@ class InventoryUpdateResponse(BaseModel):
 # endregion
 # region User Activities
 class UserActivityCreate(BaseModel):
-    activity_type: UserActivityType # the activity type, an enum which can be "Login", "Logout", "Unlock Account", "Inventory Update"
+    activity: UserActivityType # the activity type, an enum which can be "Login", "Logout", "Unlock Account", "Inventory Update"
     # TODO: let the database set the timestamp to the current time?
 
 class UserActivityResponse(BaseModel):
     id: int
     user_id: int
-    activity_type: UserActivityType # the activity type, an enum
+    activity: UserActivityType # the activity type, an enum
     timestamp: datetime
 
 class TransactionCreate(BaseModel):

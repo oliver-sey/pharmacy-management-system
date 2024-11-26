@@ -38,6 +38,7 @@ Key users of this app include:
 
 ### User-Facing Features
 
+<!-- TODO!!! -->
 - **Feature 1**: Describe feature (e.g., "User authentication with role-based access control").
 - **Feature 2**: Another feature (e.g., "Dynamic data visualization through interactive dashboards").
 
@@ -147,17 +148,17 @@ The project follows a **full-stack/client-server** architecture with the followi
 |    React Frontend   | <--> |   FastAPI Backend   |
 |    (User Interface) |      |    (API Server)     |
 +---------------------+      +---------------------+
-                                    |
-                                    v
+                                        |
+                                        v
                              +---------------------+
                              |   SQLAlchemy ORM    |
                              |   (Models, Schema)  |
                              +---------------------+
-                                    |
-                                    v
+                                        |
+                                        v
                              +---------------------+
-                             |  PostgreSQL Database|
-                             |  (Data Persistence) |
+                             | PostgreSQL Database |
+                             | (Data Persistence)  |
                              +---------------------+
 ```
 
@@ -173,16 +174,6 @@ The project follows a **full-stack/client-server** architecture with the followi
 
 The frontend and backend are interconnected through RESTful APIs. The frontend makes HTTP requests to the backend to perform various operations. The backend processes these requests, interacts with the database, and returns the appropriate responses. Docker is used to containerize both the frontend and backend, ensuring a consistent and isolated environment for the application.
 
-
-### Components
-
-1. **Frontend**: Built with React.
-    - Handles user interface and logic.
-2. **Backend**: Powered by FastAPI, providing APIs and core logic.
-    - Implements RESTful APIs for interaction.
-    - Utilizes Pydantic for **\_\_\_** TODO
-    <!-- TODO -->
-3. **Database**: PostgreSQL for structured data storage.
 
 ## Frontend
 

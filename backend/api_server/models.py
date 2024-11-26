@@ -124,7 +124,7 @@ class UserActivity(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey('users.id'))
     # restrict the set of possible values in the type column
-    activity_type = Column(SQLAlchemyEnum(UserActivityType))
+    activity = Column(SQLAlchemyEnum(UserActivityType))
     timestamp = Column(DateTime, default=func.now())
 
     user = relationship("User", back_populates="user_activities")
@@ -138,6 +138,7 @@ class InventoryUpdateType(PyEnum):
     DISCARD = "Discard medication"
     FILLPRESC = "Fill prescription"
     SELLNONPRESC = "Sell non-prescription item"
+    RESTOCK = "Restock medication" 
 
 
 class InventoryUpdate(Base):
@@ -154,12 +155,14 @@ class InventoryUpdate(Base):
     # quantity changed by
     # TODO: are we doing this so it could be positive or negative?
     quantity_changed_by = Column(Integer)
+    resulting_total_quantity = Column(Integer)
     timestamp = Column(DateTime, default=func.now())
     # what action type it was, e.g. 'add', 'discard', 'fillpresc', or 'sellnonpresc'
     activity_type = Column(SQLAlchemyEnum(InventoryUpdateType))
     medication = relationship("Medication", back_populates="inventory_updates")
     user_activity = relationship("UserActivity", back_populates="inventory_updates")  # Correct the relationship
-    # transaction = relationship("Transaction", back_populates="inventory_update")
+    # transaction = relationship("Transaction", back_populates="inventory_update")]
+    
 
 class Transaction(Base):
     __tablename__ = 'transactions'

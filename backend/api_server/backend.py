@@ -11,10 +11,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from passlib.context import CryptContext
 from typing import Optional
 from .database import SessionLocal, engine, Base
-from .schema import Token, TokenData, UserActivityCreate, UserCreate, UserEmailResponse, UserResponse, UserLogin, UserSetPassword, UserToReturn, UserUpdate, PatientCreate, PatientUpdate, PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, InventoryUpdateCreate,  InventoryUpdateResponse, UserActivityResponse,  TransactionResponse
+from .schema import (
+    Token, TokenData, UserActivityCreate, UserCreate, UserEmailResponse, UserResponse, 
+    UserLogin, UserSetPassword, UserToReturn, UserUpdate, PatientCreate, PatientUpdate, 
+    PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, InventoryUpdateCreate, 
+    InventoryUpdateResponse, UserActivityResponse, TransactionResponse, TransactionCreate, MedicationUpdate
+)
 from . import models  # Ensure this is the SQLAlchemy model
-from .models import UserActivity
-from sqlalchemy.orm import Session
+from .models import UserActivity,InventoryUpdateType
+from enum import Enum as PyEnum
+from sqlalchemy.orm import Session, selectinload
 from typing import List
 from . import schema
 from sqlalchemy.exc import SQLAlchemyError
@@ -24,188 +30,6 @@ import urllib
 
 app = FastAPI()
 
-# test endpoint
-@app.get("/test") # this is a decorator that tells fastapi to run the function below when a GET request is made to http://localhost:8000/test
-def read_root():
-    return "this is an epic gamer moment!"
-
-
-# configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("pharmacy_logger")
-
-def determine_activity_type(request: Request):
-    '''
-    Determines the type of activity based on the endpoint that was called
-    '''
-    logger.info(f"Request Path: {request.url.path}, Request Method: {request.method}")
-    logger.info(f"patients in path {'patients' in request.url.path}")
-    logger.info(f"method == post: {request.method == 'POST'}")
-    if "user" in request.url.path:
-        if request.method == "POST":
-            return models.UserActivityType.CREATE_USER
-        elif request.method == "PUT":
-            return models.UserActivityType.UPDATE_USER
-        elif request.method == "DELETE":
-            return models.UserActivityType.DELETE_USER
-        
-    elif "patient" in request.url.path:
-        if request.method == "POST":
-            return models.UserActivityType.CREATE_PATIENT
-        elif request.method == "PUT":
-            return models.UserActivityType.UPDATE_PATIENT
-        elif request.method == "DELETE":
-            return models.UserActivityType.DELETE_PATIENT
-    
-    elif "prescription" in request.url.path:
-        if request.method == "POST":
-            return models.UserActivityType.CREATE_PRESCRIPTION
-    
-    elif "medication" in request.url.path:
-        if request.method == "POST":
-            return models.UserActivityType.CREATE_MEDICATION
-        elif request.method == "PUT":
-            return models.UserActivityType.UPDATE_MEDICATION
-        elif request.method == "DELETE":
-            return models.UserActivityType.DELETE_MEDICATION
-
-    else:
-        return models.UserActivityType.OTHER   
-
-# middleware for logging 
-@app.middleware("http")
-async def log_requests(request: Request, call_next):
-    '''
-    middleware for logging. 
-    '''
-    # these types of requests dont need to be logged. 
-    # only requests that change something should be logged in
-    # as well as login and logout
-    
-    
-    db: Session = SessionLocal()
-    logger.info(f"Request Path: {request.url.path}")
-    if request.url.path in ("/token"):
-        # check if a user is loggin in 
-        logger.info(f"logging in: {request.url.path}")
-         # Read the request body only once and store it
-        request_body = await request.body()
-        parsed_data = urllib.parse.parse_qs(request_body.decode())
-        email = parsed_data.get("username", [None])[0]
-        user = db.query(models.User).filter(models.User.email == email).first()
-        request = Request(request.scope, receive=lambda: request_body)
-        response = await call_next(request)
-        if request.url.path == "/token" and response.status_code == 200:
-
-            db_user_activity = models.UserActivity(
-                user_id=user.id,
-                activity_type=models.UserActivityType.LOGIN,
-                timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
-            )
-
-            db.add(db_user_activity)
-            db.commit()
-            db.refresh(db_user_activity)
-            
-        return response
-    elif "/verify-token/" in request.url.path:
-        # check if a user is verifying their token
-        logger.info(f"verifying token: {request.url.path}")
-        response = await call_next(request)
-        return response
-    elif request.method == "GET":
-        response = await call_next(request)
-        return response
-    else:
-        logger.info(f"request.headers: {request.headers.keys()}") 
-
-        # for the route where a token is not required
-        # "/users/{user_id}/setpassword"
-        # (/userslist/new/ also gets called and doesn't need a token, but that's a GET and gets taken care of up above)
-        if "/setpassword" in request.url.path:
-            logger.info(f"/setpassword route, not requiring their token")
-            # don't get their token, just assume the user ID of the user they are setting a password on, is their user ID
-            
-            # set current_user without the get_current_user() function since we can't pass a token
-            # get the user from the DB that has the ID in the "/users/{user_id}/setpassword" request
-            current_user = db.query(models.User).filter(models.User.id == int(request.url.path.split("/")[2])).first()
-
-
-        # for all routes besides "/users/{user_id}/setpassword"
-        else:
-            token = request.headers.get("Authorization")
-            logger.info(f"token: {token}")
-            if token:
-                token = token.split(" ")[1]  # Remove 'Bearer' prefix
-            current_user = get_current_user(token, db)
-
-
-        logger.info(f"User (id={current_user.id}): {current_user.email} is making a request to {request.url.path} as a {current_user.user_type} ")
-        if request.method == "GET" :
-            # check if the request is a get. i.e. not changing anything
-            logger.info(f"GET request: {request.url.path}")
-            # rebuild request
-            request = Request(request.scope, receive=request.body)
-
-            response = call_next(request)
-            return response
-
-        try:
-            # Log incoming request details
-            logger.info(f"Received request: {request.method} {request.url}")
-
-            response = await call_next(request)
-
-            # Log successful response
-            logger.info(f"Completed request with status code: {response.status_code}")
-            activity_type = determine_activity_type(request)
-            logger.info(f"Activity Type: {activity_type}")
-            
-            # Log this information to the database
-            db_user_activity = models.UserActivity(
-                user_id=current_user.id,
-                activity_type=activity_type,
-                timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
-            )
-
-            db.add(db_user_activity)
-            db.commit()
-            db.refresh(db_user_activity)
-
-            return response
-        except SQLAlchemyError as e: # if there is an error with the database / ORM
-            logger.error(f"Database error occurred: {str(e)}")
-
-            # Insert log entry to database for DB errors
-            db_user_activity = models.UserActivity(
-                user_id=current_user.id,
-                activity_type=determine_activity_type(request),
-                timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
-            )
-
-            db.add(db_user_activity)
-            db.commit()
-            db.refresh(db_user_activity)
-            # Re-raise error after logging
-            raise e  
-        except Exception as e: # if there is any other error
-            logger.error(f"An error occurred: {str(e)}")
-
-            # Insert log entry to database for other errors
-            db_user_activity = models.UserActivity(
-                user_id=current_user.id,
-                activity_type=determine_activity_type(request),
-                timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
-            )
-
-            db.add(db_user_activity)
-            db.commit()
-            db.refresh(db_user_activity)
-
-            # Re-raise error after logging
-            raise e
-
-
 # Create the database tables
 Base.metadata.create_all(bind=engine)
 # setup middleware
@@ -213,9 +37,9 @@ Base.metadata.create_all(bind=engine)
 
 
 # this is to allow our react app to make requests to our fastapi app
-origins = [
-    'http://localhost:3000',
-]
+# origins = [
+#     'http://localhost:3000',
+# ]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],  # Allow your frontend URL
@@ -223,6 +47,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# test endpoint
+@app.get("/test") # this is a decorator that tells fastapi to run the function below when a GET request is made to http://localhost:8000/test
+def read_root():
+    return "this is an epic gamer moment!"
+
 
 # Dependency to get the database session
 def get_db():
@@ -288,11 +118,12 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)],
             raise credentials_exception
         token_data = TokenData(username=username)
     except InvalidTokenError:
-        raise credentials_exception
+        print("Invalid token", token)
+        raise HTTPException(status_code=400, detail="token is invalid")
     user = db.query(models.User).filter(models.User.email == token_data.username).first()
     current_user = UserToReturn(id=user.id, email=user.email, user_type=user.user_type)
     if user is None:
-        raise credentials_exception
+        raise HTTPException(status_code=404, detail="get_current_user user not found")
     
     return current_user
 
@@ -387,6 +218,168 @@ async def reset_password(
     return {"message": "Password has been successfully reset."}
 
 
+# # configure logging
+# logging.basicConfig(level=logging.INFO)
+# logger = logging.getLogger("pharmacy_logger")
+
+# def determine_activity_type(request: Request):
+#     '''
+#     Determines the type of activity based on the endpoint that was called
+#     '''
+#     logger.info(f"Request Path: {request.url.path}, Request Method: {request.method}")
+#     logger.info(f"patients in path {'patients' in request.url.path}")
+#     logger.info(f"method == post: {request.method == 'POST'}")
+#     if "user" in request.url.path:
+#         if request.method == "POST":
+#             return models.UserActivityType.CREATE_USER
+#         elif request.method == "PUT":
+#             return models.UserActivityType.UPDATE_USER
+#         elif request.method == "DELETE":
+#             return models.UserActivityType.DELETE_USER
+        
+#     elif "patient" in request.url.path:
+#         if request.method == "POST":
+#             return models.UserActivityType.CREATE_PATIENT
+#         elif request.method == "PUT":
+#             return models.UserActivityType.UPDATE_PATIENT
+#         elif request.method == "DELETE":
+#             return models.UserActivityType.DELETE_PATIENT
+    
+#     elif "prescription" in request.url.path:
+#         if request.method == "POST":
+#             return models.UserActivityType.CREATE_PRESCRIPTION
+    
+#     elif "medication" in request.url.path:
+#         if request.method == "POST":
+#             return models.UserActivityType.CREATE_MEDICATION
+#         elif request.method == "PUT":
+#             return models.UserActivityType.UPDATE_MEDICATION
+#         elif request.method == "DELETE":
+#             return models.UserActivityType.DELETE_MEDICATION
+
+#     else:
+#         return models.UserActivityType.OTHER   
+
+# # middleware for logging 
+# @app.middleware("http")
+# async def log_requests(request: Request, call_next):
+#     '''
+#     middleware for logging. 
+#     '''
+#     # these types of requests dont need to be logged. 
+#     # only requests that change something should be logged in
+#     # as well as login and logout
+    
+    
+#     db: Session = SessionLocal()
+#     logger.info(f"Request Path: {request.url.path}")
+#     if request.url.path in ("/token"):
+#         # check if a user is loggin in 
+#         logger.info(f"logging in: {request.url.path}")
+#          # Read the request body only once and store it
+#         request_body = await request.body()
+#         parsed_data = urllib.parse.parse_qs(request_body.decode())
+#         email = parsed_data.get("username", [None])[0]
+#         user = db.query(models.User).filter(models.User.email == email).first()
+#         request = Request(request.scope, receive=lambda: request_body)
+#         response = await call_next(request)
+#         if request.url.path == "/token" and response.status_code == 200:
+
+#             db_user_activity = models.UserActivity(
+#                 user_id=user.id,
+#                 activity_type=models.UserActivityType.LOGIN,
+#                 timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
+#             )
+
+#             db.add(db_user_activity)
+#             db.commit()
+#             db.refresh(db_user_activity)
+            
+#         return response
+#     elif "/verify-token/" in request.url.path:
+#         # check if a user is verifying their token
+#         logger.info(f"verifying token: {request.url.path}")
+#         response = await call_next(request)
+#         return response
+#     elif "/currentuser/me/" in request.url.path:
+#         #skip the log
+#         logger.info(f"current user: {request.url.path}")
+#         response = await call_next(request)
+#         return response
+#     elif request.method == "GET":
+#         response = await call_next(request)
+#         return response
+#     else:
+#         logger.info(f"request.headers: {request.headers.keys()}") 
+#         token = request.headers.get("Authorization")
+#         logger.info(f"token: {token}")
+#         if token:
+#             token = token.split(" ")[1]  # Remove 'Bearer' prefix
+#         current_user = get_current_user(token, db)
+#         logger.info(f"User (id={current_user.id}): {current_user.email} is making a request to {request.url.path} as a {current_user.user_type} ")
+#         if request.method == "GET" :
+#             # check if the request is a get. i.e. not changing anything
+#             logger.info(f"GET request: {request.url.path}")
+#             # rebuild request
+#             request = Request(request.scope, receive=request.body)
+
+#             response = call_next(request)
+#             return response
+
+#         try:
+#             # Log incoming request details
+#             logger.info(f"Received request: {request.method} {request.url}")
+
+#             response = await call_next(request)
+
+#             # Log successful response
+#             logger.info(f"Completed request with status code: {response.status_code}")
+#             activity_type = determine_activity_type(request)
+#             logger.info(f"Activity Type: {activity_type}")
+            
+#             # Log this information to the database
+#             db_user_activity = models.UserActivity(
+#                 user_id=current_user.id,
+#                 activity_type=activity_type,
+#                 timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
+#             )
+
+#             db.add(db_user_activity)
+#             db.commit()
+#             db.refresh(db_user_activity)
+
+#             return response
+#         except SQLAlchemyError as e: # if there is an error with the database / ORM
+#             logger.error(f"Database error occurred: {str(e)}")
+
+#             # Insert log entry to database for DB errors
+#             db_user_activity = models.UserActivity(
+#                 user_id=current_user.id,
+#                 activity_type=determine_activity_type(request),
+#                 timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
+#             )
+
+#             db.add(db_user_activity)
+#             db.commit()
+#             db.refresh(db_user_activity)
+#             # Re-raise error after logging
+#             raise e  
+#         except Exception as e: # if there is any other error
+#             logger.error(f"An error occurred: {str(e)}")
+
+#             # Insert log entry to database for other errors
+#             db_user_activity = models.UserActivity(
+#                 user_id=current_user.id,
+#                 activity_type=determine_activity_type(request),
+#                 timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it
+#             )
+
+#             db.add(db_user_activity)
+#             db.commit()
+#             db.refresh(db_user_activity)
+
+#             # Re-raise error after logging
+#             raise e
 
 
 
@@ -531,17 +524,49 @@ def list_users(db: Session = Depends(get_db), current_user: UserToReturn = Depen
     
     return users
 
+# lock or recovery lock account, include a boolean query parameter to set lock or unlock
+@app.put("/users/lock_status/{user_id}", response_model=UserResponse)
+def change_user_lock_status(user_id: int, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+    '''
+    Locks or unlocks a user account based on the query parameter is_locked.
+    '''
+    validate_user_type(current_user, ["Pharmacy Manager"])
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    is_locked = not db_user.is_locked_out
+    
+    db_user.is_locked_out = is_locked  # Set is_locked_out based on query parameter
+    db.commit()
+    db.refresh(db_user)
+
+    # create user activity if account is unlocked
+    if is_locked == False:
+        db_user_activity = models.UserActivity(
+            user_id=user_id,
+            activity=models.UserActivityType.UNLOCK_ACCOUNT,
+            timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it  
+        )
+        db.add(db_user_activity)
+        db.commit()
+        db.refresh(db_user_activity)
+
+    return db_user
+
 # endregion
 # region Patient CRUD
 #--------PATIENT CRUD OPERATIONS--------
 
-@app.get("/get/patient/{patient_id}", response_model=PatientResponse)
+@app.get("/patient/{patient_id}", response_model=PatientResponse)
 def get_patient(patient_id: int, db: Session = Depends(get_db),current_user: UserToReturn = Depends(get_current_user)):
     patient = db.query(models.Patient).filter(models.Patient.id == patient_id).first()
     if patient is None:
         raise HTTPException(status_code=404, detail="Medication not found")
     
-    return patient
+    # fix the date_of_birth to be a string
+    patient_to_return = PatientResponse.from_orm(patient)
+    return patient_to_return
 
 @app.get("/patients", response_model=List[PatientResponse])
 def get_patients(db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
@@ -621,7 +646,7 @@ def create_medication(medication: schema.MedicationCreate, db: Session = Depends
 @app.get("/medication/{medication_id}", response_model=schema.MedicationResponse)
 def get_medication(medication_id: int, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
 
-    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist", "Cashier"])
 
     db_medication = db.query(models.Medication).filter(models.Medication.id == medication_id).first()
     if db_medication is None:
@@ -631,9 +656,14 @@ def get_medication(medication_id: int, db: Session = Depends(get_db), current_us
 
 # update medication by id
 @app.put("/medication/{medication_id}", response_model=schema.MedicationResponse)
-def update_medication(medication_id: int, new_medication: schema.MedicationUpdate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
-
+def update_medication(
+    medication_id: int,
+    new_medication: schema.MedicationUpdate,
+    db: Session = Depends(get_db),
+    current_user: UserToReturn = Depends(get_current_user),
+):
     validate_user_type(current_user, ["Pharmacy Manager"])
+
     # Retrieve the existing medication from the database
     db_medication = db.query(models.Medication).filter(models.Medication.id == medication_id).first()
 
@@ -644,6 +674,11 @@ def update_medication(medication_id: int, new_medication: schema.MedicationUpdat
     # Dump the data from the medication model
     medication_data = new_medication.model_dump()
 
+    # Check for quantity change and create inventory update if applicable
+    quantity_changed_by = None
+    if "quantity" in medication_data and medication_data["quantity"] is not None:
+        quantity_changed_by = medication_data["quantity"] - db_medication.quantity
+
     # Update the fields of the existing medication
     for key, value in medication_data.items():
         if value is not None:
@@ -653,7 +688,28 @@ def update_medication(medication_id: int, new_medication: schema.MedicationUpdat
     db.commit()
     db.refresh(db_medication)
 
+    # If the quantity changed, create an inventory update
+    if quantity_changed_by is not None and quantity_changed_by != 0:
+        # Determine activity type
+        activity_type = (
+            InventoryUpdateType.RESTOCK.value if quantity_changed_by > 0 else InventoryUpdateType.DISCARD.value
+        )
+
+        # Create inventory update data
+        inventory_update_data = InventoryUpdateCreate(
+            medication_id=medication_id,
+            quantity_changed_by=quantity_changed_by,
+            activity_type=activity_type,
+            transaction_id=None,  # Set this to the appropriate transaction ID if applicable
+        )
+
+        # Pass the calculated resulting_total_quantity explicitly
+        create_inventory_update_with_quantity(
+            inventory_update_data, db_medication.quantity, db, current_user
+        )
+
     return db_medication
+
 
 # delete medication
 @app.delete("/medication/{medication_id}")
@@ -673,7 +729,7 @@ def delete_medication(medication_id: int, db: Session = Depends(get_db), current
 @app.get("/medicationlist/")
 def list_medication(db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
 
-    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist", "Pharmacy Technician"])
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist", "Pharmacy Technician", "Cashier"])
 
     # Query the database for all medications
     medications = db.query(models.Medication).all()
@@ -855,6 +911,22 @@ def fill_prescription(prescription_id: int, db: Session = Depends(get_db), curre
 def create_inventory_update(inventory_update: InventoryUpdateCreate, db: Session, current_user: UserToReturn):
     # Catch possible exceptions when creating the DB entries
     try:
+        # Fetch the current medication
+        medication = db.query(models.Medication).filter(models.Medication.id == inventory_update.medication_id).first()
+        if not medication:
+            raise HTTPException(status_code=404, detail="Medication not found")
+
+        # Calculate the resulting total quantity
+        resulting_total_quantity = medication.quantity + inventory_update.quantity_changed_by
+
+        # Validate for negative inventory (optional, depending on your business rules)
+        if resulting_total_quantity < 0:
+            raise HTTPException(status_code=400, detail="Resulting total quantity cannot be negative")
+
+        # Update the medication quantity
+        medication.quantity = resulting_total_quantity
+        db.add(medication)
+
         # create a user_activities entry for this
         # need to do this first so we can reference the user_activity_id in the inventory_update
         # any type of updating the inventory (add, discard, filling, selling), the user_activity entry for it will be "Inventory Update"
@@ -869,6 +941,8 @@ def create_inventory_update(inventory_update: InventoryUpdateCreate, db: Session
             # might be None if there is no transaction associated with this update
             transaction_id=inventory_update.transaction_id,
             quantity_changed_by=inventory_update.quantity_changed_by,
+            # Store the resulting quantity
+            resulting_total_quantity=resulting_total_quantity, 
             # set the timestamp in UTC so timezones don't affect it
             timestamp=datetime.now(timezone.utc),
             activity_type=inventory_update.activity_type
@@ -883,6 +957,45 @@ def create_inventory_update(inventory_update: InventoryUpdateCreate, db: Session
     db.refresh(db_inventory_update)
     return db_inventory_update
 
+def create_inventory_update_with_quantity(
+    inventory_update: InventoryUpdateCreate,
+    resulting_total_quantity: int,
+    db: Session,
+    current_user: UserToReturn,
+):
+    try:
+        # Fetch the current medication
+        medication = db.query(models.Medication).filter(models.Medication.id == inventory_update.medication_id).first()
+        if not medication:
+            raise HTTPException(status_code=404, detail="Medication not found")
+
+        # Create a user activity entry for this
+        user_activity_create = UserActivityCreate(activity_type=models.UserActivityType.INVENTORY_UPDATE)
+        new_user_activity = create_user_activity(user_activity_create, db, current_user)
+
+        # Create the inventory update record with the provided resulting_total_quantity
+        db_inventory_update = models.InventoryUpdate(
+            medication_id=inventory_update.medication_id,
+            user_activity_id=new_user_activity.id,
+            transaction_id=inventory_update.transaction_id,
+            quantity_changed_by=inventory_update.quantity_changed_by,
+            resulting_total_quantity=resulting_total_quantity,  # Use the explicitly passed value
+            timestamp=datetime.now(timezone.utc),  # Set timestamp in UTC
+            activity_type=inventory_update.activity_type,
+        )
+
+        # Add the inventory_update to the database
+        db.add(db_inventory_update)
+        db.commit()
+        db.refresh(db_inventory_update)
+
+        # Optionally print the update for debugging
+        print("Created Inventory Update:", db_inventory_update)
+
+        return db_inventory_update
+
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 # get one inventory_update
 @app.get("/inventory-updates/{id}", response_model=InventoryUpdateResponse)
@@ -902,7 +1015,8 @@ def get_inventory_update(id: int, db: Session = Depends(get_db), current_user: U
 # get all inventory_updates - **optional param to filter to one value of 'type'
 @app.get("/inventory-updates", response_model=List[InventoryUpdateResponse])
 # restrict type to the values in InventoryUpdateType
-def get_inventory_updates(activity_type: Optional[models.InventoryUpdateType] = Query(None), db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+def get_inventory_updates(activity_type: Optional[models.InventoryUpdateType] = Query(None), start_date: Optional[datetime] = Query(None),
+    end_date: Optional[datetime] = Query(None), db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
     '''
     endpoint to get inventory_updates with optional type (e.g. add, discard, fillpresc, sellnonpresc).
     If type is provided, only inventory_updates for that type are returned.
@@ -911,13 +1025,49 @@ def get_inventory_updates(activity_type: Optional[models.InventoryUpdateType] = 
     # make sure only pharmacy managers or pharmacists can call this endpoint
     validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
 
-    # if type is provided, return all inventory_updates of that type
+    # # if type is provided, return all inventory_updates of that type
+    # if activity_type:
+    #     inventory_updates = db.query(models.InventoryUpdate).filter(models.InventoryUpdate.activity_type == activity_type).all()
+    # # else return all inventory_updates
+    # else:
+    #     # inventory_updates = db.query(models.InventoryUpdate).all()
+    #     # Query inventory updates and load related medication
+    #     inventory_updates = db.query(models.InventoryUpdate).options(selectinload(models.InventoryUpdate.medication)).all()
+
+# Start building the query for inventory updates
+    query = db.query(models.InventoryUpdate).options(selectinload(models.InventoryUpdate.medication))
+
+    # Apply filter for activity_type if provided
     if activity_type:
-        inventory_updates = db.query(models.InventoryUpdate).filter(models.InventoryUpdate.activity_type == activity_type).all()
-    # else return all inventory_updates
-    else:
-        inventory_updates = db.query(models.InventoryUpdate).all()
-    return inventory_updates
+        query = query.filter(models.InventoryUpdate.activity_type == activity_type)
+
+    # Apply date range filter if start_date and end_date are provided
+    if start_date and end_date:
+        query = query.filter(models.InventoryUpdate.timestamp >= start_date, models.InventoryUpdate.timestamp <= end_date)
+    elif start_date:
+        query = query.filter(models.InventoryUpdate.timestamp >= start_date)
+    elif end_date:
+        query = query.filter(models.InventoryUpdate.timestamp <= end_date)
+
+    # Execute the query to retrieve the inventory updates
+    inventory_updates = query.all()
+        # Convert to response format with medication names
+    inventory_update_responses = [
+            InventoryUpdateResponse(
+                id=update.id,
+                medication_id=update.medication_id,
+                user_activity_id=update.user_activity_id,
+                transaction_id=update.transaction_id,
+                quantity_changed_by=update.quantity_changed_by,
+                activity_type=update.activity_type,
+                timestamp=update.timestamp,
+                medication_name=update.medication.name if update.medication else None  # Medication name
+            )
+            for update in inventory_updates
+        ]
+        # return inventory_update_responses
+    # return inventory_updates
+    return inventory_update_responses
 
 
 
@@ -979,6 +1129,44 @@ def sell_non_prescription_item(id: int, medication_update: schema.MedicationUpda
         activity_type=models.InventoryUpdateType.SELLNONPRESC
     ), db=db, current_user=current_user)
     return inventory_update
+
+# transaction crud for checkout, don't have update or delete since we are not deleting or updating transaction
+# createa a transaction
+@app.post("/transaction", response_model=TransactionResponse)
+def create_transaction(transaction: TransactionCreate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+    # make sure only pharmacy managers or pharmacists can call this endpoint
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
+
+    # create a new transaction
+    db_transaction = models.Transaction(**transaction.dict())
+    db.add(db_transaction)
+    db.commit()
+    db.refresh(db_transaction)
+    return db_transaction
+
+# get a transaction
+@app.get("/transaction/{transaction_id}", response_model=TransactionResponse)
+def get_transaction(transaction_id: int, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+    # make sure only pharmacy managers or pharmacists can call this endpoint
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
+
+    # there will only be one transaction with the matching id (since the id is unique), so using first() is fine
+    db_transaction = db.query(models.Transaction).filter(models.Transaction.id == transaction_id).first()
+
+    if db_transaction is None:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    
+    return db_transaction
+
+# get all transactions
+@app.get("/transactions", response_model=List[TransactionResponse])
+def get_transactions(db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+    # make sure only pharmacy managers or pharmacists can call this endpoint
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
+
+    transactions = db.query(models.Transaction).all()
+    return transactions
+
     
 #Returning all transactions.
 @app.get("/transaction-report", response_model=List[TransactionResponse])

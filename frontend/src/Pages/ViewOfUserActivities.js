@@ -6,7 +6,7 @@ const UserActivitiesTable = () => {
   const [filteredActivities, setFilteredActivities] = useState([]); // Store filtered activities for display
   const [filters, setFilters] = useState({
     userId: '',
-    activity: '',
+    activity_type: '',
     startDate: '',
     endDate: '',
   });
@@ -64,7 +64,7 @@ const UserActivitiesTable = () => {
     const filtered = allActivities.filter(activity => {
       // Check each filter condition separately
       const matchUserId = filters.userId ? activity.user_id.toString() === filters.userId : true;
-      const matchActivity = filters.activity ? activity.activity === filters.activity : true;
+      const matchActivity = filters.activity_type ? activity.activity_type === filters.activity : true;
   
       // Parse dates for comparison
       const activityDate = new Date(activity.timestamp);
@@ -120,7 +120,7 @@ const UserActivitiesTable = () => {
           Activity Type:
           <select
             name="activity"
-            value={filters.activity}
+            value={filters.activity_type}
             onChange={handleFilterChange}
           >
             <option value="">All</option>
@@ -167,7 +167,7 @@ const UserActivitiesTable = () => {
             filteredActivities.map((activity) => (
               <tr key={activity.id}>
                 <td>{activity.user_id}</td>
-                <td>{activity.activity}</td>
+                <td>{activity.activity_type}</td>
                 <td>{new Date(activity.timestamp).toLocaleString()}</td>
               </tr>
             ))

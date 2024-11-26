@@ -1,7 +1,7 @@
 # build a schema using pydantic
 
-from typing import Optional
-from pydantic import BaseModel, EmailStr, field_validator
+from typing import Optional, Union
+from pydantic import BaseModel, EmailStr, Field
 from datetime import date, datetime
 from .models import UserType, UserActivityType, InventoryUpdateType
 from enum import Enum as PyEnum
@@ -37,6 +37,7 @@ class UserResponse(BaseModel):
     last_name: str
     user_type: UserType
     email: str
+    is_locked_out: bool
 
 # only for use by the route that lets you see users with no password yet,
 # and doesn't require a token to call
@@ -237,7 +238,11 @@ class InventoryUpdateResponse(BaseModel):
     user_activity_id: int
     transaction_id: Optional[int] = None
     quantity_changed_by: int
-    activity_type: InventoryUpdateType
+    activity_type: Union[InventoryUpdateType, str]
+    medication_name: Optional[str] = None
+    timestamp: Optional[datetime] = None
+    resulting_total_quantity: int = Field(..., example=100) 
+   
 
 # **NOTE: we will not be allowing updating or deleting inventory_updates
 
@@ -245,14 +250,19 @@ class InventoryUpdateResponse(BaseModel):
 # endregion
 # region User Activities
 class UserActivityCreate(BaseModel):
-    activity_type: UserActivityType # the activity type, an enum which can be "Login", "Logout", "Unlock Account", "Inventory Update"
+    activity: UserActivityType # the activity type, an enum which can be "Login", "Logout", "Unlock Account", "Inventory Update"
     # TODO: let the database set the timestamp to the current time?
 
 class UserActivityResponse(BaseModel):
     id: int
     user_id: int
-    activity_type: UserActivityType # the activity type, an enum
+    activity: UserActivityType # the activity type, an enum
     timestamp: datetime
+
+class TransactionCreate(BaseModel):
+    user_id: int
+    patient_id: Optional[int] = None
+    payment_method: str
 
 class TransactionResponse(BaseModel):
     id: int

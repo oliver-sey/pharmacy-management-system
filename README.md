@@ -129,11 +129,37 @@ This structure ensures a clear separation of concerns, making the project easy t
 ## Architecture
 <!-- TODO -->
 
-This project follows a **[describe design approach, e.g., MVC or microservices]** architecture.
+This project includes a **FastAPI** backend with **SQLAlchemy** models and schema design, a **PostgreSQL** database, a **React** frontend, and the use of **Docker** containers for easy deployment.
 
-### Interconnection
+The project follows a **full-stack/client-server** architecture with the following components:
+- **FastAPI Backend**: Provides RESTful API endpoints for the frontend to interact with the database.
+- **SQLAlchemy**: ORM (Object Relational Mapper) used to define models and handle database interactions.
+- **PostgreSQL Database**: Relational database used to persist data.
+- **React Frontend**: User interface built using React.js that communicates with the backend API.
+- **Docker**: Containerization tool for easy deployment and isolation of all components.
 
-The frontend and backend are interconnected through RESTful APIs. The frontend makes HTTP requests to the backend to perform various operations. The backend processes these requests, interacts with the database, and returns the appropriate responses. Docker is used to containerize both the frontend and backend, ensuring a consistent and isolated environment for the application.
+---
+
+### Architecture Diagram
+
+```
++---------------------+      +---------------------+
+|    React Frontend   | <--> |   FastAPI Backend   |
+|    (User Interface) |      |    (API Server)     |
++---------------------+      +---------------------+
+                                    |
+                                    v
+                             +---------------------+
+                             |   SQLAlchemy ORM    |
+                             |   (Models, Schema)  |
+                             +---------------------+
+                                    |
+                                    v
+                             +---------------------+
+                             |  PostgreSQL Database|
+                             |  (Data Persistence) |
+                             +---------------------+
+```
 
 ### Tech Stack
 
@@ -142,6 +168,10 @@ The frontend and backend are interconnected through RESTful APIs. The frontend m
 | Frontend | React (JavaScript), Material-UI |
 | Backend  | FastAPI (Python), Pydantic      |
 | Database | PostgreSQL                      |
+
+### Interconnection
+
+The frontend and backend are interconnected through RESTful APIs. The frontend makes HTTP requests to the backend to perform various operations. The backend processes these requests, interacts with the database, and returns the appropriate responses. Docker is used to containerize both the frontend and backend, ensuring a consistent and isolated environment for the application.
 
 
 ### Components

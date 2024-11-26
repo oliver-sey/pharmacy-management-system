@@ -320,17 +320,30 @@ function Checkout() {
 		}));
 	};
 
-
-	const handleAddNonPrescToCart = (item, type) => {
-		const quantityInCart = cart.nonPrescription[item.id] || 1;
-		if (quantityInCart <= item.quantityInCart) {
-			// Add item to cart with selected quantity
-			setCart((prevCart) => ({
-				...prevCart,
-				[type]: [...prevCart[type], { ...item, quantityInCart }]
-			}));
+	// TODO: can we combine handleAddToCart and handleAddNonPrescToCart into one function?
+	const handleAddNonPrescToCart = (item, type, quantityToAdd) => {
+		// new code that doesn't let you add a non-prescription item to the cart twice
+		// (can still increase the quantity in the cart though)
+		if (cart.nonPrescription.some((cartItem) => cartItem.id === item.id)) {
+			showSnackbar("Item already in cart. Increase quantity in cart instead.", "error");
 		} else {
-			showSnackbar("Quantity exceeds available stock.", "error");
+			// add item to the cart with the quantity that is in the text input field
+			const quantityInCart = quantityToAdd || 0;
+
+			if (quantityInCart === 0) {
+				showSnackbar("Quantity must be greater than 0.", "error");
+			}
+
+			else if (quantityInCart <= item.quantity) {
+				// Add item to cart with selected quantity
+				setCart((prevCart) => ({
+					...prevCart,
+					[type]: [...prevCart[type], { ...item, quantityInCart }],
+				}));
+			}
+			else {
+				showSnackbar("Quantity exceeds available stock.", "error");
+			}
 		}
 	};
 	
@@ -600,10 +613,15 @@ function Checkout() {
 																<AddShoppingCartIcon />
 															}
 															onClick={() =>
+																{
+																console.log("trying to add non-prescription item to cart, quantity in table: " + quantitiesInTable[medication.id]);
 																handleAddNonPrescToCart(
 																	medication,
-																	"nonPrescription"
-																)
+																	"nonPrescription",
+																	quantitiesInTable[
+																		medication.id
+																	]
+																)}
 															}
 															disabled={cart.nonPrescription.some(
 																(item) =>

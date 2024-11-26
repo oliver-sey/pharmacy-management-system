@@ -211,693 +211,325 @@ Figure 6: User dashboard displaying data.
 
 ## API Documentation
 
-Refer to the API Documentation for detailed routes, methods, and payload formats.
-
-TODO: *********API documentation is from AI and is all wrong currently
-
-### **Users**
+The backend is built using **FastAPI**, with a **PostgreSQL** database managed through **SQLAlchemy**. This application exposes several RESTful API endpoints for authentication, user management, patient management, and password resetting. The backend also incorporates JWT-based authentication for secure API access.
 
 ---
-Users represent the employees of the pharmacy, these are the people who have login access to the system. There are pharmacy managers, pharmacists, pharmacy technicians, and cashiers.
 
-### Create a New User
+## Key Components
 
-**Endpoint**: `/users`
+## 1. **Database Connectivity**
 
-**Method**: `POST`
+The application uses **SQLAlchemy** for interacting with a PostgreSQL database. The `SessionLocal` object is used to manage database sessions.
 
-**Description**: This endpoint allows admins to create a new user.
+#### Database Session Dependency
 
-**Authorized Users**: Admins
-
-**Request Body**:
-
-```json
-{
-  "first_name": "John",
-  "last_name": "Doe",
-  "email": "john.doe@example.com",
-  "role": "Pharmacist"
-}
+```python
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 ```
 
-**Response**:
+## 2. **Authentication Endpoints**
 
-Success (201 Created):
+The authentication system in the backend is based on JSON Web Tokens (JWT). The following endpoints are responsible for handling user authentication, token issuance, and token verification:
 
-```json
-{
-  "id": 1,
-  "first_name": "John",
-  "last_name": "Doe",
-  "email": "john.doe@example.com",
-  "role": "Pharmacist"
-}
-```
+### **POST /token**
 
-### Get All Users
+This endpoint is used for user authentication. It accepts the username (email) and password, verifies the credentials, and returns a JWT access token. This token is then used for subsequent requests to authenticate the user.
 
-**Endpoint**: `/userslist`
+- **Input**: Username (email) and password.
+- **Output**: A JWT token that the user can use for authorization in future requests.
 
-**Method**: `GET`
+### **GET `/verify-token/{token}`**
 
-**Description**: This endpoint retrieves a list of all users.
+This endpoint allows a user to verify whether their JWT token is valid. It decodes the token and checks its expiration time. If the token is valid, it returns a success message.
 
-**Authorized Users**: Admins, Pharmacists, Pharmacy Managers
+- **Input**: JWT token.
+- **Output**: A message indicating if the token is valid.
 
-**Response**:
+## 3. **User Management Endpoints**
 
-Success (200 OK):
+These endpoints manage user accounts and their details:
 
-```json
-[
-  {
-    "id": 1,
-    "first_name": "John",
-    "last_name": "Doe",
-    "email": "john.doe@example.com",
-    "role": "Pharmacist"
-  },
-  ...
-]
-```
+- **POST `/users/`**: Creates a new user.
+- **GET `/users/{user_id}`**: Retrieves details of a specific user.
+- **DELETE `/users/{user_id}`**: Deletes a user if no prescriptions are associated.
+- **PUT `/users/{user_id}`**: Updates the details of an existing user.
+- **GET `/userslist/`**: Lists all users in the system.
+- **PUT `/users/unlock/{user_id}`**: Unlocks a user account after it has been locked due to too many incorrect login attempts.
 
-### Update a User
+**NOTE:** The endpoints below do not require authentication (a JWT) in the request. These are a very limited number of endpoints, and we intentionally only return very limited information.
 
-**Endpoint**: `/user/{user_id}`
+These two endpoints are used on the `/setpassword` page so that a user can set the first password on their account. We cannot pass a JWT (token) to these endpoints because the user does not have a password yet and cannot create a token.
 
-**Method**: `PUT`
+We found these endpoints to be necessary to the proper function of our system and made sure to make the system as secure as possible.
 
-**Description**: This endpoint allows admins to update user details.
-
-**Authorized Users**: Admins
-
-**Request Body**:
-
-```json
-{
-  "first_name": "John",
-  "last_name": "Doe",
-  "email": "john.doe@example.com",
-  "role": "Pharmacy Manager"
-}
-```
-
-**Response**:
-
-Success (200 OK):
-
-```json
-{
-  "id": 1,
-  "first_name": "John",
-  "last_name": "Doe",
-  "email": "john.doe@example.com",
-  "role": "Pharmacy Manager"
-}
-```
-
-### Delete a User
-
-**Endpoint**: `/user/{user_id}`
-
-**Method**: `DELETE`
-
-**Description**: This endpoint allows admins to delete a user.
-
-**Authorized Users**: Admins
-
-**Response**:
-
-Success (200 OK):
-
-```json
-{
-  "message": "User deleted successfully",
-  "user_id": 1
-}
-```
-
-### **Patients**
+- **GET `/userslist/new/`**: Returns a list of emails and user ID's for accounts that have been newly created, but the user has not activated their account by setting a password yet.
+- **PUT `/users/{user_id}/setpassword`**: Sets a new password for a user account, only works if the account has not had a password before (i.e. it is a new account). Passwords are normally changed with the PUT `/users/{user_id}` endpoint.
 
 ---
-Patients represent the individuals who receive prescriptions and other services from the pharmacy.
 
-### Create a New Patient
+## 4. **Patient Management Endpoints**
 
-**Endpoint**: `/patient`
+These endpoints handle patient records:
 
-**Method**: `POST`
-
-**Description**: This endpoint allows users to create a new patient.
-
-**Authorized Users**: Pharmacists, Pharmacy Managers
-
-**Request Body**:
-
-```json
-{
-  "first_name": "Jane",
-  "last_name": "Doe",
-  "date_of_birth": "1990-01-01",
-  "address": "123 Main St",
-  "phone_number": "555-1234",
-  "email": "jane.doe@example.com",
-  "insurance_name": "Health Insurance",
-  "insurance_group_number": "12345",
-  "insurance_member_id": "67890"
-}
-```
-
-**Response**:
-
-Success (201 Created):
-
-```json
-{
-  "id": 1,
-  "first_name": "Jane",
-  "last_name": "Doe",
-  "date_of_birth": "1990-01-01",
-  "address": "123 Main St",
-  "phone_number": "555-1234",
-  "email": "jane.doe@example.com",
-  "insurance_name": "Health Insurance",
-  "insurance_group_number": "12345",
-  "insurance_member_id": "67890"
-}
-```
-
-### Get All Patients
-
-**Endpoint**: `/patients`
-
-**Method**: `GET`
-
-**Description**: This endpoint retrieves a list of all patients.
-
-**Authorized Users**: Pharmacists, Pharmacy Managers
-
-**Response**:
-
-Success (200 OK):
-
-```json
-[
-  {
-    "id": 1,
-    "first_name": "Jane",
-    "last_name": "Doe",
-    "date_of_birth": "1990-01-01",
-    "address": "123 Main St",
-    "phone_number": "555-1234",
-    "email": "jane.doe@example.com",
-    "insurance_name": "Health Insurance",
-    "insurance_group_number": "12345",
-    "insurance_member_id": "67890"
-  },
-  ...
-]
-```
-
-### Get a Patient by ID
-
-**Endpoint**: `/get/patient/{patient_id}`
-
-**Method**: `GET`
-
-**Description**: This endpoint retrieves details of a specific patient by ID.
-
-**Authorized Users**: Pharmacists, Pharmacy Managers
-
-**Response**:
-
-Success (200 OK):
-
-```json
-{
-  "id": 1,
-  "first_name": "Jane",
-  "last_name": "Doe",
-  "date_of_birth": "1990-01-01",
-  "address": "123 Main St",
-  "phone_number": "555-1234",
-  "email": "jane.doe@example.com",
-  "insurance_name": "Health Insurance",
-  "insurance_group_number": "12345",
-  "insurance_member_id": "67890"
-}
-```
-
-### Update a Patient
-
-**Endpoint**: `/patient/{patient_id}`
-
-**Method**: `PUT`
-
-**Description**: This endpoint allows users to update patient details.
-
-**Authorized Users**: Pharmacists, Pharmacy Managers
-
-**Request Body**:
-
-```json
-{
-  "first_name": "Jane",
-  "last_name": "Doe",
-  "date_of_birth": "1990-01-01",
-  "address": "123 Main St",
-  "phone_number": "555-1234",
-  "email": "jane.doe@example.com",
-  "insurance_name": "Health Insurance",
-  "insurance_group_number": "12345",
-  "insurance_member_id": "67890"
-}
-```
-
-**Response**:
-
-Success (200 OK):
-
-```json
-{
-  "id": 1,
-  "first_name": "Jane",
-  "last_name": "Doe",
-  "date_of_birth": "1990-01-01",
-  "address": "123 Main St",
-  "phone_number": "555-1234",
-  "email": "jane.doe@example.com",
-  "insurance_name": "Health Insurance",
-  "insurance_group_number": "12345",
-  "insurance_member_id": "67890"
-}
-```
-
-### Delete a Patient
-
-**Endpoint**: `/patient/{patient_id}`
-
-**Method**: `DELETE`
-
-**Description**: This endpoint allows users to delete a patient.
-
-**Authorized Users**: Pharmacists, Pharmacy Managers
-
-**Response**:
-
-Success (200 OK):
-
-```json
-{
-  "message": "Patient deleted successfully",
-  "patient_id": 1
-}
-```
-
-### **Prescriptions**
+- **POST `/patient`**: Creates a new patient.
+- **GET `/patient/{patient_id}`**: Retrieves details of a specific patient.
+- **GET `/patients`**: Lists all patients in the system.
+- **PUT `/patient/{patient_id}`**: Updates a patient’s information.
+- **DELETE `/patient/{patient_id}`**: Deletes a patient and updates any associated prescriptions.
 
 ---
-Prescriptions represent the medications prescribed to patients by doctors.
 
-### Create a New Prescription
+## 5. **Medication CRUD Endpoints**
 
-**Endpoint**: `/prescription`
+These endpoints are used to manage medications in the system:
 
-**Method**: `POST`
-
-**Description**: This endpoint allows pharmacists to create a new prescription for a patient.
-
-**Authorized Users**: Pharmacists
-
-**Request Body**:
-
-```json
-{
-  "patient_id": 1,
-  "medication_id": 1,
-  "doctor_name": "Dr. John Doe",
-  "quantity": 30
-}
-```
-
-**Response**:
-
-Success (201 Created):
-
-```json
-{
-  "id": 123,
-  "patient_id": 1,
-  "medication_id": 1,
-  "doctor_name": "Dr. John Doe",
-  "quantity": 30,
-  "date_prescribed": "2023-10-01",
-  "filled_timestamp": null,
-  "user_entered_id": 1,
-  "user_filled_id": null
-}
-```
-
-### Get All Prescriptions
-
-**Endpoint**: `/prescriptions`
-
-**Method**: `GET`
-
-**Description**: This endpoint retrieves a list of all prescriptions, optionally filtered by patient ID.
-
-**Authorized Users**: Pharmacists, Pharmacy Managers
-
-**Response**:
-
-Success (200 OK):
-
-```json
-[
-  {
-    "id": 123,
-    "patient_id": 1,
-    "medication_id": 1,
-    "doctor_name": "Dr. John Doe",
-    "quantity": 30,
-    "date_prescribed": "2023-10-01",
-    "filled_timestamp": null,
-    "user_entered_id": 1,
-    "user_filled_id": null
-  },
-  ...
-]
-```
-
-### Get a Prescription by ID
-
-**Endpoint**: `/prescription/{prescription_id}`
-
-**Method**: `GET`
-
-**Description**: This endpoint retrieves details of a specific prescription by ID.
-
-**Authorized Users**: Pharmacists, Pharmacy Managers
-
-**Response**:
-
-Success (200 OK):
-
-```json
-{
-  "id": 123,
-  "patient_id": 1,
-  "medication_id": 1,
-  "doctor_name": "Dr. John Doe",
-  "quantity": 30,
-  "date_prescribed": "2023-10-01",
-  "filled_timestamp": null,
-  "user_entered_id": 1,
-  "user_filled_id": null
-}
-```
-
-### Update a Prescription
-
-**Endpoint**: `/prescription/{prescription_id}`
-
-**Method**: `PUT`
-
-**Description**: This endpoint allows pharmacists to update prescription details.
-
-**Authorized Users**: Pharmacists
-
-**Request Body**:
-
-```json
-{
-  "patient_id": 1,
-  "medication_id": 1,
-  "doctor_name": "Dr. John Doe",
-  "quantity": 30
-}
-```
-
-**Response**:
-
-Success (200 OK):
-
-```json
-{
-  "id": 123,
-  "patient_id": 1,
-  "medication_id": 1,
-  "doctor_name": "Dr. John Doe",
-  "quantity": 30,
-  "date_prescribed": "2023-10-01",
-  "filled_timestamp": null,
-  "user_entered_id": 1,
-  "user_filled_id": null
-}
-```
-
-### Fill a Prescription
-
-**Endpoint**: `/prescription/{prescription_id}/fill`
-
-**Method**: `PUT`
-
-**Description**: This endpoint allows pharmacists to fill a prescription.
-
-**Authorized Users**: Pharmacists
-
-**Response**:
-
-Success (200 OK):
-
-```json
-{
-  "id": 123,
-  "patient_id": 1,
-  "medication_id": 1,
-  "doctor_name": "Dr. John Doe",
-  "quantity": 30,
-  "date_prescribed": "2023-10-01",
-  "filled_timestamp": "2023-10-02T10:00:00Z",
-  "user_entered_id": 1,
-  "user_filled_id": 2
-}
-```
-
-### Delete a Prescription
-
-**Endpoint**: `/prescription/{prescription_id}`
-
-**Method**: `DELETE`
-
-**Description**: This endpoint allows pharmacists to delete a prescription.
-
-**Authorized Users**: Pharmacists
-
-**Response**:
-
-Success (200 OK):
-
-```json
-{
-  "message": "Prescription deleted successfully",
-  "prescription_id": 123
-}
-```
-
-### **Medications**
+- **POST `/medication/`**: Adds a new medication to the database.
+- **GET `/medication/{medication_id}`**: Retrieves details of a specific medication.
+- **PUT `/medication/{medication_id}`**: Updates details of an existing medication.
+- **DELETE `/medication/{medication_id}`**: Deletes a specific medication from the system.
+- **GET `/medicationlist/`**: Lists all medications in the system.
 
 ---
-Medications represent the drugs available in the pharmacy's inventory.
 
-### Create a New Medication
+## 6. **Prescription CRUD Endpoints**
 
-**Endpoint**: `/medication`
+These endpoints handle prescription management, including creation, updating, deletion, and filling:
 
-**Method**: `POST`
-
-**Description**: This endpoint allows pharmacy managers to create a new medication.
-
-**Authorized Users**: Pharmacy Managers
-
-**Request Body**:
-
-```json
-{
-  "name": "Amoxicillin",
-  "dosage": "500mg",
-  "quantity": 100,
-  "prescription_required": true,
-  "expiration_date": "2024-12-31",
-  "dollars_per_unit": 0.50
-}
-```
-
-**Response**:
-
-Success (201 Created):
-
-```json
-{
-  "id": 1,
-  "name": "Amoxicillin",
-  "dosage": "500mg",
-  "quantity": 100,
-  "prescription_required": true,
-  "expiration_date": "2024-12-31",
-  "dollars_per_unit": 0.50
-}
-```
-
-### Get All Medications
-
-**Endpoint**: `/medicationlist`
-
-**Method**: `GET`
-
-**Description**: This endpoint retrieves a list of all medications.
-
-**Authorized Users**: Pharmacy Managers, Pharmacists, Pharmacy Technicians
-
-**Response**:
-
-Success (200 OK):
-
-```json
-[
-  {
-    "id": 1,
-    "name": "Amoxicillin",
-    "dosage": "500mg",
-    "quantity": 100,
-    "prescription_required": true,
-    "expiration_date": "2024-12-31",
-    "dollars_per_unit": 0.50
-  },
-  ...
-]
-```
-
-### Get a Medication by ID
-
-**Endpoint**: `/medication/{medication_id}`
-
-**Method**: `GET`
-
-**Description**: This endpoint retrieves details of a specific medication by ID.
-
-**Authorized Users**: Pharmacy Managers, Pharmacists, Pharmacy Technicians
-
-**Response**:
-
-Success (200 OK):
-
-```json
-{
-  "id": 1,
-  "name": "Amoxicillin",
-  "dosage": "500mg",
-  "quantity": 100,
-  "prescription_required": true,
-  "expiration_date": "2024-12-31",
-  "dollars_per_unit": 0.50
-}
-```
-
-### Update a Medication
-
-**Endpoint**: `/medication/{medication_id}`
-
-**Method**: `PUT`
-
-**Description**: This endpoint allows pharmacy managers to update medication details.
-
-**Authorized Users**: Pharmacy Managers
-
-**Request Body**:
-
-```json
-{
-  "name": "Amoxicillin",
-  "dosage": "500mg",
-  "quantity": 100,
-  "prescription_required": true,
-  "expiration_date": "2024-12-31",
-  "dollars_per_unit": 0.50
-}
-```
-
-**Response**:
-
-Success (200 OK):
-
-```json
-{
-  "id": 1,
-  "name": "Amoxicillin",
-  "dosage": "500mg",
-  "quantity": 100,
-  "prescription_required": true,
-  "expiration_date": "2024-12-31",
-  "dollars_per_unit": 0.50
-}
-```
-
-### Delete a Medication
-
-**Endpoint**: `/medication/{medication_id}`
-
-**Method**: `DELETE`
-
-**Description**: This endpoint allows pharmacy managers to delete a medication.
-
-**Authorized Users**: Pharmacy Managers
-
-**Response**:
-
-Success (200 OK):
-
-```json
-{
-  "message": "Medication deleted successfully",
-  "medication_id": 1
-}
-```
-
-### **Inventory Updates**
+- **GET `/prescriptions`**: Retrieves all prescriptions, optionally filtered by patient ID.
+- **GET `/prescription/{prescription_id}`**: Retrieves a specific prescription.
+- **POST `/prescription`**: Creates a new prescription.
+- **PUT `/prescription/{prescription_id}`**: Updates an existing prescription (unless it has been filled).
+- **DELETE `/prescription/{prescription_id}`**: Deletes a prescription.
+- **PUT `/prescription/{prescription_id}/fill`**: Marks a prescription as filled and updates inventory accordingly.
 
 ---
-Inventory updates represent changes to the inventory, such as adding or removing medications.
 
-### Get All Inventory Updates
+## 7. **Inventory Update Endpoints**
 
-**Endpoint**: `/inventory-updates`
+These endpoints manage changes to medication inventory, such as adding, filling, or selling medications:
 
-**Method**: `GET`
+- **POST `/inventory-updates`**: Creates an inventory update (used internally).
+- **GET `/inventory-updates/{id}`**: Retrieves a specific inventory update.
+- **GET `/inventory-updates`**: Lists all inventory updates, optionally filtered by activity type (e.g., "add", "fillpresc", "sellnonpresc").
 
-**Description**: This endpoint retrieves a list of all inventory updates.
+---
 
-**Authorized Users**: Pharmacy Managers, Pharmacists
+## 8. **User Activities CRUD Endpoints**
 
-**Response**:
+These endpoints track user activities, such as inventory updates and prescription fillings:
 
-Success (200 OK):
+- **POST `/user-activities`**: Creates a new user activity (used internally).
+- **GET `/user-activities`**: Lists all user activities recorded in the system.
 
-```json
-[
-  {
-    "id": 1,
-    "medication_id": 1,
-    "quantity_changed_by": -10,
-    "activity_type": "Sell non-prescription item",
-    "timestamp": "2023-10-01T10:00:00Z"
-  },
-  ...
-]
-```
+---
 
+## 9. **Transaction CRUD Endpoints**
 
+These endpoints manage transactions in the pharmacy system:
+
+- **POST `/transaction`**: Creates a new transaction.
+- **GET `/transaction/{transaction_id}`**: Retrieves a specific transaction.
+- **GET `/transactions`**: Lists all transactions in the system.
+
+---
+
+## **Models**
+
+These describe our database tables
+
+### 1. **User**
+
+Represents a user (employee) in the system (e.g., Pharmacy Manager, Technician, etc.). Patients (customers) do not get a user account and cannot login.
+
+| Column Name     | Data Type            |
+|-----------------|----------------------|
+| id              | Integer (Primary Key)|
+| first_name      | String               |
+| last_name       | String               |
+| user_type       | SQLAlchemyEnum(UserType) |
+| email           | String (Unique)      |
+| password        | String               |
+| is_locked_out   | Boolean (Default: True) |
+
+---
+
+### 2. **Patient**
+
+Represents a patient with personal and insurance details.
+
+| Column Name          | Data Type            |
+|----------------------|----------------------|
+| id                   | Integer (Primary Key)|
+| first_name           | String               |
+| last_name            | String               |
+| date_of_birth        | Date                 |
+| address              | String               |
+| phone_number         | String               |
+| email                | String (Unique)      |
+| insurance_name       | String               |
+| insurance_group_number | String             |
+| insurance_member_id  | String               |
+
+---
+
+### 3. **Prescription**
+
+Represents a prescription given to a patient, including medication details.
+
+| Column Name          | Data Type            |
+|----------------------|----------------------|
+| id                   | Integer (Primary Key)|
+| patient_id           | Integer (ForeignKey) |
+| user_entered_id      | Integer (ForeignKey) |
+| user_filled_id       | Integer (ForeignKey) |
+| date_prescribed      | Date (Default: current date) |
+| filled_timestamp     | DateTime (Nullable)  |
+| medication_id        | Integer (ForeignKey) |
+| doctor_name          | String               |
+| quantity             | Integer              |
+
+---
+
+### 4. **Medication**
+
+Represents a medication, including its name, dosage, and inventory details.
+
+| Column Name          | Data Type            |
+|----------------------|----------------------|
+| id                   | Integer (Primary Key)|
+| name                 | String               |
+| dosage               | String               |
+| quantity             | Integer              |
+| prescription_required| Boolean              |
+| expiration_date      | Date                 |
+| dollars_per_unit     | Float                |
+
+---
+
+### 5. **UserActivity**
+
+Tracks a user's activities in the system (e.g., login, logout, etc.).
+
+| Column Name          | Data Type            |
+|----------------------|----------------------|
+| id                   | Integer (Primary Key)|
+| user_id              | Integer (ForeignKey) |
+| activity_type        | SQLAlchemyEnum(UserActivityType) |
+| timestamp            | DateTime (Default: current time) |
+
+---
+
+### 6. **InventoryUpdate**
+
+Represents changes to the inventory, such as adding or discarding medication.
+
+| Column Name          | Data Type            |
+|----------------------|----------------------|
+| id                   | Integer (Primary Key)|
+| medication_id        | Integer (ForeignKey) |
+| user_activity_id     | Integer (ForeignKey) |
+| transaction_id       | Integer (ForeignKey, Nullable) |
+| quantity_changed_by  | Integer              |
+| timestamp            | DateTime (Default: current time) |
+| activity_type        | SQLAlchemyEnum(InventoryUpdateType) |
+
+---
+
+### 7. **Transaction**
+
+Represents a transaction involving a user and a patient (e.g., payment for medication).
+
+| Column Name          | Data Type            |
+|----------------------|----------------------|
+| id                   | Integer (Primary Key)|
+| user_id              | Integer (ForeignKey) |
+| patient_id           | Integer (ForeignKey) |
+| timestamp            | DateTime (Default: current time) |
+| payment_method       | String               |
+
+---
+
+### Enums
+
+#### UserType
+
+Defines the roles for a user.
+
+| Value                |
+|----------------------|
+| PHARMACY_MANAGER     |
+| PHARMACY_TECHNICIAN  |
+| CASHIER              |
+| PHARMACIST           |
+
+#### UserActivityType
+
+Defines the types of user activities.
+
+| Value                |
+|----------------------|
+| LOGIN                |
+| LOGOUT               |
+| UNLOCK_ACCOUNT       |
+| INVENTORY_UPDATE     |
+| CREATE_USER          |
+| DELETE_USER          |
+| UPDATE_USER          |
+| CREATE_PATIENT       |
+| DELETE_PATIENT       |
+| UPDATE_PATIENT       |
+| CREATE_PRESCRIPTION  |
+| CREATE_MEDICATION    |
+| DELETE_MEDICATION    |
+| UPDATE_MEDICATION    |
+| OTHER                |
+| ERROR                |
+
+#### InventoryUpdateType
+
+Defines the types of inventory updates.
+
+| Value                |
+|----------------------|
+| ADD                  |
+| DISCARD              |
+| FILLPRESC            |
+| SELLNONPRESC         |
+
+### 8. **InventoryUpdate**
+
+Represents updates made to the inventory, such as adding or discarding medication.
+
+`quantity_changed_by` will be positive or negative depending on if medication was added or removed.
+
+| Column Name          | Data Type            |
+|----------------------|----------------------|
+| id                   | Integer (Primary Key)|
+| medication_id        | Integer (ForeignKey) |
+| user_activity_id     | Integer (ForeignKey) |
+| transaction_id       | Integer (ForeignKey, Nullable) |
+| quantity_changed_by  | Integer              |
+| timestamp            | DateTime (Default: current time) |
+| activity_type        | SQLAlchemyEnum(InventoryUpdateType) |
+
+---
+
+### 9. **Transaction**
+
+Represents a transaction between a user and a patient (e.g., payment for medications or services).
+
+| Column Name          | Data Type            |
+|----------------------|----------------------|
+| id                   | Integer (Primary Key)|
+| user_id              | Integer (ForeignKey) |
+| patient_id           | Integer (ForeignKey) |
+| timestamp            | DateTime (Default: current time) |
+| payment_method       | String               |
 
 ## Screenshots
 

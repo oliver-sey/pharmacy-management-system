@@ -588,11 +588,26 @@ function Checkout() {
 																className="quantity-button"
 																size="small"
 																disabled={
-																	cart
-																		.nonPrescription[
-																		medication
-																			.id
-																	] <= 0
+																	cart.nonPrescription.find(
+																		(
+																			item
+																		) =>
+																			item.id ===
+																			medication.id
+																	)
+																		?.quantityInCart ===
+																		0 ||
+																	(!cart.nonPrescription.find(
+																		(
+																			item
+																		) =>
+																			item.id ===
+																			medication.id
+																	) &&
+																		quantitiesInTable[
+																			medication
+																				.id
+																		] === 0)
 																}
 															></Button>
 															<TextField
@@ -643,13 +658,30 @@ function Checkout() {
 																}
 																className="quantity-button"
 																size="small"
+																// Disable the button if the quantity in the cart is already the max quantity
+																// or if the item is not in the cart and the quantity in quantitiesInTable is the max quantity
 																disabled={
-																	cart
-																		.nonPrescription[
-																		medication
-																			.id
-																	] >=
-																	medication.quantity
+																	cart.nonPrescription.find(
+																		(
+																			item
+																		) =>
+																			item.id ===
+																			medication.id
+																	)
+																		?.quantityInCart >=
+																		medication.quantity ||
+																	(!cart.nonPrescription.find(
+																		(
+																			item
+																		) =>
+																			item.id ===
+																			medication.id
+																	) &&
+																		quantitiesInTable[
+																			medication
+																				.id
+																		] >=
+																			medication.quantity)
 																}
 															></Button>
 														</div>

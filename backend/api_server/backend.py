@@ -1175,12 +1175,3 @@ def get_transactions(db: Session = Depends(get_db), current_user: UserToReturn =
     return transactions
 
     
-#Returning all transactions.
-@app.get("/transaction-report", response_model=List[TransactionResponse])
-def get_transaction_report(db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
-    # Restrict access to authorized roles
-    validate_user_type(current_user, ["Finance Manager", "Pharmacy Manager"])
-
-    # Query all transactions
-    transactions = db.query(Transaction).all()
-    return transactions

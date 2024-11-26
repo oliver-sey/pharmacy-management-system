@@ -25,25 +25,10 @@ import {
 } from "@mui/material";
 
 
-// TODO: use RemoveShoppingCartIcon instead of Button
-// TODO: clear cart when the selected patient changes? don't want to let the wrong patient buy prescription items
-	// or just clear prescriptions items from the cart?
-// TODO: put the patient at the top and require the patient dropdown before checking out 
-// (need patient_id for the transaction)
-
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import RemoveShoppingCartIcon from "@mui/icons-material/RemoveShoppingCart";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
-
-// import Autocomplete from "@mui/lab/Autocomplete";
-
-// Mock data
-// const nonPrescriptionItems = [
-	// 	{ id: 1, name: "Pain Reliever", dollars_per_unit: 5.0, details: "200mg Tablet" },
-	// 	{ id: 2, name: "Cough Syrup", dollars_per_unit: 8.5, details: "100ml Bottle" },
-	// 	{ id: 3, name: "Vitamin C", dollars_per_unit: 12.0, details: "500mg Tablet" },
-	// ];
 
 
 function Checkout() {

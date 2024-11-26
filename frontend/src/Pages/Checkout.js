@@ -136,13 +136,10 @@ function Checkout() {
 				`Error fetching non-prescription items (medications): ${error}`
 			);
 			// error handling
-			// setErrorMessage("Failed to fetch non-prescription items");
 			// use the error message from the Error that gives some more details
 			showSnackbar(error.message, "error");
 		} finally {
 			// done loading non-prescription items data
-			// wait 5 seconds
-			// await new Promise(resolve => setTimeout(resolve, 5000));
 			setNonPrescriptionItemsLoading(false);
 		}
 	}, [token]);
@@ -213,8 +210,6 @@ function Checkout() {
 			showSnackbar("Failed to fetch prescriptions", "error");
 		} finally {
 			// done loading prescriptions data
-			// wait 5 seconds
-			// await new Promise(resolve => setTimeout(resolve, 5000));
 			setPrescriptionsLoading(false);
 		}
 	};
@@ -276,8 +271,6 @@ function Checkout() {
 			const data = await response.json();
 			setPatients(data); // Store the fetched data in state
 			
-			// console.log("patient data: " + JSON.stringify(data));
-			// return data;
 		} catch (error) {
 			console.error("Error fetching patient:", error);
 			// error handling
@@ -334,18 +327,6 @@ function Checkout() {
 			[type]: prevCart[type].filter((item) => item.id !== id),
 		}));
 	};
-
-	// const handleQuantityChange = (id, type, quantity) => {
-	// 	setCart((prevCart) => ({
-	// 		...prevCart,
-	// 		[type]: prevCart[type].map((item) =>
-	// 			item.id === id
-	// 				? { ...item, quantity: quantity < 1 ? 1 : quantity }
-	// 				: item
-	// 		),
-	// 	}));
-	// };
-
 
 
 	const handleQuantityChange = (itemId, change) => {
@@ -413,7 +394,6 @@ function Checkout() {
 		<div className="checkout-page">
 			<div className="checkout-container">
 				<div className="tables-container">
-
 					{/* handling the case if there is a problem fetching the patients */}
 					{patientsLoading ? (
 						<Skeleton
@@ -442,7 +422,6 @@ function Checkout() {
 									label="Patient"
 									onChange={(e) => {
 										handlePatientSelect(e.target.value);
-										// console.log("in the onChange for the patient selection. e.target.value: " + e.target.value + ", selected patient: " + selectedPatient)
 									}}
 								>
 									{patients.map((patient) => (
@@ -472,7 +451,9 @@ function Checkout() {
 									<TableRow>
 										<TableCell>Name</TableCell>
 										<TableCell>Dosage</TableCell>
-										<TableCell>Quantity Available</TableCell>
+										<TableCell>
+											Quantity Available
+										</TableCell>
 										<TableCell>Unit Price</TableCell>
 										<TableCell>Edit Quantity</TableCell>
 										<TableCell>Total Price</TableCell>
@@ -593,7 +574,8 @@ function Checkout() {
 														$
 														{medication.dollars_per_unit.toFixed(
 															4
-														) * medication.quantityInCart}
+														) *
+															medication.quantityInCart}
 													</TableCell>
 
 													<TableCell>
@@ -636,16 +618,6 @@ function Checkout() {
 							<h1 className="prescriptions-title">
 								Prescription Items
 							</h1>
-							{/* <Autocomplete */}
-							{/* options={patients}
-						inputValue={searchTerm}
-						onInputChange={(e, newInputValue) => setSearchTerm(newInputValue)}
-						onChange={(e, value) => handlePatientSelect(value)}
-						renderInput={(params) => <TextField {...params} label="Patient Name" />}
-					/> */}
-
-							{/* use the skeleton from Material UI to show a placeholder while data is loading */}
-
 							<h3 className="prescriptions-title">
 								Prescriptions for {selectedPatient.first_name}{" "}
 								{selectedPatient.last_name}
@@ -727,7 +699,8 @@ function Checkout() {
 														$
 														{prescription.dollars_per_unit.toFixed(
 															4
-														) * prescription.quantity}
+														) *
+															prescription.quantity}
 													</TableCell>
 													<TableCell>
 														<Button
@@ -832,8 +805,6 @@ function Checkout() {
 												item.dollars_per_unit *
 												item.quantityInCart
 											).toFixed(2)}
-
-											
 											<Button
 												size="small"
 												variant="outlined"

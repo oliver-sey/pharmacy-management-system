@@ -49,6 +49,16 @@ These endpoints manage user accounts and their details:
 - **GET `/userslist/`**: Lists all users in the system.
 - **PUT `/users/unlock/{user_id}`**: Unlocks a user account after it has been locked due to too many incorrect login attempts.
 
+**NOTE:** The endpoints below do not require authentication (a JWT) in the request. These are a very limited number of endpoints, and we intentionally only return very limited information. 
+
+These two endpoints are used on the `/setpassword` page so that a user can set the first password on their account. We cannot pass a JWT (token) to these endpoints because the user does not have a password yet and cannot create a token.
+
+We found these endpoints to be necessary to the proper function of our system and made sure to make the system as secure as possible.
+
+- **GET `/userslist/new/`**: Returns a list of emails and user ID's for accounts that have been newly created, but the user has not activated their account by setting a password yet.
+- **PUT `/users/{user_id}/setpassword`**: Sets a new password for a user account, only works if the account has not had a password before (i.e. it is a new account). Passwords are normally changed with the PUT `/users/{user_id}` endpoint.
+
+
 ---
 
 ## 4. **Patient Management Endpoints**
@@ -270,6 +280,8 @@ Defines the types of inventory updates.
 
 ### 8. **InventoryUpdate**
 Represents updates made to the inventory, such as adding or discarding medication.
+
+`quantity_changed_by` will be positive or negative depending on if medication was added or removed.
 
 | Column Name          | Data Type            |
 |----------------------|----------------------|

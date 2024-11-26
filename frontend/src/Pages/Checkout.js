@@ -900,14 +900,16 @@ function Checkout() {
 								</h3>
 								<List>
 									{cart.nonPrescription.map((item) => (
-										<ListItem key={item.id}>
-											{item.name} - $
-											{item.dollars_per_unit} x{" "}
-											{item.quantityInCart} = $
-											{(
-												item.dollars_per_unit *
-												item.quantityInCart
-											).toFixed(2)}
+										<ListItem key={item.id} className="cart-item">
+											<div className="cart-item-details">
+												{item.name} - $
+												{item.dollars_per_unit} x{" "}
+												{item.quantityInCart} = $
+												{(
+													item.dollars_per_unit *
+													item.quantityInCart
+												).toFixed(2)}
+											</div>
 											<Button
 												size="small"
 												variant="outlined"
@@ -935,16 +937,18 @@ function Checkout() {
 								</h3>
 								<List>
 									{cart.prescription.map((item) => (
-										<ListItem key={item.id}>
-											{/* use medication_name here since that is what we call it 
-											when we add the name (from Medication) into the list of Prescriptions */}
-											{item.medication_name} - $
-											{item.dollars_per_unit} x{" "}
-											{item.quantityInCart} = $
-											{(
-												item.dollars_per_unit *
-												item.quantityInCart
-											).toFixed(2)}
+										<ListItem key={item.id} className="cart-item">
+											<div className="cart-item-details">
+												{/* use medication_name here since that is what we call it 
+												when we add the name (from Medication) into the list of Prescriptions */}
+												{item.medication_name} - $
+												{item.dollars_per_unit} x{" "}
+												{item.quantityInCart} = $
+												{(
+													item.dollars_per_unit *
+													item.quantityInCart
+												).toFixed(2)}
+											</div>
 											<Button
 												size="small"
 												variant="outlined"

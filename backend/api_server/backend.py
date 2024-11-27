@@ -429,7 +429,7 @@ def get_user(user_id: int, db: Session = Depends(get_db), current_user: UserToRe
     return db_user
 
 
-@app.delete("/users/{user_id}")
+@app.delete("/users/{user_id}", response_model=UserResponse)
 def delete_user(user_id: int, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
 
     validate_user_type(current_user, ["Pharmacy Manager"])
@@ -437,21 +437,14 @@ def delete_user(user_id: int, db: Session = Depends(get_db), current_user: UserT
     db_user = db.query(models.User).filter(models.User.id == user_id).first()
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
-    
-    # Check for associated prescriptions
-    prescriptions_count = db.query(models.Prescription).filter(
-        (models.Prescription.user_entered_id == user_id) | 
-        (models.Prescription.user_filled_id == user_id)
-    ).count()
 
-    if prescriptions_count > 0:
-        raise HTTPException(status_code=400, detail="User cannot be deleted while having prescriptions")
+    # don't actually delete the user, just mark them as deleted
+    db_user.is_deleted = True
 
-
-    db.delete(db_user)
     db.commit()
-    return SimpleResponse(message="User deleted successfully")
-
+    db.refresh(db_user)
+    return db_user
+    
 
 # *****an endpoint that doesn't need any authorization, since users who are in the process of setting
 # their password (can't make a token yet) need to be able to call it

@@ -38,6 +38,7 @@ class UserResponse(BaseModel):
     user_type: UserType
     email: str
     is_locked_out: bool
+    is_deleted: bool
 
 # only for use by the route that lets you see users with no password yet,
 # and doesn't require a token to call

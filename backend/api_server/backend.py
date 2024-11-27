@@ -18,7 +18,7 @@ from .schema import (
     InventoryUpdateResponse, UserActivityResponse, TransactionResponse, TransactionCreate, MedicationUpdate
 )
 from . import models  # Ensure this is the SQLAlchemy model
-from .models import UserActivity,InventoryUpdateType
+from .models import Transaction, UserActivity,InventoryUpdateType
 from enum import Enum as PyEnum
 from sqlalchemy.orm import Session, selectinload
 from typing import List
@@ -1047,20 +1047,23 @@ def get_inventory_updates(activity_type: Optional[models.InventoryUpdateType] = 
     # Execute the query to retrieve the inventory updates
     inventory_updates = query.all()
         # Convert to response format with medication names
-    inventory_update_responses = [
-            InventoryUpdateResponse(
-                id=update.id,
-                medication_id=update.medication_id,
-                user_activity_id=update.user_activity_id,
-                transaction_id=update.transaction_id,
-                quantity_changed_by=update.quantity_changed_by,
-                activity_type=update.activity_type,
-                timestamp=update.timestamp,
-                medication_name=update.medication.name if update.medication else None  # Medication name
-            )
-            for update in inventory_updates
-        ]
-        # return inventory_update_responses
+    inventory_update_responses = sorted(
+    [
+        InventoryUpdateResponse(
+            id=update.id,
+            medication_id=update.medication_id,
+            user_activity_id=update.user_activity_id,
+            transaction_id=update.transaction_id,
+            quantity_changed_by=update.quantity_changed_by,
+            activity_type=update.activity_type,
+            timestamp=update.timestamp,
+            medication_name=update.medication.name if update.medication else None,
+            resulting_total_quantity=update.resulting_total_quantity if update.resulting_total_quantity > 0 else -1 * update.resulting_total_quantity,
+        )
+        for update in inventory_updates
+    ],
+    key=lambda response: response.timestamp  # Sort by timestamp in ascending order
+    )
     # return inventory_updates
     return inventory_update_responses
 
@@ -1130,10 +1133,10 @@ def sell_non_prescription_item(id: int, medication_update: schema.MedicationUpda
 @app.post("/transaction", response_model=TransactionResponse)
 def create_transaction(transaction: TransactionCreate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
     # make sure only pharmacy managers or pharmacists can call this endpoint
-    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist", "Cashier"])
 
     # create a new transaction
-    db_transaction = models.Transaction(**transaction.dict())
+    db_transaction = transaction.model_dump()
     db.add(db_transaction)
     db.commit()
     db.refresh(db_transaction)

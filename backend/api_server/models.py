@@ -30,6 +30,7 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     password = Column(String)
     is_locked_out = Column(Boolean, default=True)
+    is_deleted = Column(Boolean, default=False)
 
     # A user can enter many prescriptions
     entered_prescriptions = relationship("Prescription", back_populates="user_entered", foreign_keys="[Prescription.user_entered_id]", cascade="all, delete-orphan")
@@ -104,6 +105,10 @@ class UserActivityType(PyEnum):
     # including all the possible types that we are storing in inventory_updates
     #  (Add medication, Discard medication, Fill prescription, Sell non-prescription item)
     INVENTORY_UPDATE = "Inventory Update"
+    # for selling a prescription item, since we don't make an inventory_update when it gets sold (only when it gets filled)
+    # so there would otherwise be no record of it being sold
+    # which would be odd since non-prescription items we have a record of it being sold (because an inventory_update gets created)
+    SELL_PRESCRIPTION = "Sell Prescription Medication"
     CREATE_USER = "Create User"
     DELETE_USER = "Delete User"
     UPDATE_USER = "Update User"
@@ -162,7 +167,13 @@ class InventoryUpdate(Base):
     medication = relationship("Medication", back_populates="inventory_updates")
     user_activity = relationship("UserActivity", back_populates="inventory_updates")  # Correct the relationship
     # transaction = relationship("Transaction", back_populates="inventory_update")]
-    
+
+
+# an enum class so we can restrict the set of possible values in the payment_method column in transactions
+class PaymentMethodType(PyEnum):
+    CASH = "Cash"
+    CREDIT_CARD = "Credit Card"
+    DEBIT_CARD = "Debit Card"
 
 class Transaction(Base):
     __tablename__ = 'transactions'
@@ -171,8 +182,29 @@ class Transaction(Base):
     user_id = Column(Integer, ForeignKey('users.id'))
     patient_id = Column(Integer, ForeignKey('patients.id'))
     timestamp = Column(DateTime, default=func.now())
-    payment_method = Column(String)
+    payment_method = Column(SQLAlchemyEnum(PaymentMethodType))
+
+    total_price = Column(Float)
 
     patient = relationship("Patient", back_populates="transactions")
     user = relationship("User", back_populates="transactions")
+
+    # TODO: uncomment this?
     # inventory_update = relationship("InventoryUpdate", back_populates="transaction")  # This should link to the correct attribute
+    transaction_items = relationship("TransactionItem", back_populates="transaction")
+
+
+class TransactionItem(Base):
+    __tablename__ = "transaction_items"
+
+    id = Column(Integer, primary_key=True, index=True)
+    # relationship to the transaction that this is a part of
+    transaction_id = Column(Integer, ForeignKey("transactions.id"))
+    # the medication that got sold
+    # allow it to be nullable so we can delete the medication
+    medication_id = Column(Integer, ForeignKey("medications.id"), nullable=True)
+    # the number of pills of this medication that got sold
+    quantity = Column(Integer)
+    subtotal_price = Column(Float)
+
+    transaction = relationship("Transaction", back_populates="transaction_items")

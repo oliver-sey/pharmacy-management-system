@@ -13,96 +13,51 @@ import {
 	Button,
 	TextField,
 	DialogContentText,
+	MenuItem,
+	FormControl,
+	Select,
+	InputLabel
 } from "@mui/material";
 import "../Styles/SearchBar.css"
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
-const CheckoutModal = ({ open, onClose, row, onSave }) => {
+const CheckoutModal = ({ open, onClose, patient, total, onSave}) => {
 	// Initialize form data
 	const [formData, setFormData] = useState({
-		medication: "",
-		patient: "",
-		quantity: "",
-		doctor_name: ""
+		cardType: "",
+		cardNumber: "",
+		month: "",
+		year: "",
+		CVC: "",
+		zip: ""
 	});
 
-	const [medication_data, set_medication_data] = useState([]);
-	const [patient_data, set_patient_data] = useState([])
-	const [valid_patient, set_valid_patient] = useState(true)
-	const [valid_medication, set_valid_medication] = useState(true)
-	
 
+	const [isSigned, setIsSigned] = useState(false)
+	const months = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0'));
+	const years = Array.from({ length: 21 }, (_, i) => (2024 + i).toString());
+	const [tenderAmount, setTenderAmount] = useState(0)
 	const token = localStorage.getItem('token');
-	
-	// Update form data on input change
-	const onSearchChange = (e) => {
-		const { name, value } = e.target;
-		setFormData((prev) => ({ ...prev, [name]: value }));
-		
-	};
+	const [signature, setSignature] = useState('')
+	const [cardCashToggle, setCardCashToggle] = useState("card")
 
-	const onSearchSelect = (field, searchTerm) => {
-		setFormData((prev) => ({ ...prev, [field]: searchTerm }));
-	}
-
-	const fetchMedication = async () => {
-		try {
-		  const response = await fetch('http://localhost:8000/medicationlist/', {
-			headers: { 'Authorization': 'Bearer ' + token }
-		});
-		  const data = await response.json(); // Convert response to JSON
-		  const list = []
-		  data.map((info) => { list.push({id: info.id, name: info.name + ", " + info.dosage}) })
-		  
-		  set_medication_data(list)
-		} catch (error) {
-		  console.error('Error fetching medication:', error);
-		}
-	}; 
-
-	const fetchPatients = async () => {
-		try {
-		  const response = await fetch('http://localhost:8000/patients', {
-			headers: { 'Authorization': 'Bearer ' + token }
-		  });
-		  const data = await response.json(); // Convert response to JSON
-		  const list = []
-		  data.map((info) => { list.push({id: info.id, name: info.first_name + " " + info.last_name}) })
-		  set_patient_data(list)
-		} catch (error) {
-		  console.error('Error fetching patients:', error);
-		}
-	};
 
 	// useEffect to fetch data when the component mounts
 	useEffect(() => {
+		console.log(patient)
 		
-		fetchPatients();
-		fetchMedication(); // Call the async function
-		set_valid_medication(true)
-		set_valid_patient(true)
-		
-	  }, [formData]);
+	  }, []);
 
-	// Update form data when the row prop changes
-	useEffect(() => {
-		if (row) {
-			
-			setFormData({
-				medication: row?.medication_name || "",
-				patient: row?.patient_name || "",
-				quantity: row?.quantity || "",
-				doctor_name: row?.doctor_name || ""
-			});
-		} else {
-			// Reset to empty fields when adding a new patient
-			setFormData({
-				medication: "",
-				patient: "",
-				quantity: "",
-				doctor_name: ""
-			});
+
+	const handleSetCardCash = (e) => {
+		const { name, value } = e.target;
+
+		if (value !== null){
+      		setCardCashToggle((prev) => (prev === "card" ? "cash" : "card"))
 		}
-	}, [row]);
+
+	}
 
 	// Update form data on input change
 	const handleChange = (e) => {
@@ -110,148 +65,237 @@ const CheckoutModal = ({ open, onClose, row, onSave }) => {
 		setFormData((prev) => ({ ...prev, [name]: value }));
 	};
 
-	const checkValidPatient = () => {
-		const patient_names = patient_data.map((item) => (item.name))
-		if (!patient_names.includes(formData.patient)) {
-			set_valid_patient(false)
-			return false
-		} 
-		return true
-	}
+	const handleSignatureChange = (e) => {
+		const { name, value } = e.target;
 
-	const checkValidMedication = () => {
-		const medication_names = medication_data.map((item) => (item.name))
-		if (!medication_names.includes(formData.medication)) {
-			set_valid_medication(false)
-			return false
+		setSignature(value)
+		
+		 if (patient.first_name && (value === ( patient.first_name + " " + patient.last_name))) {
+			
+			setIsSigned(true)
+		} else {
+			setIsSigned(false)
 		}
-		return true
 	}
 
 
 	// Handle saving of the updated data
 	const handleSave = () => {
-		const medication_valid = checkValidMedication()
-		const patient_valid = checkValidPatient()
-
-
-		if (medication_valid && patient_valid ) {
-			const patient_id = patient_data.filter(item => {
-				const searchTerm = formData.patient.toLowerCase();
-				const patient_name = item.name.toLowerCase();
-
-				return patient_name === searchTerm;
-			}).map(item => (item.id))[0].toString();
-
-			const medication_id = medication_data.filter(item => {
-				const searchTerm = formData.medication.toLowerCase();
-				const medication_name = item.name.toLowerCase();
-
-				return medication_name === searchTerm;
-			}).map(item => (item.id))[0].toString();
-
-			
-
-			
-			const data_to_return = {...formData, medication: medication_id, patient: patient_id}
-
-			setFormData((prev) => ({medication: medication_id, patient: patient_id, ...prev}));
-			
-			console.log(data_to_return)
-			onSave(data_to_return, row?.id); // Pass updated form data to parent component
-			onClose()
+		if (cardCashToggle === "cash") {
+			setFormData((prev) => ({...prev, cardType: "cash"}))
 		}
-	};
+
+		onSave(formData.cardType); // Pass updated form data to parent component
+		onClose()
+	}
+
+	const handleClose = () => {
+		onClose()
+	}
+
+	const handleCashChange = (e, newValue) => {
+		const {name, value} = e.target
+		  
+		if (value.includes('.')) {
+			if (value[value.length - 3] === '.') {
+			setTenderAmount(parseFloat(value).toFixed(2))
+			} else {
+			setTenderAmount(value)
+			}
+		} else if (value === "" || value === null) {
+			setTenderAmount(0)
+		} else {
+			setTenderAmount(parseInt(value, 10))
+		}
+	}
+
+	const handleChangeZip = (e) => {
+		const {name, value} = e.target
+
+		if (value.length <= 5) {
+			const onlyNum = value.replace(/[^0-9]/g, '')
+			
+			setFormData((prev) => ({...prev, zip: onlyNum}))
+		}
+	}
+
+	const handleChangeNum = (e) => {
+		const {name, value} = e.target
+
+		if (value.length <= 16) {
+			const onlyNum = value.replace(/[^0-9]/g, '')
+			
+			setFormData((prev) => ({...prev, cardNumber: onlyNum}))
+		}
+	}
 
 	return (
-		<Dialog open={open} onClose={onClose}>
+		<Dialog open={open} onClose={onClose} sx={{minWidth: 1500}}>
 		{/* change the title based on if we are adding or editing,
 		which we can tell from if row is null or not */}
+		
+		{patient ?
 			<DialogTitle>
-				{row ? "Edit Prescription" : "Add Prescription"}
-			</DialogTitle>
-			
-			{/* To be honest, I'm not sure what fullWidth and margin do, open to changing them */}
+				Enter {patient.first_name}'s Payment
+			</DialogTitle> 
+			:
+			<DialogTitle>
+				Enter Payment
+			</DialogTitle> 
+			}
 			<DialogContent>
+			<DialogContentText sx={{mb:1, 
+                  fontWeight: 'bold', 
+                  textAlign: 'center'}}>
+				Total: ${total}
+			</DialogContentText>
+			<ToggleButtonGroup
+			color="primary"
+			value={cardCashToggle}
+			exclusive
+			onChange={handleSetCardCash}
+			aria-label="card or cash"
+			margin="dense"
+      		fullWidth
+			
+			>
+				<ToggleButton value="card" aria-label="card">
+					Card
+				</ToggleButton>
+				<ToggleButton value="cash" aria-label="cash">
+					Cash
+				</ToggleButton>
+			</ToggleButtonGroup>
+			<div/>
+      {cardCashToggle === "card" ? <>
+        <FormControl margin="dense">
+		<InputLabel>Card Type</InputLabel>
+		<Select
+			id="card-type-selector"
+			select
+			label="Card Type"
+			defaultValue="credit"
+			
+			slotProps={{
+				select: {
+				native: true,
+				},
+			}}
+			sx={{minWidth: 200}}
+			>
+			<MenuItem key={"credit"} value={"credit"}>
+				Credit
+			</MenuItem>
+			<MenuItem key={"debit"} value={"debit"}>
+				Debit
+			</MenuItem>
+        </Select>
+			</FormControl>
 				<TextField
-					label="Medication Name"
-					name="medication"
-					value={formData.medication}
-					onChange={onSearchChange}
+					label="Card Number"
+					name="cardNumber"
+					value={formData.cardNumber}
+					onChange={handleChangeNum}
 					fullWidth
 					margin="dense"
+					size="large"
+					
 				/>
-				<DialogContentText>
-				<div className="dropdown">
-					{medication_data.filter(item => {
-							
-							const searchTerm = formData.medication.toLowerCase();
-							const medication_name = item.name.toLowerCase();
-						
-							return searchTerm && medication_name.startsWith(searchTerm) && medication_name !== searchTerm;
-						
-					})
-					.map(item => (<div onClick={() => onSearchSelect("medication", item.name)} className="dropdown-row">
-						{item.name}
-					</div> 
-					))}
-				</div>
-				</DialogContentText>
-				<TextField
-					label="Patient"
-					name="patient"
-					value={formData.patient}
-					onChange={onSearchChange}
-					fullWidth
-					margin="dense"
-				/>
-				<DialogContentText>
-				<div className="dropdown">
-					{patient_data.filter(item => {
-						
-							const searchTerm = formData.patient.toLowerCase();
-							const patient_name = item.name.toLowerCase();
-						
+        <DialogContentText>Expiration Date</DialogContentText>
+      <FormControl margin="dense">
+        <InputLabel> Month</InputLabel>
+				<Select
+				id="month-selector"
+				select
+				defaultValue="01"
+				helperText="Month"
+				slotProps={{
+					select: {
+					native: true,
+					},
+				}}
+				sx={{width:90}}>
+				{
+					months.map((month) => (
+						<MenuItem value={month} >
+							{month}
+						</MenuItem>
+          			))
+				}
+				</Select>
+        </FormControl>
 
-							return searchTerm && patient_name.startsWith(searchTerm) && patient_name !== searchTerm;
-						
-					})
-					.map(item => (<div onClick={() => onSearchSelect("patient", item.name)} className="dropdown-row">
-						{item.name}
-					</div> 
-					))}
-				</div>
-				</DialogContentText>
-				<TextField
-					label="quantity"
-					name="quantity"
-					value={formData.quantity}
-					onChange={handleChange}
-					fullWidth
-					margin="dense"
-				/>
-				<TextField
-					label="Prescribing Doctor"
-					name="doctor_name"
-					value={formData.doctor_name}
-					onChange={handleChange}
-					fullWidth
-					margin="dense"
-				/>
-				<DialogContentText className="error-text">
-					{!valid_medication && <p>Medication is not found.</p>}
-				</DialogContentText>
-				<DialogContentText className="error-text">
-					{!valid_patient && <p>Patient is not found.</p>}
-				</DialogContentText>
-				
-			</DialogContent>
+        <FormControl margin="dense">
+          <InputLabel>Year</InputLabel>
+			<Select
+			id="year-selector"
+			select
+			defaultValue="2024"
+			helperText="Year"
+			slotProps={{
+				select: {
+				native: true,
+				},
+			}}
+			sx={{width:90}}
+			
+			>
+			{
+				years.map((year) => (
+					<MenuItem value={year}>
+						{year}
+					</MenuItem>
+				))
+			}
+        	</Select>
+		</FormControl>
+
+        <TextField
+			label="Zip Code"
+			name="zip"
+			value={formData.zip}
+			onChange={handleChangeZip}
+			margin="dense"
+			size="large"
+          	sx={{ml: 2}}
+		/>
+
+		<TextField
+			label="Signature"
+			name="signature"
+			value={signature}
+			onChange={handleSignatureChange}
+			fullWidth
+			margin="dense"
+			size="large"
+			/>
+		</>
+      : <> 
+      <TextField
+			label="Tender Amount"
+			name="tenderAmount"
+			value={tenderAmount}
+			onChange={handleCashChange}
+			sx={{minWidth: 400}}
+			margin="dense"
+			size="large"
+		/>
+        
+        {tenderAmount >= total &&
+          <DialogContentText sx={{mt:1, 
+                  fontWeight: 'bold', 
+                  textAlign: 'center'}}>
+              Change to give: ${(tenderAmount - total).toFixed(2)}
+          </DialogContentText>
+          }
+      </>
+      }
+
+		</DialogContent>
 			<DialogActions>
-				<Button onClick={onClose}>Cancel</Button>
-				{/* change the button text based on if we are adding or editing,
-				which we can tell from if row is null or not */}
-				<Button onClick={handleSave} color="primary">
-					{row ? "Save Changes" : "Add Prescription"}
+				<Button onClick={handleClose}>Cancel</Button>
+				<Button onClick={handleSave} disabled={(cardCashToggle === "cash" && (tenderAmount < total)) || (cardCashToggle === "card" && (!isSigned || formData.zip.length < 5 || formData.cardNumber.length < 15))} color="primary">
+					Complete Payment
 				</Button>
 			</DialogActions>
 		</Dialog>

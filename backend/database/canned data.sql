@@ -237,7 +237,7 @@ INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES
 -- inventory_updates table
 
 
-INSERT INTO inventory_updates(medication_id, user_activity_id, quantity_changed_by, resulting_total_quantity, timestamp, transaction_id, activity_type) VALUES (1, 2, 500, 500, '2024-09-01 08:35:00', NULL, 'ADD');
+INSERT INTO inventory_updates(medication_id, user_activity_id, quantity_changed_by, resulting_total_quantity, timestamp, transaction_id, activity_type) VALUES (1, 2, 1500, 500, '2024-09-01 08:35:00', NULL, 'ADD');
 INSERT INTO inventory_updates(medication_id, user_activity_id, quantity_changed_by, resulting_total_quantity, timestamp, transaction_id, activity_type) VALUES (2, 2, -1000, -500, '2024-09-30 08:42:10', NULL, 'DISCARD');
 INSERT INTO inventory_updates(medication_id, user_activity_id, quantity_changed_by, resulting_total_quantity, timestamp, transaction_id, activity_type) VALUES (3, 8, -500, 0, '2024-09-12 11:00:40', NULL, 'DISCARD');
 INSERT INTO inventory_updates(medication_id, user_activity_id, quantity_changed_by, resulting_total_quantity, timestamp, transaction_id, activity_type) VALUES (2, 21, -1, -501, '2024-09-30 14:35:00', 1, 'FILLPRESC');

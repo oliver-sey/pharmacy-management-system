@@ -248,7 +248,7 @@ class InventoryUpdateResponse(BaseModel):
     medication_name: Optional[str] = None
     timestamp: Optional[datetime] = None
     resulting_total_quantity: int = Field(..., example=100) 
-   
+
 
 # **NOTE: we will not be allowing updating or deleting inventory_updates
 
@@ -256,26 +256,54 @@ class InventoryUpdateResponse(BaseModel):
 # endregion
 # region User Activities
 class UserActivityCreate(BaseModel):
-    activity: UserActivityType # the activity type, an enum which can be "Login", "Logout", "Unlock Account", "Inventory Update"
+    activity_type: UserActivityType # the activity type, an enum which can be "Login", "Logout", "Unlock Account", "Inventory Update"
     # TODO: let the database set the timestamp to the current time?
 
 class UserActivityResponse(BaseModel):
     id: int
     user_id: int
-    activity: UserActivityType # the activity type, an enum
+    activity_type: UserActivityType # the activity type, an enum
     timestamp: datetime
 
+# endregion
+# region Transaction Items
+
+# this requires the transaction_id, just need to make the transaction first, 
+# and then the associated transaction_items once you have the transaction_id
+class TransactionItemCreate(BaseModel):
+    medication_id: int
+    quantity: int
+
+
+class TransactionItemResponse(BaseModel):
+    id: int
+    transaction_id: int
+    medication_id: int
+    quantity: int
+    subtotal_price: float
+
+    class Config:
+        from_attributes = True
+
+
+# endregion
+# region Transactions
 class TransactionCreate(BaseModel):
-    user_id: int
-    patient_id: Optional[int] = None
+    # get user_id from token
+    # patient_id is required
+    patient_id: int
     payment_method: str
+    transaction_items: list[TransactionItemCreate]
 
 class TransactionResponse(BaseModel):
     id: int
     user_id: int
-    patient_id: Optional[int] = None
+    patient_id: int
     timestamp: datetime
     payment_method: str
+    total_price: float
+
+    transaction_items: list[TransactionItemResponse]
 
     class Config:
-        from_attributes = True 
+        from_attributes = True

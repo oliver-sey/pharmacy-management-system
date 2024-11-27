@@ -100,47 +100,47 @@ INSERT INTO patients(first_name, last_name, date_of_birth, address, phone_number
 -- medications table
 
 INSERT INTO medications(name, dosage, quantity, prescription_required, expiration_date, dollars_per_unit) 
-VALUES('Ibuprofen', '200 mg', 500, FALSE, '2025-05-10', 0.1);
+VALUES('Ibuprofen', '200 mg', 500, FALSE, '2025-05-10', 0.15); -- id #1
 INSERT INTO medications(name, dosage, quantity, prescription_required, expiration_date, dollars_per_unit) 
-VALUES('Amoxicillin', '500 mg', 200, TRUE, '2024-12-01', 2);
+VALUES('Amoxicillin', '500 mg', 200, TRUE, '2024-12-01', 0.3); -- id #2
 INSERT INTO medications(name, dosage, quantity, prescription_required, expiration_date, dollars_per_unit) 
-VALUES('Lipitor', '20 mg', 300, TRUE, '2026-03-15', 0.75);
+VALUES('Lipitor', '20 mg', 300, TRUE, '2026-03-15', 0.5); -- id #3
 INSERT INTO medications(name, dosage, quantity, prescription_required, expiration_date, dollars_per_unit) 
-VALUES('Acetaminophen', '500 mg', 1000, FALSE, '2025-11-30', 0.08);
+VALUES('Acetaminophen', '500 mg', 1000, FALSE, '2025-11-30', 0.1); -- id #4
 INSERT INTO medications(name, dosage, quantity, prescription_required, expiration_date, dollars_per_unit) 
-VALUES('Aspirin', '100 mg', 500, FALSE, '2024-07-22', 0.05);
+VALUES('Aspirin', '100 mg', 500, FALSE, '2024-07-22', 0.09); -- id #5
 INSERT INTO medications(name, dosage, quantity, prescription_required, expiration_date, dollars_per_unit) 
-VALUES('Warfarin', '2.5 grams', 150, TRUE, '2024-10-10', 1.5);
+VALUES('Warfarin', '2.5 grams', 150, TRUE, '2024-10-10', 0.6); -- id #6
 INSERT INTO medications(name, dosage, quantity, prescription_required, expiration_date, dollars_per_unit) 
-VALUES('Metformin', '850 mg', 400, TRUE, '2025-02-14', 0.5);
+VALUES('Metformin', '850 mg', 400, TRUE, '2025-02-14', 0.03); -- id #7
 INSERT INTO medications(name, dosage, quantity, prescription_required, expiration_date, dollars_per_unit) 
-VALUES('Melatonin', '20mL', 5, FALSE, '2024-10-31', 0.0004);
+VALUES('Melatonin', '20mL', 5, FALSE, '2024-10-31', 0.08); -- id #8
 INSERT INTO medications(name, dosage, quantity, prescription_required, expiration_date, dollars_per_unit) 
-VALUES('Dramamine', '1000 mg', 1200, FALSE, '2021-10-01', 0.51);
+VALUES('Dramamine', '1000 mg', 1200, FALSE, '2021-10-01', 0.07); -- id #9
 INSERT INTO medications(name, dosage, quantity, prescription_required, expiration_date, dollars_per_unit) 
-VALUES('Ibuprofen', '200 mg', 500, FALSE, '2025-05-10', 0.1);
+VALUES('Ibuprofen', '200 mg', 500, FALSE, '2025-05-10', 0.09); -- id #10
 INSERT INTO medications(name, dosage, quantity, prescription_required, expiration_date, dollars_per_unit) 
-VALUES('Amoxicillin', '500 mg', 100, TRUE, '2024-12-01', 2);
+VALUES('Amoxicillin', '600 mg', 100, TRUE, '2024-12-01', 0.2); -- id #11
 INSERT INTO medications(name, dosage, quantity, prescription_required, expiration_date, dollars_per_unit) 
-VALUES('Lipitor', '20 mg', 300, TRUE, '2026-03-15', 0.75);
+VALUES('Lipitor', '20 mg', 300, TRUE, '2026-03-15', 0.1); -- id #12
 INSERT INTO medications(name, dosage, quantity, prescription_required, expiration_date, dollars_per_unit) 
-VALUES('Acetaminophen', '500 mg', 1000, FALSE, '2025-11-30', 0.08);
+VALUES('Acetaminophen', '1000 mg', 1000, FALSE, '2025-11-30', 0.20); -- id #13
 INSERT INTO medications(name, dosage, quantity, prescription_required, expiration_date, dollars_per_unit) 
-VALUES('Aspirin', '100 nanograms', 200, FALSE, '2024-07-22', 0.05);
+VALUES('Aspirin', '100 nanograms', 200, FALSE, '2024-07-22', 0.05); -- id #14
 INSERT INTO medications(name, dosage, quantity, prescription_required, expiration_date, dollars_per_unit) 
-VALUES('Hydrochlorothiazide', '12.5 mg', 600, TRUE, '2026-02-18', 0.5);
+VALUES('Hydrochlorothiazide', '12.5 mg', 600, TRUE, '2026-02-18', 0.30); -- id #15
 INSERT INTO medications(name, dosage, quantity, prescription_required, expiration_date, dollars_per_unit) 
-VALUES('Simvastatin', '40 mg', 1, TRUE, '2025-09-20', 1.1);
+VALUES('Simvastatin', '40 mg', 1, TRUE, '2025-09-20', 0.2); -- id #16
 INSERT INTO medications(name, dosage, quantity, prescription_required, expiration_date, dollars_per_unit) 
-VALUES('Metformin', '1000 mg', 400, TRUE, '2026-05-23', 0.25);
+VALUES('Metformin', '1000 mg', 400, TRUE, '2026-05-23', 0.03); -- id #17
 INSERT INTO medications(name, dosage, quantity, prescription_required, expiration_date, dollars_per_unit) 
-VALUES('Prednisone', '10 mg', 500, TRUE, '2024-10-05', 1.5);
+VALUES('Prednisone', '10 mg', 500, TRUE, '2024-10-05', 0.2); -- id #18
 INSERT INTO medications(name, dosage, quantity, prescription_required, expiration_date, dollars_per_unit) 
-VALUES('Warfarin', '5g', 100, TRUE, '2025-04-20', 0.8);
+VALUES('Warfarin', '5g', 100, TRUE, '2025-04-20', 0.06); -- id #19
 INSERT INTO medications(name, dosage, quantity, prescription_required, expiration_date, dollars_per_unit) 
-VALUES('Losartan', '50 grams', 200, TRUE, '2024-11-11', 1);
+VALUES('Losartan', '50 grams', 200, TRUE, '2024-11-11', 0.03); -- id #20
 INSERT INTO medications(name, dosage, quantity, prescription_required, expiration_date, dollars_per_unit) 
-VALUES('Levothyroxine', '75 mg', 300, TRUE, '2026-01-01', 0.55);
+VALUES('Levothyroxine', '75 mg', 300, TRUE, '2026-01-01', 0.04); -- id #21
 
 
 
@@ -177,61 +177,148 @@ VALUES (21, 2, null, '2024-09-29', null, 17, 'Dr. Carter', 90);
 -- user_activities table
 
 
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (21, 'INVENTORY_UPDATE', '2024-07-18 10:47:00');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (24, 'LOGIN', '2024-08-06 07:55:35');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (5, 'INVENTORY_UPDATE', '2024-08-07 16:05:00');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (2, 'LOGIN', '2024-09-01 11:00:18');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (2, 'UNLOCK_ACCOUNT', '2024-09-02 09:10:20');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (7, 'INVENTORY_UPDATE', '2024-09-03 09:15:00');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (13, 'INVENTORY_UPDATE', '2024-09-03 12:25:00');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (1, 'LOGIN', '2024-09-11 08:24:10');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (5, 'LOGIN', '2024-09-12 08:20:00');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (8, 'LOGIN', '2024-09-12 11:00:20');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (2, 'LOGOUT', '2024-09-12 11:45:30');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (8, 'INVENTORY_UPDATE', '2024-09-12 12:35:22');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (8, 'LOGOUT', '2024-09-12 12:37:50');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (19, 'INVENTORY_UPDATE', '2024-09-13 12:23:00');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (12, 'LOGIN', '2024-09-25 08:13:30');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (12, 'INVENTORY_UPDATE', '2024-09-25 08:45:30');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (12, 'LOGOUT', '2024-09-25 09:01:30');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (24, 'LOGIN', '2024-09-26 09:05:10');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (24, 'LOGIN', '2024-09-26 09:05:31');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (1, 'LOGOUT', '2024-09-26 10:15:10');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (5, 'LOGOUT', '2024-09-26 17:20:55');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (10, 'INVENTORY_UPDATE', '2024-09-27 11:53:00');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (15, 'INVENTORY_UPDATE', '2024-09-27 17:14:00');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (14, 'LOGIN', '2024-09-29 09:00:05');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (12, 'INVENTORY_UPDATE', '2024-09-29 10:12:45');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (19, 'INVENTORY_UPDATE', '2024-09-29 15:10:00');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (14, 'LOGOUT', '2024-09-29 17:45:20');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (20, 'LOGIN', '2024-09-30 08:00:12');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (1, 'LOGIN', '2024-09-30 08:01:00');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (3, 'INVENTORY_UPDATE', '2024-09-30 08:15:40');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (3, 'INVENTORY_UPDATE', '2024-09-30 08:20:10');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (14, 'INVENTORY_UPDATE', '2024-09-30 10:23:00');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (21, 'INVENTORY_UPDATE', '2024-09-30 14:35:00');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (9, 'INVENTORY_UPDATE', '2024-09-30 14:40:00');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (8, 'INVENTORY_UPDATE', '2024-09-30 16:52:00');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (1, 'LOGOUT', '2024-09-30 17:05:32');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (20, 'LOGOUT', '2024-09-30 18:00:25');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (19, 'INVENTORY_UPDATE', '2024-10-01 09:32:00');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (16, 'INVENTORY_UPDATE', '2024-10-01 09:57:00');
-INSERT INTO user_activities (user_id, activity, timestamp) VALUES (17, 'INVENTORY_UPDATE', '2024-10-02 14:12:00');
--- transactions table
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (21, 'INVENTORY_UPDATE', '2024-07-18 10:47:00');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (24, 'LOGIN', '2024-08-06 07:55:35');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (5, 'INVENTORY_UPDATE', '2024-08-07 16:05:00');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (2, 'LOGIN', '2024-09-01 11:00:18');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (2, 'UNLOCK_ACCOUNT', '2024-09-02 09:10:20');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (7, 'INVENTORY_UPDATE', '2024-09-03 09:15:00');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (13, 'INVENTORY_UPDATE', '2024-09-03 12:25:00');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (1, 'LOGIN', '2024-09-11 08:24:10');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (5, 'LOGIN', '2024-09-12 08:20:00');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (8, 'LOGIN', '2024-09-12 11:00:20');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (2, 'LOGOUT', '2024-09-12 11:45:30');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (8, 'INVENTORY_UPDATE', '2024-09-12 12:35:22');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (8, 'LOGOUT', '2024-09-12 12:37:50');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (19, 'INVENTORY_UPDATE', '2024-09-13 12:23:00');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (12, 'LOGIN', '2024-09-25 08:13:30');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (12, 'INVENTORY_UPDATE', '2024-09-25 08:45:30');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (12, 'LOGOUT', '2024-09-25 09:01:30');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (24, 'LOGIN', '2024-09-26 09:05:10');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (24, 'LOGIN', '2024-09-26 09:05:31');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (1, 'LOGOUT', '2024-09-26 10:15:10');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (5, 'LOGOUT', '2024-09-26 17:20:55');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (10, 'INVENTORY_UPDATE', '2024-09-27 11:53:00');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (15, 'INVENTORY_UPDATE', '2024-09-27 17:14:00');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (14, 'LOGIN', '2024-09-29 09:00:05');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (12, 'INVENTORY_UPDATE', '2024-09-29 10:12:45');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (19, 'INVENTORY_UPDATE', '2024-09-29 15:10:00');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (14, 'LOGOUT', '2024-09-29 17:45:20');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (20, 'LOGIN', '2024-09-30 08:00:12');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (1, 'LOGIN', '2024-09-30 08:01:00');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (3, 'INVENTORY_UPDATE', '2024-09-30 08:15:40');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (3, 'INVENTORY_UPDATE', '2024-09-30 08:20:10');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (14, 'INVENTORY_UPDATE', '2024-09-30 10:23:00');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (21, 'INVENTORY_UPDATE', '2024-09-30 14:35:00');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (9, 'INVENTORY_UPDATE', '2024-09-30 14:40:00');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (8, 'INVENTORY_UPDATE', '2024-09-30 16:52:00');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (1, 'LOGOUT', '2024-09-30 17:05:32');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (20, 'LOGOUT', '2024-09-30 18:00:25');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (19, 'INVENTORY_UPDATE', '2024-10-01 09:32:00');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (16, 'INVENTORY_UPDATE', '2024-10-01 09:57:00');
+INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (17, 'INVENTORY_UPDATE', '2024-10-02 14:12:00');
 
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (5, 1, '2024-09-30 14:35:18', 'credit card');
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (6, 2, '2024-09-13 12:23:57', 'cash');
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (7, 3, '2024-08-07 16:05:32', 'debit card');
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (8, 1, '2024-09-30 16:52:10', 'cash');
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (6, 4, '2024-09-03 09:15:43', 'credit card');
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (9, 1, '2024-07-18 10:47:29', 'debit card');
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (10, 5, '2024-09-27 11:53:02', 'cash');
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (11, 6, '2024-10-01 09:32:12', 'credit card');
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (12, 7, '2024-09-30 14:40:37', 'debit card');
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (13, 7, '2024-09-03 12:25:15', 'cash');
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (15, 3, '2024-09-27 17:14:29', 'debit card');
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (16, 1, '2024-10-01 09:57:41', 'cash');
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (14, 1, '2024-10-02 14:12:34', 'credit card');
+
+-- transactions table
+-- ****NOTE: total price includes tax but the subtotal prices in transaction_items do not!!!!!
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method, total_price) VALUES (5, 1, '2024-09-30 14:35:18', 'CASH', 25.48);
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method, total_price) VALUES (6, 2, '2024-09-13 12:23:57', 'CREDIT_CARD', 8.10);
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method, total_price) VALUES (7, 3, '2024-08-07 16:05:32', 'DEBIT_CARD', 1.62);
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method, total_price) VALUES (8, 1, '2024-09-30 16:52:10', 'CREDIT_CARD', 7.61);
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method, total_price) VALUES (6, 4, '2024-09-03 09:15:43', 'DEBIT_CARD', 4.32);
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method, total_price) VALUES (9, 1, '2024-07-18 10:47:29', 'DEBIT_CARD', 21.06);
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method, total_price) VALUES (10, 5, '2024-09-27 11:53:02', 'CASH', 9.72);
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method, total_price) VALUES (11, 6, '2024-10-01 09:32:12', 'CREDIT_CARD', 200.88);
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method, total_price) VALUES (12, 7, '2024-09-30 14:40:37', 'CREDIT_CARD', 3.78);
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method, total_price) VALUES (13, 7, '2024-09-03 12:25:15', 'CASH', 4.32);
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method, total_price) VALUES (15, 3, '2024-09-27 17:14:29', 'CREDIT_CARD', 24.94);
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method, total_price) VALUES (16, 1, '2024-10-01 09:57:41', 'CASH', 3.88);
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method, total_price) VALUES (14, 1, '2024-10-02 14:12:34', 'CREDIT_CARD', 3.24);
+
+
+-- transaction_items table
+-- Transaction 1
+-- Total price (before tax): $23.6
+-- Total price (with tax): 25.488 --> (truncate) $25.48
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (1, 1, 100, 15.0); -- Ibuprofen
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (1, 2, 10, 3.0); -- Amoxicillin
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (1, 4, 20, 2.0); -- Acetaminophen
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (1, 5, 40, 3.6); -- Aspirin
+
+-- Transaction 2
+-- Total price (before tax): $7.5
+-- Total price (with tax): 8.10 --> (truncate) $8.10
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (2, 2, 10, 3.0); -- Amoxicillin
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (2, 5, 50, 4.5); -- Aspirin
+
+-- Transaction 3
+-- Total price (before tax): $1.5
+-- Total price (with tax): 1.62 --> (truncate) $1.62
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (3, 3, 15, 1.5); -- Lipitor
+
+-- Transaction 4
+-- Total price (before tax): $7.05
+-- Total price (with tax): 7.614 --> (truncate) $7.61
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (4, 6, 5, 3.0);  -- Warfarin
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (4, 1, 25, 3.75); -- Ibuprofen
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (4, 7, 10, 0.3); -- Metformin
+
+-- Transaction 5
+-- Total price (before tax): $4.0
+-- Total price (with tax): 4.32 --> (truncate) $4.32
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (5, 4, 40, 4.0); -- Acetaminophen
+
+-- Transaction 6
+-- Total price (before tax): $19.5
+-- Total price (with tax): 21.06 --> (truncate) $21.06
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (6, 8, 100, 8.0);  -- Melatonin
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (6, 9, 100, 7.0); -- Dramamine
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (6, 10, 50, 4.5); -- Ibuprofen
+
+-- Transaction 7
+-- Total price (before tax): $9.0
+-- Total price (with tax): 9.72 --> (truncate) $9.72
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (7, 11, 20, 6.0); -- Amoxicillin
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (7, 12, 30, 3.0); -- Lipitor
+
+-- Transaction 8
+-- Total price (before tax): $186
+-- Total price (with tax): 200.88 --> (truncate) $200.88
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (8, 11, 20, 6.0); -- Amoxicillin
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (8, 12, 300, 150.0); -- Lipitor
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (8, 13, 250, 25.0); -- Acetaminophen
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (8, 14, 100, 5.0); -- Aspirin
+
+-- Transaction 9
+-- Total price (before tax): $3.5
+-- Total price (with tax): 3.78 --> (truncate) $3.78
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (9, 15, 5, 1.5);  -- Hydrochlorothiazide
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (9, 16, 10, 2.0);  -- Simvastatin
+
+-- Transaction 10
+-- Total price (before tax): $4.0
+-- Total price (with tax): 4.32 --> (truncate) $4.32
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (10, 18, 20, 4.0); -- Prednisone
+
+-- Transaction 11
+-- Total price (before tax): $23.1
+-- Total price (with tax): 24.948 --> (truncate) $24.94
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (11, 19, 10, 6.0); -- Warfarin
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (11, 20, 30, 9.0); -- Losartan
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (11, 10, 90, 8.1); -- Ibuprofen
+
+-- Transaction 12
+-- Total price (before tax): $3.6
+-- Total price (with tax): 3.888 --> (truncate) $3.88
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (12, 21, 40, 1.6); -- Levothyroxine
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (12, 8, 25, 2.0); -- Melatonin
+
+-- Transaction 13
+-- Total price (before tax): $3.0
+-- Total price (with tax): 3.24 --> (truncate) $3.24
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (13, 11, 15, 3.0); -- Amoxicillin
+
+
 
 
 -- inventory_updates table

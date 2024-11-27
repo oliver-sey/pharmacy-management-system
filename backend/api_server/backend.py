@@ -12,7 +12,7 @@ from passlib.context import CryptContext
 from typing import Optional
 from .database import SessionLocal, engine, Base
 from .schema import (
-    Token, TokenData, UserActivityCreate, UserCreate, UserEmailResponse, UserLockRequest, UserResponse, 
+    Token, TokenData, TransactionItemCreate, TransactionItemResponse, UserActivityCreate, UserCreate, UserEmailResponse, UserLockRequest, UserResponse, 
     UserLogin, UserSetPassword, UserToReturn, UserUpdate, PatientCreate, PatientUpdate, 
     PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, InventoryUpdateCreate, 
     InventoryUpdateResponse, UserActivityResponse, TransactionResponse, TransactionCreate, MedicationUpdate
@@ -577,7 +577,7 @@ def change_user_lock_status(user_id: int, db: Session = Depends(get_db), current
     if is_locked == False:
         db_user_activity = models.UserActivity(
             user_id=user_id,
-            activity=models.UserActivityType.UNLOCK_ACCOUNT,
+            activity_type=models.UserActivityType.UNLOCK_ACCOUNT,
             timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it  
         )
         db.add(db_user_activity)
@@ -932,6 +932,40 @@ def fill_prescription(prescription_id: int, db: Session = Depends(get_db), curre
     return db_prescription
 
 
+# endregion
+# region Non-Prescription items
+
+# selling non-prescription items
+@app.put("/non-prescription/{id}", response_model=InventoryUpdateResponse)
+def sell_non_prescription_item(id: int, medication_update: schema.MedicationUpdate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+    # make sure only pharmacy managers or pharmacists can call this endpoint
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
+
+    # query medication with id and make sure it's prescription-required is False
+    db_medication = db.query(models.Medication).filter(models.Medication.id == id).first()
+    if db_medication is None:
+        raise HTTPException(status_code=404, detail="Medication not found")
+    elif db_medication.prescription_required:
+        raise HTTPException(status_code=400, detail="This medication requires a prescription to be sold")
+    
+    # update the medication
+    for key, value in medication_update.model_dump().items():
+        if value is not None:
+            setattr(db_medication, key, value)
+
+    # commit the changes
+    db.commit()
+    db.refresh(db_medication)
+
+    #create inventory update
+    inventory_update = create_inventory_update(inventory_update=InventoryUpdateCreate(
+        medication_id=id,
+        quantity_changed_by= - medication_update.quantity,
+        activity_type=models.InventoryUpdateType.SELLNONPRESC
+    ), db=db, current_user=current_user)
+    return inventory_update
+
+
 
 # endregion
 # region Inventory Updates
@@ -1135,48 +1169,73 @@ def get_all_user_activities(db: Session = Depends(get_db), current_user: UserToR
     return activities
 
 
-# selling non-prescription items
-@app.put("/non-prescription/{id}", response_model=InventoryUpdateResponse)
-def sell_non_prescription_item(id: int, medication_update: schema.MedicationUpdate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
-    # make sure only pharmacy managers or pharmacists can call this endpoint
-    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
-
-    # query medication with id and make sure it's prescription-required is False
-    db_medication = db.query(models.Medication).filter(models.Medication.id == id).first()
-    if db_medication is None:
-        raise HTTPException(status_code=404, detail="Medication not found")
-    elif db_medication.prescription_required:
-        raise HTTPException(status_code=400, detail="This medication requires a prescription to be sold")
-    
-    # update the medication
-    for key, value in medication_update.model_dump().items():
-        if value is not None:
-            setattr(db_medication, key, value)
-
-    # commit the changes
-    db.commit()
-    db.refresh(db_medication)
-
-    #create inventory update
-    inventory_update = create_inventory_update(inventory_update=InventoryUpdateCreate(
-        medication_id=id,
-        quantity_changed_by= - medication_update.quantity,
-        activity_type=models.InventoryUpdateType.SELLNONPRESC
-    ), db=db, current_user=current_user)
-    return inventory_update
+# endregion
+# region Transaction CRUD
 
 # transaction crud for checkout, don't have update or delete since we are not deleting or updating transaction
-# createa a transaction
+# create a transaction
 @app.post("/transaction", response_model=TransactionResponse)
 def create_transaction(transaction: TransactionCreate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
     # make sure only pharmacy managers or pharmacists can call this endpoint
-    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist", "Cashier"])
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
+
+    # TODO: could possibly calculate total cost as a later feature
+    # Calculate the total cost of items in the transaction
+    total_cost = 0
+    for item in transaction.transaction_items:
+        medication = db.query(models.Medication).filter(models.Medication.id == item.medication_id).first()
+        if not medication:
+            raise HTTPException(status_code=404, detail=f"Medication with ID {item.medication_id} not found")
+        total_cost += medication.dollars_per_unit * item.quantity
+
+
+    # add 8% tax to the total cost
+    total_cost *= 1.08
 
     # create a new transaction
-    db_transaction = transaction.model_dump()
+    # but ignore the transaction_items field since we will create those separately
+    db_transaction = models.Transaction(
+        # get the user_id from the current_user
+        user_id=current_user.id,
+        patient_id=transaction.patient_id,
+        total_cost=total_cost,
+        timestamp=datetime.now(timezone.utc), # set the timestamp in UTC so timezones don't affect it
+        payment_method=transaction.payment_method
+    )
+
+    # add the transaction to the database
     db.add(db_transaction)
     db.commit()
     db.refresh(db_transaction)
+
+    # make a transaction_items entry for each of the items that got passed to this endpoint
+    # pass the transaction_id of the transaction we just created
+    for transaction_item in transaction.transaction_items:
+        create_transaction_item(
+            transaction_item=transaction_item, transaction_id=db_transaction.id, db=db, current_user=current_user
+        )
+
+        # get the medication from the transaction_item
+        medication = db.query(models.Medication).filter(models.Medication.id == transaction_item.medication_id).first()
+        # if it's a prescription item, just make a user_activity entry
+        # the inventory_update was already created when the prescription was filled
+        if medication.prescription_required:
+            # Create a user activity for selling a prescription item
+            user_activity_create = UserActivityCreate(activity_type=models.UserActivityType.SELL_PRESCRIPTION)
+            create_user_activity(user_activity_create, db, current_user)
+
+        # if it's a non-prescription item, make an inventory update
+        else:
+            # Create an inventory update (which will create a user activity)
+            # TODO: call create_inventory_update_with_quantity instead???
+            inventory_update = InventoryUpdateCreate(
+                medication_id=medication.id,
+                transaction_id=db_transaction.id,
+                quantity_changed_by=-transaction_item.quantity,
+                activity_type=models.InventoryUpdateType.SELLNONPRESC,
+            )
+            create_inventory_update(inventory_update=inventory_update, db=db, current_user=current_user)
+
     return db_transaction
 
 # get a transaction
@@ -1203,12 +1262,68 @@ def get_transactions(db: Session = Depends(get_db), current_user: UserToReturn =
     return transactions
 
     
-#Returning all transactions.
-@app.get("/transaction-report", response_model=List[TransactionResponse])
-def get_transaction_report(db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
-    # Restrict access to authorized roles
-    validate_user_type(current_user, ["Finance Manager", "Pharmacy Manager"])
+# endregion
+# region Transaction Items CRUD
+# transaction items crud for checkout, don't have update or delete since we are not deleting or updating transaction items
 
-    # Query all transactions
-    transactions = db.query(Transaction).all()
-    return transactions
+# create a transaction item
+# @app.post("/transaction-item", response_model=TransactionItemResponse)
+# def create_transaction_item(transaction_item: TransactionItemCreate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+def create_transaction_item(transaction_item: TransactionItemCreate, transaction_id: int, db: Session, current_user: UserToReturn):
+    # allow all user types 
+
+    # calculate the subtotal price
+    # get the medication from the transaction_item
+    medication = db.query(models.Medication).filter(models.Medication.id == transaction_item.medication_id).first()
+
+    subtotal_price = medication.dollars_per_unit * transaction_item.quantity
+
+    # no tax on the subtotal price, but there will be in the total_price in the transaction
+
+    # create a new transaction item
+    db_transaction_item = models.TransactionItem(
+        # get the transaction_id from the parameter, from the transaction that we just created
+        transaction_id=transaction_id,
+        medication_id=transaction_item.medication_id,
+        quantity=transaction_item.quantity,
+        subtotal_price=subtotal_price
+    )
+
+    db.add(db_transaction_item)
+    db.commit()
+    db.refresh(db_transaction_item)
+    return db_transaction_item
+
+
+# get a transaction item
+@app.get("/transaction-item/{transaction_item_id}", response_model=TransactionItemResponse)
+def get_transaction_item(transaction_item_id: int, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+    # allow all user types 
+
+    # there will only be one transaction item with the matching id (since the id is unique), so using first() is fine
+    db_transaction_item = db.query(models.TransactionItem).filter(models.TransactionItem.id == transaction_item_id).first()
+
+    if db_transaction_item is None:
+        raise HTTPException(status_code=404, detail="Transaction item not found")
+    
+    return db_transaction_item
+
+
+# get all transaction items
+@app.get("/transaction-items", response_model=List[TransactionItemResponse])
+def get_transaction_items(transaction_id: Optional[int] = Query(None), db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+    '''
+    endpoint to get transaction_items with optional transaction_id.
+    If transaction_id is provided, only transaction_items for that patient are returned.
+    call like so: /transaction-items?transaction_id=1 or /transaction-items to get all transaction_items
+    '''
+    # allow all user types 
+
+    # if transaction_id is provided, return all transaction_items for that transaction
+    if transaction_id:
+        transaction_items = db.query(models.TransactionItem).filter(models.TransactionItem.transaction_id == transaction_id).all()
+    # otherwise just return all transaction items
+    else:
+        transaction_items = db.query(models.TransactionItem).all()
+
+    return transaction_items

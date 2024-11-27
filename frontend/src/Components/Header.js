@@ -3,6 +3,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { NotificationContext } from './NotificationProvider'; // Import your notification context if available
 import "../Styles/Notification.css";
+import "../Styles/Header.css";
 
 const Header = () => {
     const navigate = useNavigate();
@@ -81,8 +82,18 @@ const Header = () => {
                     </li>
                 )}
 
+                {/* link to cart/checkout page */}
+                {/* all users can access this */}
+                {token && (
+                    <li>
+                        <Link to="/checkout">
+                            Checkout
+                        </Link>
+                    </li>
+                )}
+
                 {/* logout button only when logged in */}
-                {token && <li><button onClick={handleLogout}>Logout</button></li>}
+                {token && <li className='logout-container'><button onClick={handleLogout}>Logout</button></li>}
             </ul>
         </nav>
     );

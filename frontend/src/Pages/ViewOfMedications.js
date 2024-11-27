@@ -363,9 +363,10 @@ function ViewOfMedications() {
 		  };
 		
 		  // Set the headers
-		  doc.text('Medication ID', 10, yPosition);
-		  doc.text('Medication Name', 40, yPosition);
-		  doc.text('Quantity Changed', 100, yPosition);
+		  doc.text('ID', 10, yPosition);
+		  doc.text('Medication Name', 30, yPosition);
+		  doc.text('Quantity Changed', 70, yPosition);
+		  doc.text('Quantity Left', 110, yPosition);
 		  doc.text('Timestamp', 150, yPosition);
 		
 		  yPosition += 10; // Space after header row
@@ -376,12 +377,14 @@ function ViewOfMedications() {
 			const medicationIdText = truncateText(update.medication_id.toString(), maxLength.medicationId);
 			const medicationNameText = truncateText(update.medication_name || 'Unknown Medication', maxLength.medicationName);
 			const quantityChangedText = truncateText(update.quantity_changed_by.toString(), maxLength.quantityChanged);
+			const quantityLeftText = truncateText(update.resulting_total_quantity.toString(), maxLength.quantityChanged);
 			const timestampText = truncateText(update.timestamp ? new Date(update.timestamp).toLocaleString() : 'N/A', maxLength.timestamp);
 		
 			// Add the truncated text to the PDF
 			doc.text(medicationIdText, 10, yPosition);
-			doc.text(medicationNameText, 40, yPosition);
-			doc.text(quantityChangedText, 100, yPosition);
+			doc.text(medicationNameText, 30, yPosition);
+			doc.text(quantityChangedText, 70, yPosition);
+			doc.text(quantityLeftText, 110, yPosition);
 			doc.text(timestampText, 150, yPosition);
 		
 			// Move to the next row

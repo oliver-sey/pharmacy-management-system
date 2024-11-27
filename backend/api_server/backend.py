@@ -1177,11 +1177,27 @@ def create_transaction(transaction: TransactionCreate, db: Session = Depends(get
             transaction_item=transaction_item, transaction_id=db_transaction.id, db=db, current_user=current_user
         )
 
-    # Create a user activity
-    # TODO: ***************fix the user_activity type
-    user_activity = UserActivityCreate(activity_type=models.UserActivityType.OTHER)
-    create_user_activity(user_activity=user_activity, db=db, current_user=current_user)
-    
+        # get the medication from the transaction_item
+        medication = db.query(models.Medication).filter(models.Medication.id == transaction_item.medication_id).first()
+        # if it's a prescription item, just make a user_activity entry
+        # the inventory_update was already created when the prescription was filled
+        if medication.prescription_required:
+            # Create a user activity for selling a prescription item
+            user_activity_create = UserActivityCreate(activity_type=models.UserActivityType.SELL_PRESCRIPTION)
+            create_user_activity(user_activity_create, db, current_user)
+
+        # if it's a non-prescription item, make an inventory update
+        else:
+            # Create an inventory update (which will create a user activity)
+            # TODO: call create_inventory_update_with_quantity instead???
+            inventory_update = InventoryUpdateCreate(
+                medication_id=medication.id,
+                transaction_id=db_transaction.id,
+                quantity_changed_by=-transaction_item.quantity,
+                activity_type=models.InventoryUpdateType.SELLNONPRESC,
+            )
+            create_inventory_update(inventory_update=inventory_update, db=db, current_user=current_user)
+
     return db_transaction
 
 # get a transaction

@@ -104,6 +104,10 @@ class UserActivityType(PyEnum):
     # including all the possible types that we are storing in inventory_updates
     #  (Add medication, Discard medication, Fill prescription, Sell non-prescription item)
     INVENTORY_UPDATE = "Inventory Update"
+    # for selling a prescription item, since we don't make an inventory_update when it gets sold (only when it gets filled)
+    # so there would otherwise be no record of it being sold
+    # which would be odd since non-prescription items we have a record of it being sold (because an inventory_update gets created)
+    SELL_PRESCRIPTION = "Sell Prescription Medication"
     CREATE_USER = "Create User"
     DELETE_USER = "Delete User"
     UPDATE_USER = "Update User"

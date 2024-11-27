@@ -1144,6 +1144,16 @@ def create_transaction(transaction: TransactionCreate, db: Session = Depends(get
     # make sure only pharmacy managers or pharmacists can call this endpoint
     validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
 
+    # TODO: could possibly calculate total cost as a later feature
+    # Calculate the total cost of items in the transaction
+    # total_cost = 0
+    # for item in transaction.transaction_items:
+    #     medication = db.query(models.Medication).filter(models.Medication.id == item.medication_id).first()
+    #     if not medication:
+    #         raise HTTPException(status_code=404, detail=f"Medication with ID {item.medication_id} not found")
+    #     total_cost += medication.dollars_per_unit * item.quantity
+
+
     # create a new transaction
     # but ignore the transaction_items field since we will create those separately
     db_transaction = models.Transaction(

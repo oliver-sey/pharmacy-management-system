@@ -194,7 +194,8 @@ class TransactionItem(Base):
     # relationship to the transaction that this is a part of
     transaction_id = Column(Integer, ForeignKey("transactions.id"))
     # the medication that got sold
-    medication_id = Column(Integer, ForeignKey("medications.id"))
+    # allow it to be nullable so we can delete the medication
+    medication_id = Column(Integer, ForeignKey("medications.id"), nullable=True)
     # the number of pills of this medication that got sold
     quantity = Column(Integer)
 

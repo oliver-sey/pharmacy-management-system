@@ -2,6 +2,19 @@
 
 Developed in Fall 2024 by Skyler DeVaugh, Katelyn McLean, Oliver Seymour, Hsinwei Lin, CJ Reda, and Dalia Castro
 
+## Table of Contents
+
+<!-- 3. [Tech Stack](#tech-stack) -->
+1. [Overview](#overview)
+2. [Features](#features)
+3. [Setup Instructions](#setup-instructions)
+4. [Code Structure](#code-structure)
+5. [Architecture](#architecture)
+6. [Frontend](#frontend)
+7. [Backend](#backend)
+8. [API Documentation](#api-documentation)
+9. [Screenshots](#screenshots)
+
 ## Overview
 
 This is a complete Web App for managing a modern pharmacy, including managing prescriptions, inventory, employee accounts, and more, and selling items to customers with a point-of-sale.
@@ -21,26 +34,17 @@ Key users of this app include:
 - Pharmacy technicians: Can view medication inventory and checkout customers
 - Cashiers: can checkout customers
 
-## Table of Contents
-
-<!-- 3. [Tech Stack](#tech-stack) -->
-1. [Overview](#overview)
-2. [Features](#features)
-3. [Setup Instructions](#setup-instructions)
-4. [Code Structure](#code-structure)
-5. [Architecture](#architecture)
-6. [Frontend](#frontend)
-7. [Backend](#backend)
-8. [API Documentation](#api-documentation)
-9. [Screenshots](#screenshots)
 
 ## Features
 
 ### User-Facing Features
 
 <!-- TODO!!! -->
-- **Feature 1**: Describe feature (e.g., "User authentication with role-based access control").
+- **Feature 1**: User authentication with role-based access control
+    We used JWT (JSON Web Token) to perform user authentication and role-based access control. Each user will be given a token at login. When user login and perform restricted actions that only allows some pharmacy staff to perform, the backend will check if that user's token has the privillege to do so. If not, will return errors.
+
 - **Feature 2**: Another feature (e.g., "Dynamic data visualization through interactive dashboards").
+
 
 ### Admin Features
 
@@ -128,7 +132,6 @@ The project is organized into the following directories:
 This structure ensures a clear separation of concerns, making the project easy to navigate and maintain.
 
 ## Architecture
-<!-- TODO -->
 
 This project includes a **FastAPI** backend with **SQLAlchemy** models and schema design, a **PostgreSQL** database, a **React** frontend, and the use of **Docker** containers for easy deployment.
 
@@ -201,13 +204,18 @@ For Users:
 For Admins:
 [Briefly describe admin functionalities.]
 Screenshots
-Login Page
 
-Figure 5: Screenshot of the login page.
+Home Page
+![Home page](frontend/src/assets/homepage.png)
+Figure 5: Screenshot of the Home page.
+
+Login Page
+![Login page](frontend/src/assets/loginpage.png)
+Figure 6: Screenshot of the login page.
 
 Dashboard
-
-Figure 6: User dashboard displaying data.
+![Dashboard](frontend/src/assets/dashboard.png)
+Figure 7: User dashboard displaying data.
 
 ## API Documentation
 

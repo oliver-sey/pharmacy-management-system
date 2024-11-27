@@ -242,7 +242,7 @@ class InventoryUpdateResponse(BaseModel):
     medication_name: Optional[str] = None
     timestamp: Optional[datetime] = None
     resulting_total_quantity: int = Field(..., example=100) 
-   
+
 
 # **NOTE: we will not be allowing updating or deleting inventory_updates
 
@@ -259,26 +259,9 @@ class UserActivityResponse(BaseModel):
     activity: UserActivityType # the activity type, an enum
     timestamp: datetime
 
-
-# endregion
-# region Transactions
-class TransactionCreate(BaseModel):
-    user_id: int
-    patient_id: Optional[int] = None
-    payment_method: str
-
-class TransactionResponse(BaseModel):
-    id: int
-    user_id: int
-    patient_id: Optional[int] = None
-    timestamp: datetime
-    payment_method: str
-
-    class Config:
-        from_attributes = True 
-
 # endregion
 # region Transaction Items
+
 
 class TransactionItemCreate(BaseModel):
     transaction_id: int
@@ -291,6 +274,25 @@ class TransactionItemResponse(BaseModel):
     transaction_id: int
     medication_id: int
     quantity: int
+
+    class Config:
+        from_attributes = True
+
+
+# endregion
+# region Transactions
+class TransactionCreate(BaseModel):
+    user_id: int
+    patient_id: Optional[int] = None
+    payment_method: str
+
+
+class TransactionResponse(BaseModel):
+    id: int
+    user_id: int
+    patient_id: Optional[int] = None
+    timestamp: datetime
+    payment_method: str
 
     class Config:
         from_attributes = True

@@ -30,6 +30,7 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     password = Column(String)
     is_locked_out = Column(Boolean, default=True)
+    is_deleted = Column(Boolean, default=False)
 
     # A user can enter many prescriptions
     entered_prescriptions = relationship("Prescription", back_populates="user_entered", foreign_keys="[Prescription.user_entered_id]", cascade="all, delete-orphan")

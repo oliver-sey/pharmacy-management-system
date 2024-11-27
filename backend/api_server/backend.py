@@ -12,7 +12,7 @@ from passlib.context import CryptContext
 from typing import Optional
 from .database import SessionLocal, engine, Base
 from .schema import (
-    Token, TokenData, UserActivityCreate, UserCreate, UserEmailResponse, UserResponse, 
+    Token, TokenData, UserActivityCreate, UserCreate, UserEmailResponse, UserLockRequest, UserResponse, 
     UserLogin, UserSetPassword, UserToReturn, UserUpdate, PatientCreate, PatientUpdate, 
     PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, InventoryUpdateCreate, 
     InventoryUpdateResponse, UserActivityResponse, TransactionResponse, TransactionCreate, MedicationUpdate
@@ -62,6 +62,8 @@ def get_db():
     finally:
         db.close()
 
+# endregion
+# region Auth
 #for password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -124,6 +126,10 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)],
     current_user = UserToReturn(id=user.id, email=user.email, user_type=user.user_type)
     if user is None:
         raise HTTPException(status_code=404, detail="get_current_user user not found")
+    elif user.is_locked_out:
+        raise HTTPException(status_code=423, detail="This account is locked out due to too many failed login attempts")
+    elif user.is_deleted:
+        raise HTTPException(status_code=403, detail="This account has been deleted and cannot be used to log in")
     
     return current_user
 
@@ -154,6 +160,17 @@ async def login_for_access_token(
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    elif user.is_locked_out:
+        raise HTTPException(
+            status_code=status.HTTP_423_LOCKED,
+            detail="This account is locked out due to too many failed login attempts",
+        )
+    elif user.is_deleted:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="This account has been deleted and cannot be used to log in",
+        )
+    
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": user.email}, expires_delta=access_token_expires
@@ -218,6 +235,8 @@ async def reset_password(
     return {"message": "Password has been successfully reset."}
 
 
+# endregion
+# region Logging
 # # configure logging
 # logging.basicConfig(level=logging.INFO)
 # logger = logging.getLogger("pharmacy_logger")
@@ -385,6 +404,26 @@ async def reset_password(
 
 # endregion
 # region User CRUD
+# *****an endpoint that doesn't need any authorization, since this needs to get called
+# when the user hasn't successfully logged in, so of course they don't have a token yet
+@app.put("/users/lock")
+def lock_user_out(user_lock_request: UserLockRequest, db: Session = Depends(get_db)):
+
+    db_user = db.query(models.User).filter(models.User.email == user_lock_request.email).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    if db_user.is_locked_out:
+        raise HTTPException(status_code=409, detail="User is already locked out")
+
+    # lock the user out
+    db_user.is_locked_out = True
+
+    db.commit()
+    db.refresh(db_user)
+    return {"message": "User locked successfully", "user_id": db_user.id}
+
+
+
 # POST endpoint to create a user
 @app.post("/users/", response_model=UserResponse)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
@@ -425,7 +464,7 @@ def get_user(user_id: int, db: Session = Depends(get_db), current_user: UserToRe
     return db_user
 
 
-@app.delete("/users/{user_id}")
+@app.delete("/users/{user_id}", response_model=UserResponse)
 def delete_user(user_id: int, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
 
     validate_user_type(current_user, ["Pharmacy Manager"])
@@ -433,21 +472,14 @@ def delete_user(user_id: int, db: Session = Depends(get_db), current_user: UserT
     db_user = db.query(models.User).filter(models.User.id == user_id).first()
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
-    
-    # Check for associated prescriptions
-    prescriptions_count = db.query(models.Prescription).filter(
-        (models.Prescription.user_entered_id == user_id) | 
-        (models.Prescription.user_filled_id == user_id)
-    ).count()
 
-    if prescriptions_count > 0:
-        raise HTTPException(status_code=400, detail="User cannot be deleted while having prescriptions")
+    # don't actually delete the user, just mark them as deleted
+    db_user.is_deleted = True
 
-
-    db.delete(db_user)
     db.commit()
-    return SimpleResponse(message="User deleted successfully")
-
+    db.refresh(db_user)
+    return db_user
+    
 
 # *****an endpoint that doesn't need any authorization, since users who are in the process of setting
 # their password (can't make a token yet) need to be able to call it

@@ -23,6 +23,11 @@ class UserInDB(BaseModel):
 
 # endregion
 # region Users
+
+# for when we are sending a request to lock a user account due to too many incorrect login attempts
+class UserLockRequest(BaseModel):
+    email: str
+
 class UserToReturn(BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
@@ -38,6 +43,7 @@ class UserResponse(BaseModel):
     user_type: UserType
     email: str
     is_locked_out: bool
+    is_deleted: bool
 
 # only for use by the route that lets you see users with no password yet,
 # and doesn't require a token to call

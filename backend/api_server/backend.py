@@ -1145,6 +1145,16 @@ def create_transaction(transaction: TransactionCreate, db: Session = Depends(get
     validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
 
     # create a new transaction
+    # but ignore the transaction_items field since we will create those separately
+    db_transaction = models.Transaction(
+        # get the user_id from the current_user
+        user_id=current_user.id,
+        patient_id=transaction.patient_id,
+        # total_cost=total_cost,
+        timestamp=datetime.now(timezone.utc), # set the timestamp in UTC so timezones don't affect it
+        payment_method=transaction.payment_method
+    )
+
     # add the transaction to the database
     db.add(db_transaction)
     db.commit()

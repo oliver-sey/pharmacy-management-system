@@ -214,19 +214,19 @@ INSERT INTO user_activities (user_id, activity, timestamp) VALUES (16, 'INVENTOR
 INSERT INTO user_activities (user_id, activity, timestamp) VALUES (17, 'INVENTORY_UPDATE', '2024-10-02 14:12:00');
 -- transactions table
 
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (5, 1, '2024-09-30 14:35:18', 'credit card');
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (6, 2, '2024-09-13 12:23:57', 'cash');
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (7, 3, '2024-08-07 16:05:32', 'debit card');
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (8, 1, '2024-09-30 16:52:10', 'cash');
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (6, 4, '2024-09-03 09:15:43', 'credit card');
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (9, 1, '2024-07-18 10:47:29', 'debit card');
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (10, 5, '2024-09-27 11:53:02', 'cash');
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (11, 6, '2024-10-01 09:32:12', 'credit card');
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (12, 7, '2024-09-30 14:40:37', 'debit card');
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (13, 7, '2024-09-03 12:25:15', 'cash');
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (15, 3, '2024-09-27 17:14:29', 'debit card');
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (16, 1, '2024-10-01 09:57:41', 'cash');
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (14, 1, '2024-10-02 14:12:34', 'credit card');
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (5, 1, '2024-09-30 14:35:18', 'CASH');
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (6, 2, '2024-09-13 12:23:57', 'GIFT_CARD');
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (7, 3, '2024-08-07 16:05:32', 'DEBIT_CARD');
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (8, 1, '2024-09-30 16:52:10', 'CREDIT_CARD');
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (6, 4, '2024-09-03 09:15:43', 'CHECK');
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (9, 1, '2024-07-18 10:47:29', 'DEBIT_CARD');
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (10, 5, '2024-09-27 11:53:02', 'CASH');
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (11, 6, '2024-10-01 09:32:12', 'CREDIT_CARD');
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (12, 7, '2024-09-30 14:40:37', 'CREDIT_CARD');
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (13, 7, '2024-09-03 12:25:15', 'CASH');
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (15, 3, '2024-09-27 17:14:29', 'CREDIT_CARD');
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (16, 1, '2024-10-01 09:57:41', 'CASH');
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (14, 1, '2024-10-02 14:12:34', 'CREDIT_CARD');
 
 
 -- transaction_items table

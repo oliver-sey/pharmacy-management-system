@@ -23,6 +23,11 @@ class UserInDB(BaseModel):
 
 # endregion
 # region Users
+
+# for when we are sending a request to lock a user account due to too many incorrect login attempts
+class UserLockRequest(BaseModel):
+    email: str
+
 class UserToReturn(BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None

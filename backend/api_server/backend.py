@@ -12,7 +12,7 @@ from passlib.context import CryptContext
 from typing import Optional
 from .database import SessionLocal, engine, Base
 from .schema import (
-    Token, TokenData, UserActivityCreate, UserCreate, UserEmailResponse, UserResponse, 
+    Token, TokenData, UserActivityCreate, UserCreate, UserEmailResponse, UserLockRequest, UserResponse, 
     UserLogin, UserSetPassword, UserToReturn, UserUpdate, PatientCreate, PatientUpdate, 
     PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, InventoryUpdateCreate, 
     InventoryUpdateResponse, UserActivityResponse, TransactionResponse, TransactionCreate, MedicationUpdate
@@ -389,6 +389,26 @@ async def reset_password(
 
 # endregion
 # region User CRUD
+# *****an endpoint that doesn't need any authorization, since this needs to get called
+# when the user hasn't successfully logged in, so of course they don't have a token yet
+@app.put("/users/lock")
+def lock_user_out(user_lock_request: UserLockRequest, db: Session = Depends(get_db)):
+
+    db_user = db.query(models.User).filter(models.User.email == user_lock_request.email).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    if db_user.is_locked_out:
+        raise HTTPException(status_code=409, detail="User is already locked out")
+
+    # lock the user out
+    db_user.is_locked_out = True
+
+    db.commit()
+    db.refresh(db_user)
+    return {"message": "User locked successfully", "user_id": db_user.id}
+
+
+
 # POST endpoint to create a user
 @app.post("/users/", response_model=UserResponse)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):

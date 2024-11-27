@@ -215,77 +215,103 @@ INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (17, 'INV
 
 
 -- transactions table
-
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (5, 1, '2024-09-30 14:35:18', 'CASH');
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (6, 2, '2024-09-13 12:23:57', 'CREDIT_CARD');
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (7, 3, '2024-08-07 16:05:32', 'DEBIT_CARD');
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (8, 1, '2024-09-30 16:52:10', 'CREDIT_CARD');
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (6, 4, '2024-09-03 09:15:43', 'DEBIT_CARD');
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (9, 1, '2024-07-18 10:47:29', 'DEBIT_CARD');
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (10, 5, '2024-09-27 11:53:02', 'CASH');
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (11, 6, '2024-10-01 09:32:12', 'CREDIT_CARD');
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (12, 7, '2024-09-30 14:40:37', 'CREDIT_CARD');
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (13, 7, '2024-09-03 12:25:15', 'CASH');
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (15, 3, '2024-09-27 17:14:29', 'CREDIT_CARD');
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (16, 1, '2024-10-01 09:57:41', 'CASH');
-INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (14, 1, '2024-10-02 14:12:34', 'CREDIT_CARD');
+-- ****NOTE: total price includes tax but the subtotal prices in transaction_items do not!!!!!
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method, total_price) VALUES (5, 1, '2024-09-30 14:35:18', 'CASH', 25.48);
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method, total_price) VALUES (6, 2, '2024-09-13 12:23:57', 'CREDIT_CARD', 8.10);
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method, total_price) VALUES (7, 3, '2024-08-07 16:05:32', 'DEBIT_CARD', 1.62);
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method, total_price) VALUES (8, 1, '2024-09-30 16:52:10', 'CREDIT_CARD', 7.61);
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method, total_price) VALUES (6, 4, '2024-09-03 09:15:43', 'DEBIT_CARD', 4.32);
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method, total_price) VALUES (9, 1, '2024-07-18 10:47:29', 'DEBIT_CARD', 21.06);
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method, total_price) VALUES (10, 5, '2024-09-27 11:53:02', 'CASH', 9.72);
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method, total_price) VALUES (11, 6, '2024-10-01 09:32:12', 'CREDIT_CARD', 200.88);
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method, total_price) VALUES (12, 7, '2024-09-30 14:40:37', 'CREDIT_CARD', 3.78);
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method, total_price) VALUES (13, 7, '2024-09-03 12:25:15', 'CASH', 4.32);
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method, total_price) VALUES (15, 3, '2024-09-27 17:14:29', 'CREDIT_CARD', 24.94);
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method, total_price) VALUES (16, 1, '2024-10-01 09:57:41', 'CASH', 3.88);
+INSERT INTO transactions (user_id, patient_id, timestamp, payment_method, total_price) VALUES (14, 1, '2024-10-02 14:12:34', 'CREDIT_CARD', 3.24);
 
 
 -- transaction_items table
 -- Transaction 1
-INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (1, 1, 300); -- Ibuprofen
-INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (1, 4, 20); -- Acetaminophen
-INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (1, 2, 10); -- Amoxicillin
-INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (2, 5, 40); -- Aspirin
+-- Total price (before tax): $23.6
+-- Total price (with tax): 25.488 --> (truncate) $25.48
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (1, 1, 100, 15.0); -- Ibuprofen
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (1, 2, 10, 3.0); -- Amoxicillin
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (1, 4, 20, 2.0); -- Acetaminophen
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (1, 5, 40, 3.6); -- Aspirin
 
 -- Transaction 2
-INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (2, 2, 10); -- Amoxicillin
-INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (2, 5, 50); -- Aspirin
+-- Total price (before tax): $7.5
+-- Total price (with tax): 8.10 --> (truncate) $8.10
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (2, 2, 10, 3.0); -- Amoxicillin
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (2, 5, 50, 4.5); -- Aspirin
 
 -- Transaction 3
-INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (3, 3, 15); -- Lipitor
+-- Total price (before tax): $1.5
+-- Total price (with tax): 1.62 --> (truncate) $1.62
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (3, 3, 15, 1.5); -- Lipitor
 
 -- Transaction 4
-INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (4, 6, 5);  -- Warfarin
-INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (4, 1, 25); -- Ibuprofen
-INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (4, 7, 10); -- Metformin
+-- Total price (before tax): $7.05
+-- Total price (with tax): 7.614 --> (truncate) $7.61
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (4, 6, 5, 3.0);  -- Warfarin
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (4, 1, 25, 3.75); -- Ibuprofen
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (4, 7, 10, 0.3); -- Metformin
 
 -- Transaction 5
-INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (5, 4, 40); -- Acetaminophen
+-- Total price (before tax): $4.0
+-- Total price (with tax): 4.32 --> (truncate) $4.32
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (5, 4, 40, 4.0); -- Acetaminophen
 
 -- Transaction 6
-INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (6, 8, 100);  -- Melatonin
-INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (6, 9, 100); -- Dramamine
-INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (6, 10, 50); -- Ibuprofen
+-- Total price (before tax): $19.5
+-- Total price (with tax): 21.06 --> (truncate) $21.06
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (6, 8, 100, 8.0);  -- Melatonin
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (6, 9, 100, 7.0); -- Dramamine
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (6, 10, 50, 4.5); -- Ibuprofen
 
 -- Transaction 7
-INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (7, 11, 20); -- Amoxicillin
-INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (7, 12, 30); -- Lipitor
+-- Total price (before tax): $9.0
+-- Total price (with tax): 9.72 --> (truncate) $9.72
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (7, 11, 20, 6.0); -- Amoxicillin
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (7, 12, 30, 3.0); -- Lipitor
 
 -- Transaction 8
-INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (8, 11, 20); -- Amoxicillin
-INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (8, 12, 300); -- Lipitor
-INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (8, 13, 250); -- Acetaminophen
-INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (8, 14, 100); -- Aspirin
+-- Total price (before tax): $186
+-- Total price (with tax): 200.88 --> (truncate) $200.88
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (8, 11, 20, 6.0); -- Amoxicillin
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (8, 12, 300, 150.0); -- Lipitor
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (8, 13, 250, 25.0); -- Acetaminophen
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (8, 14, 100, 5.0); -- Aspirin
 
 -- Transaction 9
-INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (9, 15, 5);  -- Hydrochlorothiazide
-INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (9, 16, 10);  -- Simvastatin
+-- Total price (before tax): $3.5
+-- Total price (with tax): 3.78 --> (truncate) $3.78
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (9, 15, 5, 1.5);  -- Hydrochlorothiazide
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (9, 16, 10, 2.0);  -- Simvastatin
 
 -- Transaction 10
-INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (10, 18, 20); -- Prednisone
+-- Total price (before tax): $4.0
+-- Total price (with tax): 4.32 --> (truncate) $4.32
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (10, 18, 20, 4.0); -- Prednisone
 
 -- Transaction 11
-INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (11, 19, 10); -- Warfarin
-INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (11, 20, 30); -- Losartan
-INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (11, 10, 90); -- Ibuprofen
+-- Total price (before tax): $23.1
+-- Total price (with tax): 24.948 --> (truncate) $24.94
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (11, 19, 10, 6.0); -- Warfarin
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (11, 20, 30, 9.0); -- Losartan
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (11, 10, 90, 8.1); -- Ibuprofen
 
 -- Transaction 12
-INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (12, 21, 40); -- Levothyroxine
-INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (12, 8, 25); -- Melatonin
+-- Total price (before tax): $3.6
+-- Total price (with tax): 3.888 --> (truncate) $3.88
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (12, 21, 40, 1.6); -- Levothyroxine
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (12, 8, 25, 2.0); -- Melatonin
 
 -- Transaction 13
-INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (13, 11, 15); -- Amoxicillin
+-- Total price (before tax): $3.0
+-- Total price (with tax): 3.24 --> (truncate) $3.24
+INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (13, 11, 15, 3.0); -- Amoxicillin
 
 
 

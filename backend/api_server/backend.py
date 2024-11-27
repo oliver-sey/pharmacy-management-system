@@ -258,10 +258,9 @@ async def log_requests(request: Request, call_next):
     # these types of requests dont need to be logged. 
     # only requests that change something should be logged in
     # as well as login and logout
-
-
     db: Session = SessionLocal()
     logger.info(f"Request Path: {request.url.path}")
+    logger.info(f"Request Method: {request.method}")
     if request.url.path in ("/token"):
         # check if a user is loggin in 
         logger.info(f"logging in: {request.url.path}")
@@ -283,22 +282,27 @@ async def log_requests(request: Request, call_next):
             db.refresh(db_user_activity)
         
         return response
+    # dont log whenever calling verify-token
     elif "/verify-token/" in request.url.path:
         # check if a user is verifying their token
         logger.info(f"verifying token: {request.url.path}")
         response = await call_next(request)
         return response
+    # dont run the logger on currentuser/me because the user does not have a token yet
     elif "currentuser/me" in request.url.path:
         #skip the log
         logger.info(f"current user: {request.url.path}")
         response = await call_next(request)
         return response
-    elif request.method == "GET":
+    # dont log get requests
+    elif request.method == "GET" or request.method == "OPTIONS":
         response = await call_next(request)
         return response
+    # log all other requests
     else:
+        logger.info(f"request: {request.headers}")
         logger.info(f"request.headers: {request.headers.keys()}") 
-        token = request.headers.get("Authorization")
+        token = request.headers.get("authorization")
         logger.info(f"token: {token}")
         if token:
             token = token.split(" ")[1]  # Remove 'Bearer' prefix

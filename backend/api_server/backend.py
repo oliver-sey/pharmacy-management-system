@@ -545,7 +545,7 @@ def change_user_lock_status(user_id: int, db: Session = Depends(get_db), current
     if is_locked == False:
         db_user_activity = models.UserActivity(
             user_id=user_id,
-            activity=models.UserActivityType.UNLOCK_ACCOUNT,
+            activity_type=models.UserActivityType.UNLOCK_ACCOUNT,
             timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it  
         )
         db.add(db_user_activity)

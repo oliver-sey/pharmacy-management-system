@@ -1061,7 +1061,8 @@ def get_inventory_updates(activity_type: Optional[models.InventoryUpdateType] = 
                 quantity_changed_by=update.quantity_changed_by,
                 activity_type=update.activity_type,
                 timestamp=update.timestamp,
-                medication_name=update.medication.name if update.medication else None  # Medication name
+                medication_name=update.medication.name if update.medication else None,  # Medication name
+                resulting_total_quantity=update.resulting_total_quantity
             )
             for update in inventory_updates
         ]

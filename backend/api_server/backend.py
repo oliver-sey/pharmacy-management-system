@@ -12,7 +12,7 @@ from passlib.context import CryptContext
 from typing import Optional
 from .database import SessionLocal, engine, Base
 from .schema import (
-    Token, TokenData, UserActivityCreate, UserCreate, UserEmailResponse, UserResponse, 
+    Token, TokenData, TransactionItemCreate, TransactionItemResponse, UserActivityCreate, UserCreate, UserEmailResponse, UserResponse, 
     UserLogin, UserSetPassword, UserToReturn, UserUpdate, PatientCreate, PatientUpdate, 
     PatientResponse, MedicationCreate, SimpleResponse, PrescriptionUpdate, InventoryUpdateCreate, 
     InventoryUpdateResponse, UserActivityResponse, TransactionResponse, TransactionCreate, MedicationUpdate
@@ -1175,3 +1175,52 @@ def get_transactions(db: Session = Depends(get_db), current_user: UserToReturn =
     return transactions
 
     
+# endregion
+# region Transaction Items CRUD
+# transaction items crud for checkout, don't have update or delete since we are not deleting or updating transaction items
+
+# create a transaction item
+@app.post("/transaction-item", response_model=TransactionItemResponse)
+def create_transaction_item(transaction_item: TransactionItemCreate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+    # allow all user types 
+
+    # create a new transaction item
+    db_transaction_item = models.TransactionItem(**transaction_item.dict())
+    db.add(db_transaction_item)
+    db.commit()
+    db.refresh(db_transaction_item)
+    return db_transaction_item
+
+
+# get a transaction item
+@app.get("/transaction-item/{transaction_item_id}", response_model=TransactionItemResponse)
+def get_transaction_item(transaction_item_id: int, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+    # allow all user types 
+
+    # there will only be one transaction item with the matching id (since the id is unique), so using first() is fine
+    db_transaction_item = db.query(models.TransactionItem).filter(models.TransactionItem.id == transaction_item_id).first()
+
+    if db_transaction_item is None:
+        raise HTTPException(status_code=404, detail="Transaction item not found")
+    
+    return db_transaction_item
+
+
+# get all transaction items
+@app.get("/transaction-items", response_model=List[TransactionItemResponse])
+def get_transaction_items(transaction_id: Optional[int] = Query(None), db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+    '''
+    endpoint to get transaction_items with optional transaction_id.
+    If transaction_id is provided, only transaction_items for that patient are returned.
+    call like so: /transaction-items?transaction_id=1 or /transaction-items to get all transaction_items
+    '''
+    # allow all user types 
+
+    # if transaction_id is provided, return all transaction_items for that transaction
+    if transaction_id:
+        transaction_items = db.query(models.TransactionItem).filter(models.TransactionItem.transaction_id == transaction_id).all()
+    # otherwise just return all transaction items
+    else:
+        transaction_items = db.query(models.TransactionItem).all()
+
+    return transaction_items

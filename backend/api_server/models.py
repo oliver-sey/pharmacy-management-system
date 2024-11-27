@@ -162,7 +162,7 @@ class InventoryUpdate(Base):
     medication = relationship("Medication", back_populates="inventory_updates")
     user_activity = relationship("UserActivity", back_populates="inventory_updates")  # Correct the relationship
     # transaction = relationship("Transaction", back_populates="inventory_update")]
-    
+
 
 class Transaction(Base):
     __tablename__ = 'transactions'
@@ -176,3 +176,18 @@ class Transaction(Base):
     patient = relationship("Patient", back_populates="transactions")
     user = relationship("User", back_populates="transactions")
     # inventory_update = relationship("InventoryUpdate", back_populates="transaction")  # This should link to the correct attribute
+    transaction_items = relationship("TransactionItem", back_populates="transaction")
+
+
+class TransactionItem(Base):
+    __tablename__ = "transaction_items"
+
+    id = Column(Integer, primary_key=True, index=True)
+    # relationship to the transaction that this is a part of
+    transaction_id = Column(Integer, ForeignKey("transactions.id"))
+    # the medication that got sold
+    medication_id = Column(Integer, ForeignKey("medications.id"))
+    # the number of pills of this medication that got sold
+    quantity = Column(Integer)
+
+    transaction = relationship("Transaction", back_populates="transaction_items")

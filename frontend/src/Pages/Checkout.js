@@ -438,9 +438,6 @@ function Checkout() {
 	
 	const nonPrescriptionTotal = calculateTotal(cart.nonPrescription);
 	const prescriptionTotal = calculateTotal(cart.prescription);
-	const subtotal = nonPrescriptionTotal + prescriptionTotal;
-	const tax = subtotal * 0.08;
-	const grandTotal = subtotal + tax;
 
 	return (
 		<div className="checkout-page">

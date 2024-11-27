@@ -282,8 +282,9 @@ class TransactionItemResponse(BaseModel):
 # endregion
 # region Transactions
 class TransactionCreate(BaseModel):
-    user_id: int
-    patient_id: Optional[int] = None
+    # get user_id from token
+    # patient_id is required
+    patient_id: int
     payment_method: str
 
 

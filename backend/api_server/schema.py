@@ -274,6 +274,7 @@ class TransactionItemResponse(BaseModel):
     transaction_id: int
     medication_id: int
     quantity: int
+    subtotal_price: float
 
     class Config:
         from_attributes = True

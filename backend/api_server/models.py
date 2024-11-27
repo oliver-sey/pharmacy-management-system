@@ -204,5 +204,6 @@ class TransactionItem(Base):
     medication_id = Column(Integer, ForeignKey("medications.id"), nullable=True)
     # the number of pills of this medication that got sold
     quantity = Column(Integer)
+    subtotal_price = Column(Float)
 
     transaction = relationship("Transaction", back_populates="transaction_items")

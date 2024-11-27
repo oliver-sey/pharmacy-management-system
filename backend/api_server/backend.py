@@ -1237,12 +1237,21 @@ def get_transactions(db: Session = Depends(get_db), current_user: UserToReturn =
 def create_transaction_item(transaction_item: TransactionItemCreate, transaction_id: int, db: Session, current_user: UserToReturn):
     # allow all user types 
 
+    # calculate the subtotal price
+    # get the medication from the transaction_item
+    medication = db.query(models.Medication).filter(models.Medication.id == transaction_item.medication_id).first()
+
+    subtotal_price = medication.dollars_per_unit * transaction_item.quantity
+
+    # no tax on the subtotal price, but there will be in the total_price in the transaction
+
     # create a new transaction item
     db_transaction_item = models.TransactionItem(
         # get the transaction_id from the parameter, from the transaction that we just created
         transaction_id=transaction_id,
         medication_id=transaction_item.medication_id,
         quantity=transaction_item.quantity,
+        subtotal_price=subtotal_price
     )
 
     db.add(db_transaction_item)

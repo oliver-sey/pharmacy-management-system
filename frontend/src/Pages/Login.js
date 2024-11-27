@@ -22,7 +22,6 @@ function Login({ updateUserRole }) {
 	// whether or not this account is locked out because of too many incorrect attempts
 	const [isLockedOut, setIsLockedOut] = useState(false);
 
-
 	const navigate = useNavigate();
 
 	const validateForm = () => {

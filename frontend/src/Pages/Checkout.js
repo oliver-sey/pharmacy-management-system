@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from 'react-router-dom';
 import VerifyToken from '../Functions/VerifyToken';
 import '../Styles/Checkout.css';
-
+import CheckUserType from "../Functions/CheckUserType";
 import {
 	TextField,
 	Table,
@@ -25,6 +25,7 @@ import {
 } from "@mui/material";
 
 
+
 // TODO: use RemoveShoppingCartIcon instead of Button
 // TODO: clear cart when the selected patient changes? don't want to let the wrong patient buy prescription items
 	// or just clear prescriptions items from the cart?
@@ -35,6 +36,7 @@ import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import RemoveShoppingCartIcon from "@mui/icons-material/RemoveShoppingCart";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
+import CheckoutModal from "../Components/CheckoutModal";
 
 // import Autocomplete from "@mui/lab/Autocomplete";
 
@@ -52,7 +54,7 @@ function Checkout() {
 	const [selectedPatient, setSelectedPatient] = useState(null);
 	const [filteredPrescriptions, setFilteredPrescriptions] = useState([]);
 	const [nonPrescriptionItems, setNonPrescriptionItems] = useState([]);
-
+	const [isEditOpen, setIsEditOpen] = useState(false)
 
 	// to open the snackbar component with a little alert to the user
 	// Snackbar handler state
@@ -71,6 +73,7 @@ function Checkout() {
 
 	const navigate = useNavigate();
 	const token = localStorage.getItem("token");
+	const roles = ["Pharmacist", "Pharmacy Manager", "Cashier"]
 
 
     useEffect(() => {
@@ -307,9 +310,6 @@ function Checkout() {
 				[type]: [...prevCart[type], { ...item, quantityInCart: item.quantity}],
 				
 			}));
-		
-
-	
 	};
 
 
@@ -356,6 +356,39 @@ function Checkout() {
 		
 	}
 	
+	const closeEditModal = () => {
+		
+		setIsEditOpen(false);
+	};
+
+	const handleCompletePayment = (paymentMethod) => {
+		CheckUserType(roles, navigate)
+		.then((curr_user_data) => addTransaction({
+			user_id: curr_user_data.id,
+			patient_id: selectedPatient.id, 
+			payment_method: paymentMethod
+		}))
+	}
+
+	const addTransaction = async (data) => {
+		try {
+		  
+		  const response = await fetch(`http://localhost:8000/transaction`, {
+			method: 'POST',
+			headers: {
+			  'Content-Type': 'application/json',
+			  'Authorization': 'Bearer ' + token,
+			},
+			body: JSON.stringify(data),
+		  });
+		  if (!response.ok) {
+			throw new Error('Failed to add transaction');
+		  }
+		  
+		} catch (error) {
+		  console.error('Error adding transaction:', error);
+		}
+	  }
 
 	const handlePatientSelect = async (patientID) => {
 		// Clear the prescription items in the cart if the selected patient changes (from a value other than the default, to a new value)
@@ -396,12 +429,13 @@ function Checkout() {
 	};
 
 
-	const calculateTotal = (items) =>
+	const calculateTotal = (items) => 
 		items.reduce(
-			(total, item) => total + item.dollars_per_unit * item.quantity,
+			(total, item) => total + item.dollars_per_unit * item.quantityInCart,
 			0
 		);
-
+	
+	
 	const nonPrescriptionTotal = calculateTotal(cart.nonPrescription);
 	const prescriptionTotal = calculateTotal(cart.prescription);
 	const subtotal = nonPrescriptionTotal + prescriptionTotal;
@@ -579,9 +613,9 @@ function Checkout() {
 													<TableCell>
 														{/* TODO: how many decimal places here?? */}
 														$
-														{medication.dollars_per_unit.toFixed(
+														{(medication.dollars_per_unit.toFixed(
 															4
-														) * parseInt(medication.quantityInCart, 10)}
+														) * parseInt(medication.quantityInCart, 10)).toFixed(2)}
 													</TableCell>
 
 													<TableCell>
@@ -856,6 +890,16 @@ function Checkout() {
 								<p className="cart-total">
 									Grand Total: ${grandTotal.toFixed(2)}
 								</p>
+								<Button
+									variant="outlined"
+									className="pay-button"
+									onClick={() =>
+										setIsEditOpen(true)
+									}
+									style={{minWidth: 110}}
+								>
+									Pay
+								</Button>
 							</>
 						)}
 					</Paper>
@@ -875,7 +919,16 @@ function Checkout() {
 					{snackbar.message}
 				</Alert>
 			</Snackbar>
+
+			<CheckoutModal
+			open={isEditOpen}
+			onClose={closeEditModal}
+			patient={selectedPatient}
+			total={grandTotal.toFixed(2)}
+			onSave={handleCompletePayment}
+			/>
 		</div>
+		
 	);
 }
 

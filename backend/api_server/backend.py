@@ -18,7 +18,7 @@ from .schema import (
     InventoryUpdateResponse, UserActivityResponse, TransactionResponse, TransactionCreate, MedicationUpdate
 )
 from . import models  # Ensure this is the SQLAlchemy model
-from .models import UserActivity,InventoryUpdateType
+from .models import Transaction, UserActivity,InventoryUpdateType
 from enum import Enum as PyEnum
 from sqlalchemy.orm import Session, selectinload
 from typing import List
@@ -1135,10 +1135,10 @@ def sell_non_prescription_item(id: int, medication_update: schema.MedicationUpda
 @app.post("/transaction", response_model=TransactionResponse)
 def create_transaction(transaction: TransactionCreate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
     # make sure only pharmacy managers or pharmacists can call this endpoint
-    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist", "Cashier"])
 
     # create a new transaction
-    db_transaction = models.Transaction(**transaction.dict())
+    db_transaction = transaction.model_dump()
     db.add(db_transaction)
     db.commit()
     db.refresh(db_transaction)

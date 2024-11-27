@@ -1,82 +1,128 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { CircularProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Alert, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import {
+    CircularProgress,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Paper,
+    Alert,
+    Button,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+} from '@mui/material';
 
 const ViewOfPatientPrescriptions = () => {
-    const { patientId } = useParams(); 
+    const { patientId } = useParams(); // Extract patientId from the route
     const navigate = useNavigate();
-    const [prescriptions, setPrescriptions] = useState([]);  
-    const [patientName, setPatientName] = useState("");  // New state for patient's name
-    const [loading, setLoading] = useState(true);  
-    const [error, setError] = useState(null);  
-    const [selectedPrescriptionHistory, setSelectedPrescriptionHistory] = useState([]);  
-    const [openModal, setOpenModal] = useState(false);  
+
+    const [prescriptions, setPrescriptions] = useState([]);
+    const [patientName, setPatientName] = useState('');
+    const [medicationNames, setMedicationNames] = useState({});
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [selectedPrescriptionHistory, setSelectedPrescriptionHistory] = useState([]);
+    const [openModal, setOpenModal] = useState(false);
 
     const token = localStorage.getItem('token');
 
-    // Fetch prescriptions for the patient from the API
+    // Fetch prescriptions for the patient
     const fetchPrescriptions = useCallback(async () => {
         try {
             const response = await fetch(`http://localhost:8000/prescriptions/?patient_id=${patientId}`, {
                 headers: {
-                    'Authorization': 'Bearer ' + token,
+                    Authorization: `Bearer ${token}`,
                 },
-              });
+            });
 
             if (!response.ok) {
                 throw new Error('Failed to fetch prescriptions');
             }
+
             const data = await response.json();
-            if (Array.isArray(data)) { //This make sure it's in an array.
-                setPrescriptions(data);
-            } else {
-                throw new Error('Expected an array but got something else');
-            }
+            setPrescriptions(data);
         } catch (err) {
             console.error(err);
             setError('Failed to load prescriptions');
         } finally {
             setLoading(false);
         }
-    }, [patientId]);
+    }, [patientId, token]);
 
     // Fetch patient name
     const fetchPatientName = useCallback(async () => {
         try {
             const response = await fetch(`http://localhost:8000/get/patient/${patientId}`, {
                 headers: {
-                    'Authorization': 'Bearer ' + token,
+                    Authorization: `Bearer ${token}`,
                 },
             });
-    
+
             if (!response.ok) {
                 throw new Error('Failed to fetch patient details');
             }
-    
+
             const patientData = await response.json();
             setPatientName(`${patientData.first_name} ${patientData.last_name}`);
         } catch (err) {
             console.error(err);
             setError('Failed to load patient details');
         }
-    }, [patientId]);
-    
+    }, [patientId, token]);
+
+    // Fetch medication name by ID
+    const fetchMedicationName = useCallback(async (medicationId) => {
+        try {
+            const response = await fetch(`http://localhost:8000/medication/${medicationId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to fetch medication details for ID: ${medicationId}`);
+            }
+
+            const medicationData = await response.json();
+            setMedicationNames((prev) => ({
+                ...prev,
+                [medicationId]: medicationData.name,
+            }));
+        } catch (err) {
+            console.error(err);
+        }
+    }, [token]);
 
     // Fetch prescriptions and patient name when the component mounts
     useEffect(() => {
-        fetchPrescriptions();
-        fetchPatientName();  // Fetch patient name alongside prescriptions
-    }, [fetchPrescriptions, fetchPatientName, patientId]);
+        const fetchData = async () => {
+            setLoading(true);
+            await fetchPrescriptions();
+            await fetchPatientName();
+        };
+        fetchData();
+    }, [fetchPrescriptions, fetchPatientName]);
 
-    // Function to show detailed prescription history
+    // Fetch medication names after prescriptions are loaded
+    useEffect(() => {
+        prescriptions.forEach((prescription) => {
+            if (!medicationNames[prescription.medication_id]) {
+                fetchMedicationName(prescription.medication_id);
+            }
+        });
+    }, [prescriptions, medicationNames, fetchMedicationName]);
+
+    // Show prescription history in a modal
     const viewPrescriptionHistory = (medicationId) => {
-        const history = prescriptions.filter(p => p.medication_id === medicationId);
+        const history = prescriptions.filter((p) => p.medication_id === medicationId);
         setSelectedPrescriptionHistory(history);
-        setOpenModal(true); 
+        setOpenModal(true);
     };
-
-    // Extract Main prescriptions by Medication ID
-    const uniquePrescriptions = [...new Map(prescriptions.map(p => [p.medication_id, p])).values()];
 
     if (loading) {
         return <CircularProgress />;
@@ -92,28 +138,27 @@ const ViewOfPatientPrescriptions = () => {
 
     return (
         <div>
-            <h2>Prescriptions for Patient {patientName}</h2> {/* Display patient name */}
+            <h2>Prescriptions for Patient: {patientName}</h2>
 
-            {/* Initial Simplified Table (Unique Medications Only) */}
             <TableContainer component={Paper}>
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell>Medication ID</TableCell>
+                            <TableCell>Medication Name</TableCell>
                             <TableCell>Dosage</TableCell>
                             <TableCell>Doctor Name</TableCell>
                             <TableCell>Action</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {uniquePrescriptions.map((prescription) => (
+                        {prescriptions.map((prescription) => (
                             <TableRow key={prescription.medication_id}>
-                                <TableCell>{prescription.medication_id}</TableCell>
+                                <TableCell>{medicationNames[prescription.medication_id] || 'Loading...'}</TableCell>
                                 <TableCell>{prescription.quantity}</TableCell>
                                 <TableCell>{prescription.doctor_name}</TableCell>
                                 <TableCell>
-                                    <Button 
-                                        variant="contained" 
+                                    <Button
+                                        variant="contained"
                                         color="primary"
                                         onClick={() => viewPrescriptionHistory(prescription.medication_id)}
                                     >
@@ -126,7 +171,7 @@ const ViewOfPatientPrescriptions = () => {
                 </Table>
             </TableContainer>
 
-            {/* (Popup) for Detailed Prescription History */}
+            {/* Modal for Prescription History */}
             <Dialog open={openModal} onClose={() => setOpenModal(false)} fullWidth>
                 <DialogTitle>Prescription History</DialogTitle>
                 <DialogContent>
@@ -134,19 +179,19 @@ const ViewOfPatientPrescriptions = () => {
                         <Table>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell>Medication ID</TableCell>
+                                    <TableCell>Medication Name</TableCell>
                                     <TableCell>Dosage</TableCell>
                                     <TableCell>Doctor Name</TableCell>
                                     <TableCell>Date Prescribed</TableCell>
                                     <TableCell>Filled Timestamp</TableCell>
-                                    <TableCell>Entered By (User ID)</TableCell>
-                                    <TableCell>Filled By (User ID)</TableCell>
+                                    <TableCell>Entered By</TableCell>
+                                    <TableCell>Filled By</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
                                 {selectedPrescriptionHistory.map((history) => (
                                     <TableRow key={history.id}>
-                                        <TableCell>{history.medication_id}</TableCell>
+                                        <TableCell>{medicationNames[history.medication_id] || 'Loading...'}</TableCell>
                                         <TableCell>{history.quantity}</TableCell>
                                         <TableCell>{history.doctor_name}</TableCell>
                                         <TableCell>{new Date(history.date_prescribed).toLocaleDateString()}</TableCell>

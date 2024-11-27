@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from 'react-router-dom';
 import VerifyToken from '../Functions/VerifyToken';
 import '../Styles/Checkout.css';
-
+import CheckUserType from "../Functions/CheckUserType";
 import {
 	TextField,
 	Table,
@@ -29,6 +29,7 @@ import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import RemoveShoppingCartIcon from "@mui/icons-material/RemoveShoppingCart";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
+import CheckoutModal from "../Components/CheckoutModal";
 
 
 function Checkout() {
@@ -37,7 +38,7 @@ function Checkout() {
 	const [selectedPatient, setSelectedPatient] = useState(null);
 	const [filteredPrescriptions, setFilteredPrescriptions] = useState([]);
 	const [nonPrescriptionItems, setNonPrescriptionItems] = useState([]);
-
+	const [isEditOpen, setIsEditOpen] = useState(false)
 
 	// to open the snackbar component with a little alert to the user
 	// Snackbar handler state
@@ -63,6 +64,7 @@ function Checkout() {
 
 	const navigate = useNavigate();
 	const token = localStorage.getItem("token");
+	const roles = ["Pharmacist", "Pharmacy Manager", "Cashier"]
 
 
     useEffect(() => {
@@ -319,9 +321,6 @@ function Checkout() {
 				[type]: [...prevCart[type], { ...item, quantityInCart: item.quantity}],
 				
 			}));
-		
-
-	
 	};
 
 	// TODO: can we combine handleAddToCart and handleAddNonPrescToCart into one function?
@@ -427,6 +426,39 @@ function Checkout() {
 		}
 	};
 	
+	const closeEditModal = () => {
+		
+		setIsEditOpen(false);
+	};
+
+	const handleCompletePayment = (paymentMethod) => {
+		CheckUserType(roles, navigate)
+		.then((curr_user_data) => addTransaction({
+			user_id: curr_user_data.id,
+			patient_id: selectedPatient.id, 
+			payment_method: paymentMethod
+		}))
+	}
+
+	const addTransaction = async (data) => {
+		try {
+		  
+		  const response = await fetch(`http://localhost:8000/transaction`, {
+			method: 'POST',
+			headers: {
+			  'Content-Type': 'application/json',
+			  'Authorization': 'Bearer ' + token,
+			},
+			body: JSON.stringify(data),
+		  });
+		  if (!response.ok) {
+			throw new Error('Failed to add transaction');
+		  }
+		  
+		} catch (error) {
+		  console.error('Error adding transaction:', error);
+		}
+	  }
 
 	const handlePatientSelect = async (patientID) => {
 		// Clear the prescription items in the cart if the selected patient changes (from a value other than the default, to a new value)
@@ -465,6 +497,20 @@ function Checkout() {
 	const handleCloseSnackbar = () => {
 		setSnackbar((prev) => ({ ...prev, open: false }));
 	};
+
+
+	const calculateTotal = (items) => 
+		items.reduce(
+			(total, item) => total + item.dollars_per_unit * item.quantityInCart,
+			0
+		);
+	
+	
+	const nonPrescriptionTotal = calculateTotal(cart.nonPrescription);
+	const prescriptionTotal = calculateTotal(cart.prescription);
+	const subtotal = nonPrescriptionTotal + prescriptionTotal;
+	const tax = subtotal * 0.08;
+	const grandTotal = subtotal + tax;
 
 
 	return (
@@ -683,19 +729,11 @@ function Checkout() {
 
 													<TableCell>
 														$
-														{(
-															medication.dollars_per_unit *
-															(cart.nonPrescription.find(
-																(item) =>
-																	item.id ===
-																	medication.id
-															)?.quantityInCart ||
-																quantitiesInTable[
-																	medication
-																		.id
-																] ||
-																0)
-														).toFixed(2)}
+
+														{(medication.dollars_per_unit.toFixed(
+															4
+														) * parseInt(medication.quantityInCart, 10)).toFixed(2)}
+
 													</TableCell>
 
 													<TableCell>
@@ -980,6 +1018,16 @@ function Checkout() {
 								<p className="cart-total">
 									Grand Total: ${grandTotal.toFixed(2)}
 								</p>
+								<Button
+									variant="outlined"
+									className="pay-button"
+									onClick={() =>
+										setIsEditOpen(true)
+									}
+									style={{minWidth: 110}}
+								>
+									Pay
+								</Button>
 							</>
 						)}
 					</Paper>
@@ -999,7 +1047,16 @@ function Checkout() {
 					{snackbar.message}
 				</Alert>
 			</Snackbar>
+
+			<CheckoutModal
+			open={isEditOpen}
+			onClose={closeEditModal}
+			patient={selectedPatient}
+			total={grandTotal.toFixed(2)}
+			onSave={handleCompletePayment}
+			/>
 		</div>
+		
 	);
 }
 

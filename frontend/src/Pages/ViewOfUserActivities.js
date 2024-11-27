@@ -62,28 +62,28 @@ const UserActivitiesTable = () => {
     const filtered = allActivities.filter(activity => {
       // Check each filter condition separately
       const matchUserId = filters.userId ? activity.user_id.toString() === filters.userId : true;
-      const matchActivity = filters.activity_type ? activity.activity_type === filters.activity : true;
-  
+      const matchActivity = filters.activity_type ? activity.activity_type === filters.activity_type : true; // Fixed key mismatch
+
       // Parse dates for comparison
       const activityDate = new Date(activity.timestamp);
       const startDate = filters.startDate ? new Date(filters.startDate) : null;
       const endDate = filters.endDate ? new Date(filters.endDate) : null;
-  
+
       const matchStartDate = startDate ? activityDate >= startDate : true;
       const matchEndDate = endDate ? activityDate <= endDate : true;
 
       // Return true only if all conditions match
       return matchUserId && matchActivity && matchStartDate && matchEndDate;
     });
-  
+
     setFilteredActivities(filtered);
   };
-  
+
 
   const handleClearFilters = () => {
     setFilters({
       userId: '',
-      activity: '',
+      activity_type: '', // Fixed key name
       startDate: '',
       endDate: '',
     });
@@ -107,7 +107,7 @@ const UserActivitiesTable = () => {
         <label>
           Activity Type:
           <select
-            name="activity"
+            name="activity_type"
             value={filters.activity_type}
             onChange={handleFilterChange}
           >

@@ -368,38 +368,129 @@ function ViewOfMedications() {
 		doc.save('inventory_update_report.pdf');
 	  };
 	
-	  const generateFinancialReport = () => {
-        const doc = new jsPDF();
-
-        // Set title for the PDF
-        doc.setFontSize(20);
-        doc.text('Financial Report', 10, 20);
-
-        // Set table headers for financial data
-        doc.setFontSize(12);
-        let yPosition = 30;
-        doc.text('Medication Name', 10, yPosition);
-        doc.text('Dollars per Unit', 60, yPosition);
-        doc.text('Quantity', 100, yPosition);
-        doc.text('Total Value', 140, yPosition);
-
-        yPosition += 10; // Space after header row
-
-        // Loop through rows and add each medication financial detail
-        rows.forEach((medication) => {
-            const totalValue = (medication.dollars_per_unit * medication.quantity).toFixed(2); // Calculate total value
-            doc.text(medication.name, 10, yPosition);
-            doc.text(medication.dollars_per_unit.toFixed(2), 60, yPosition);
-            doc.text(medication.quantity.toString(), 100, yPosition);
-            doc.text(totalValue, 140, yPosition);
-            yPosition += 10; // Move to the next row
-        });
-
-        // Save the generated PDF
-        doc.save('financial_report.pdf');
-    }
-
-
+	  const generateFinancialReport = async () => {
+		try {
+			// Fetch all transactions
+			const transactionsResponse = await fetch('http://localhost:8000/transactions', {
+				headers: { Authorization: 'Bearer ' + token },
+			});
+			if (!transactionsResponse.ok) throw new Error('Failed to fetch transactions');
+			const transactions = await transactionsResponse.json();
+	
+			// Fetch all transaction items
+			const transactionItemsResponse = await fetch('http://localhost:8000/transaction-items', {
+				headers: { Authorization: 'Bearer ' + token },
+			});
+			if (!transactionItemsResponse.ok) throw new Error('Failed to fetch transaction items');
+			const transactionItems = await transactionItemsResponse.json();
+	
+			// Initialize jsPDF
+			const doc = new jsPDF();
+			const pageHeight = doc.internal.pageSize.height; // Get page height
+			let yPosition = 20; // Start position for the first page
+	
+			// Helper to add a new page if needed
+			const addNewPageIfNeeded = () => {
+				if (yPosition + 10 > pageHeight - 15) { // 15 is the bottom margin
+					doc.addPage();
+					yPosition = 20; // Reset yPosition for the new page
+				}
+			};
+	
+			// Title
+			doc.setFontSize(20);
+			doc.text('Financial Report', 10, yPosition);
+			yPosition += 10;
+	
+			// Total Revenue
+			const totalRevenue = transactions.reduce((sum, transaction) => sum + transaction.total_price, 0);
+			doc.setFontSize(12);
+			doc.text(`Total Revenue: $${totalRevenue.toFixed(2)}`, 10, yPosition);
+			yPosition += 10;
+	
+			// Average Transaction Value
+			const averageTransactionValue = totalRevenue / transactions.length;
+			doc.text(`Average Transaction Value: $${averageTransactionValue.toFixed(2)}`, 10, yPosition);
+			yPosition += 10;
+	
+			// Transaction Count
+			doc.text(`Total Transactions: ${transactions.length}`, 10, yPosition);
+			yPosition += 10;
+	
+			// Payment Method Breakdown
+			const paymentMethods = transactions.reduce((totals, transaction) => {
+				const method = transaction.payment_method;
+				totals[method] = (totals[method] || 0) + 1; 
+				return totals;
+			}, {});
+			const mostPopularPaymentMethod = Object.entries(paymentMethods).sort((a, b) => b[1] - a[1])[0][0];
+			doc.text('Payment Method Breakdown:', 10, yPosition);
+			yPosition += 10;
+	
+			Object.entries(paymentMethods).forEach(([method, count]) => {
+				addNewPageIfNeeded();
+				doc.text(`  - ${method}: ${count} transactions`, 10, yPosition);
+				yPosition += 10;
+			});
+			doc.text(`Most Popular Payment Method: ${mostPopularPaymentMethod}`, 10, yPosition);
+			yPosition += 20;
+	
+			// Top Selling Medications
+			const medicationSales = transactionItems.reduce((totals, item) => {
+				totals[item.medication_id] = (totals[item.medication_id] || 0) + item.quantity;
+				return totals;
+			}, {});
+			const topSellingMedications = Object.entries(medicationSales)
+				.sort((a, b) => b[1] - a[1])
+				.slice(0, 5); // Top 5 medications
+			doc.text('Top Selling Medications (by Quantity):', 10, yPosition);
+			yPosition += 10;
+	
+			topSellingMedications.forEach(([medicationId, quantity]) => {
+				addNewPageIfNeeded();
+				doc.text(`  - Medication ID: ${medicationId}, Quantity Sold: ${quantity}`, 10, yPosition);
+				yPosition += 10;
+			});
+	
+			// Transaction Details
+			doc.setFontSize(14);
+			doc.text('Transaction Details:', 10, yPosition);
+			yPosition += 10;
+			doc.setFontSize(12);
+	
+			transactions.forEach((transaction) => {
+				addNewPageIfNeeded();
+				doc.text(`Transaction ID: ${transaction.id}`, 10, yPosition);
+				doc.text(`  Patient ID: ${transaction.patient_id}`, 70, yPosition);
+				doc.text(`  Total Price (incl. tax): $${transaction.total_price.toFixed(2)}`, 140, yPosition);
+				yPosition += 10;
+	
+				// Transaction Items
+				const items = transactionItems.filter((item) => item.transaction_id === transaction.id);
+				items.forEach((item) => {
+					addNewPageIfNeeded();
+					const subtotalWithTax = item.subtotal_price * 1.08; // Assuming 8% tax
+					doc.text(
+						`    - Medication ID: ${item.medication_id}, Quantity: ${item.quantity}, Subtotal (w/tax): $${subtotalWithTax.toFixed(2)}`,
+						20,
+						yPosition
+					);
+					yPosition += 10;
+				});
+				yPosition += 10; // Space between transactions
+			});
+	
+			// Save the generated PDF
+			doc.save('financial_report_with_statistics.pdf');
+		} catch (error) {
+			console.error('Error generating financial report:', error);
+			setErrorMessage('Failed to generate financial report: ' + error.message);
+			setOpenSnackbar(true);
+		}
+	};
+	
+	
+	
 	return (
 		<div>
 			<h2>Medication Inventory Table</h2>

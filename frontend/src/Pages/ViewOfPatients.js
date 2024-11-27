@@ -80,7 +80,6 @@ function ViewOfPatients() {
 
 	const deletePatient = async (id) => {
 		try {
-			console.log("row", id);
 			const response = await fetch(`http://localhost:8000/patient/${id}`, {
 				method: 'DELETE',
 				headers: {'Authorization': 'Bearer ' + token}
@@ -103,15 +102,12 @@ function ViewOfPatients() {
 	 */
 	// this is 'onSave()'
 	const addEditPatient = async (data, id) => {
-		console.log("adding patient: ", data, id);
 		try {
 			if (id) {
 				const result = await editPatient(data, id);
-				console.log("editPatient result:", result);
 				return result;
 			} else {
 				const result = await addPatient(data);
-				console.log("addPatient result:", result);
 				return result;
 			}
 		} catch (error) {
@@ -126,7 +122,6 @@ function ViewOfPatients() {
 	 */
 	const editPatient = async (data, id) => {
 		try {
-			console.log("row in editPatient", id, data)
 			const response = await fetch(`http://localhost:8000/patient/${id}`, {
 				method: 'PUT',
 				headers: {
@@ -137,7 +132,6 @@ function ViewOfPatients() {
 			});
 			if (!response.ok) {
 				const responseData = await response.json(); // Wait for the JSON to be parsed
-				console.log("Error detail from response:", responseData.detail[0].msg);
 				throw new Error(responseData.detail[0].msg);
 			}
 			fetchPatients();
@@ -155,7 +149,6 @@ function ViewOfPatients() {
 	 */
 	const addPatient = async (data) => {
 		try {
-			console.log("row in addPatient", data)
 			const response = await fetch(`http://localhost:8000/patient`, {
 				method: 'POST',
 				headers: {

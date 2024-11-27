@@ -175,8 +175,6 @@ VALUES (21, 2, null, '2024-09-29', null, 17, 'Dr. Carter', 90);
 
 
 -- user_activities table
-
-
 INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (21, 'INVENTORY_UPDATE', '2024-07-18 10:47:00');
 INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (24, 'LOGIN', '2024-08-06 07:55:35');
 INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (5, 'INVENTORY_UPDATE', '2024-08-07 16:05:00');
@@ -217,6 +215,7 @@ INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (20, 'LOG
 INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (19, 'INVENTORY_UPDATE', '2024-10-01 09:32:00');
 INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (16, 'INVENTORY_UPDATE', '2024-10-01 09:57:00');
 INSERT INTO user_activities (user_id, activity_type, timestamp) VALUES (17, 'INVENTORY_UPDATE', '2024-10-02 14:12:00');
+
 
 
 -- transactions table
@@ -317,7 +316,6 @@ INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal
 -- Total price (before tax): $3.0
 -- Total price (with tax): 3.24 --> (truncate) $3.24
 INSERT INTO transaction_items (transaction_id, medication_id, quantity, subtotal_price) VALUES (13, 11, 15, 3.0); -- Amoxicillin
-
 
 
 

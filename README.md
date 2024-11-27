@@ -2,6 +2,32 @@
 
 Developed in Fall 2024 by Skyler DeVaugh, Katelyn McLean, Oliver Seymour, Hsinwei Lin, CJ Reda, and Dalia Castro
 
+
+## Walkthrough
+
+When you first visit the pharmacy management system, you will be shown the homepage with information about location, hours and more.
+
+<img src="readme_pictures\homepage.png">
+
+You can click the login button to login to your account.
+
+<img src="readme_pictures/login.png">
+
+After you login, you will be shown the dashboard. The dashboard is different for every user type, this screenshot shows the dashboard for Pharmacy Managers.
+
+<img src="readme_pictures/PM_dashboard.png">
+
+You can naviagate to different places on the website using the navbar at the top or the buttons on the dashboard. Here are a few of the pages.
+
+- Prescriptions:
+  <img src="readme_pictures/prescriptions.png">
+- User Acrtivity:
+  <img src="readme_pictures/user_activity.png">
+- Notifications:
+  <img src="readme_pictures/notifications.png">
+
+Each page serves a unique purpose, most are simple CRUD operations for prescriptions, medication, patients, and users. Pages like user activity, report engine, and notifications allow pharmacy managers to monitor logs and get repors.
+
 ## Table of Contents
 
 <!-- 3. [Tech Stack](#tech-stack) -->
@@ -35,6 +61,18 @@ Key users of this app include:
 - Cashiers: can checkout customers
 
 
+## Table of Contents
+<!-- 3. [Tech Stack](#tech-stack) -->
+1. [Overview](#overview)
+2. [Features](#features)
+3. [Setup Instructions](#setup-instructions)
+4. [Code Structure](#code-structure)
+5. [Architecture](#architecture)
+6. [Frontend](#frontend)
+7. [Backend](#backend)
+8. [API Documentation](#api-documentation)
+9. [Screenshots](#screenshots)
+
 ## Features
 
 ### User-Facing Features
@@ -50,7 +88,6 @@ Key users of this app include:
 
 - **Feature A**: Describe feature (e.g., "Ability to monitor and manage users").
 
-
 ## Setup Instructions
 
 Follow these steps to run the project locally.
@@ -62,50 +99,50 @@ Follow these steps to run the project locally.
 2. Install [Python](https://www.python.org/)
 3. Check Docker status, making sure it's properly installed
 
-    ```shell
-    docker --version
-    docker-compose --version
-    ```
+   ```shell
+   docker --version
+   docker-compose --version
+   ```
 
 ### Installation and first-time setup
 
 1. Clone the repository:
 
-    ```bash
-    git clone https://github.com/oliver-sey/pharmacy-management-system
-    ```
+   ```bash
+   git clone https://github.com/oliver-sey/pharmacy-management-system
+   ```
 
 2. Navigate to the project directory:
 
-    ```bash
-    cd pharmacy-management-system
-    ```
+   ```bash
+   cd pharmacy-management-system
+   ```
 
 3. Build Docker container
 
-    You only need to run this command with the `--build` flag the first time or after changing the environment (importing a new package, etc).
+   You only need to run this command with the `--build` flag the first time or after changing the environment (importing a new package, etc).
 
-    ```shell
-    docker-compose up --build
-    ```
+   ```shell
+   docker-compose up --build
+   ```
 
-    The Docker container should now be up and running, and the website should be available at [localhost:3000](http://localhost:3000) in your browser.
+   The Docker container should now be up and running, and the website should be available at [localhost:3000](http://localhost:3000) in your browser.
 
 ### Running Locally
 
 1. Starting the container in a typical situation:
 
-    Start the container:
+   Start the container:
 
-    ```shell
-    docker-compose up
-    ```
+   ```shell
+   docker-compose up
+   ```
 
 2. Stop the container (stops the code):
 
-    ```shell
-    ctrl (control key) c
-    ```
+   ```shell
+   ctrl (control key) c
+   ```
 
 ## Code Structure
 
@@ -136,6 +173,7 @@ This structure ensures a clear separation of concerns, making the project easy t
 This project includes a **FastAPI** backend with **SQLAlchemy** models and schema design, a **PostgreSQL** database, a **React** frontend, and the use of **Docker** containers for easy deployment.
 
 The project follows a **full-stack/client-server** architecture with the following components:
+
 - **FastAPI Backend**: Provides RESTful API endpoints for the frontend to interact with the database.
 - **SQLAlchemy**: ORM (Object Relational Mapper) used to define models and handle database interactions.
 - **PostgreSQL Database**: Relational database used to persist data.
@@ -176,7 +214,6 @@ The project follows a **full-stack/client-server** architecture with the followi
 ### Interconnection
 
 The frontend and backend are interconnected through RESTful APIs. The frontend makes HTTP requests to the backend to perform various operations. The backend processes these requests, interacts with the database, and returns the appropriate responses. Docker is used to containerize both the frontend and backend, ensuring a consistent and isolated environment for the application.
-
 
 ## Frontend
 
@@ -354,15 +391,15 @@ These describe our database tables
 
 Represents a user (employee) in the system (e.g., Pharmacy Manager, Technician, etc.). Patients (customers) do not get a user account and cannot login.
 
-| Column Name     | Data Type            |
-|-----------------|----------------------|
-| id              | Integer (Primary Key)|
-| first_name      | String               |
-| last_name       | String               |
-| user_type       | SQLAlchemyEnum(UserType) |
-| email           | String (Unique)      |
-| password        | String               |
-| is_locked_out   | Boolean (Default: True) |
+| Column Name   | Data Type                |
+| ------------- | ------------------------ |
+| id            | Integer (Primary Key)    |
+| first_name    | String                   |
+| last_name     | String                   |
+| user_type     | SQLAlchemyEnum(UserType) |
+| email         | String (Unique)          |
+| password      | String                   |
+| is_locked_out | Boolean (Default: True)  |
 
 ---
 
@@ -370,18 +407,18 @@ Represents a user (employee) in the system (e.g., Pharmacy Manager, Technician, 
 
 Represents a patient with personal and insurance details.
 
-| Column Name          | Data Type            |
-|----------------------|----------------------|
-| id                   | Integer (Primary Key)|
-| first_name           | String               |
-| last_name            | String               |
-| date_of_birth        | Date                 |
-| address              | String               |
-| phone_number         | String               |
-| email                | String (Unique)      |
-| insurance_name       | String               |
-| insurance_group_number | String             |
-| insurance_member_id  | String               |
+| Column Name            | Data Type             |
+| ---------------------- | --------------------- |
+| id                     | Integer (Primary Key) |
+| first_name             | String                |
+| last_name              | String                |
+| date_of_birth          | Date                  |
+| address                | String                |
+| phone_number           | String                |
+| email                  | String (Unique)       |
+| insurance_name         | String                |
+| insurance_group_number | String                |
+| insurance_member_id    | String                |
 
 ---
 
@@ -389,17 +426,17 @@ Represents a patient with personal and insurance details.
 
 Represents a prescription given to a patient, including medication details.
 
-| Column Name          | Data Type            |
-|----------------------|----------------------|
-| id                   | Integer (Primary Key)|
-| patient_id           | Integer (ForeignKey) |
-| user_entered_id      | Integer (ForeignKey) |
-| user_filled_id       | Integer (ForeignKey) |
-| date_prescribed      | Date (Default: current date) |
-| filled_timestamp     | DateTime (Nullable)  |
-| medication_id        | Integer (ForeignKey) |
-| doctor_name          | String               |
-| quantity             | Integer              |
+| Column Name      | Data Type                    |
+| ---------------- | ---------------------------- |
+| id               | Integer (Primary Key)        |
+| patient_id       | Integer (ForeignKey)         |
+| user_entered_id  | Integer (ForeignKey)         |
+| user_filled_id   | Integer (ForeignKey)         |
+| date_prescribed  | Date (Default: current date) |
+| filled_timestamp | DateTime (Nullable)          |
+| medication_id    | Integer (ForeignKey)         |
+| doctor_name      | String                       |
+| quantity         | Integer                      |
 
 ---
 
@@ -407,15 +444,15 @@ Represents a prescription given to a patient, including medication details.
 
 Represents a medication, including its name, dosage, and inventory details.
 
-| Column Name          | Data Type            |
-|----------------------|----------------------|
-| id                   | Integer (Primary Key)|
-| name                 | String               |
-| dosage               | String               |
-| quantity             | Integer              |
-| prescription_required| Boolean              |
-| expiration_date      | Date                 |
-| dollars_per_unit     | Float                |
+| Column Name           | Data Type             |
+| --------------------- | --------------------- |
+| id                    | Integer (Primary Key) |
+| name                  | String                |
+| dosage                | String                |
+| quantity              | Integer               |
+| prescription_required | Boolean               |
+| expiration_date       | Date                  |
+| dollars_per_unit      | Float                 |
 
 ---
 
@@ -423,12 +460,12 @@ Represents a medication, including its name, dosage, and inventory details.
 
 Tracks a user's activities in the system (e.g., login, logout, etc.).
 
-| Column Name          | Data Type            |
-|----------------------|----------------------|
-| id                   | Integer (Primary Key)|
-| user_id              | Integer (ForeignKey) |
-| activity_type        | SQLAlchemyEnum(UserActivityType) |
-| timestamp            | DateTime (Default: current time) |
+| Column Name   | Data Type                        |
+| ------------- | -------------------------------- |
+| id            | Integer (Primary Key)            |
+| user_id       | Integer (ForeignKey)             |
+| activity_type | SQLAlchemyEnum(UserActivityType) |
+| timestamp     | DateTime (Default: current time) |
 
 ---
 
@@ -436,15 +473,15 @@ Tracks a user's activities in the system (e.g., login, logout, etc.).
 
 Represents changes to the inventory, such as adding or discarding medication.
 
-| Column Name          | Data Type            |
-|----------------------|----------------------|
-| id                   | Integer (Primary Key)|
-| medication_id        | Integer (ForeignKey) |
-| user_activity_id     | Integer (ForeignKey) |
-| transaction_id       | Integer (ForeignKey, Nullable) |
-| quantity_changed_by  | Integer              |
-| timestamp            | DateTime (Default: current time) |
-| activity_type        | SQLAlchemyEnum(InventoryUpdateType) |
+| Column Name         | Data Type                           |
+| ------------------- | ----------------------------------- |
+| id                  | Integer (Primary Key)               |
+| medication_id       | Integer (ForeignKey)                |
+| user_activity_id    | Integer (ForeignKey)                |
+| transaction_id      | Integer (ForeignKey, Nullable)      |
+| quantity_changed_by | Integer                             |
+| timestamp           | DateTime (Default: current time)    |
+| activity_type       | SQLAlchemyEnum(InventoryUpdateType) |
 
 ---
 
@@ -452,13 +489,13 @@ Represents changes to the inventory, such as adding or discarding medication.
 
 Represents a transaction involving a user and a patient (e.g., payment for medication).
 
-| Column Name          | Data Type            |
-|----------------------|----------------------|
-| id                   | Integer (Primary Key)|
-| user_id              | Integer (ForeignKey) |
-| patient_id           | Integer (ForeignKey) |
-| timestamp            | DateTime (Default: current time) |
-| payment_method       | String               |
+| Column Name    | Data Type                        |
+| -------------- | -------------------------------- |
+| id             | Integer (Primary Key)            |
+| user_id        | Integer (ForeignKey)             |
+| patient_id     | Integer (ForeignKey)             |
+| timestamp      | DateTime (Default: current time) |
+| payment_method | String                           |
 
 ---
 
@@ -470,46 +507,46 @@ These restrict the possible values that can be stored in certain database column
 
 Defines the roles for a user.
 
-| Value                |
-|----------------------|
-| PHARMACY_MANAGER     |
-| PHARMACY_TECHNICIAN  |
-| CASHIER              |
-| PHARMACIST           |
+| Value               |
+| ------------------- |
+| PHARMACY_MANAGER    |
+| PHARMACY_TECHNICIAN |
+| CASHIER             |
+| PHARMACIST          |
 
 #### UserActivityType
 
 Defines the types of user activities.
 
-| Value                |
-|----------------------|
-| LOGIN                |
-| LOGOUT               |
-| UNLOCK_ACCOUNT       |
-| INVENTORY_UPDATE     |
-| CREATE_USER          |
-| DELETE_USER          |
-| UPDATE_USER          |
-| CREATE_PATIENT       |
-| DELETE_PATIENT       |
-| UPDATE_PATIENT       |
-| CREATE_PRESCRIPTION  |
-| CREATE_MEDICATION    |
-| DELETE_MEDICATION    |
-| UPDATE_MEDICATION    |
-| OTHER                |
-| ERROR                |
+| Value               |
+| ------------------- |
+| LOGIN               |
+| LOGOUT              |
+| UNLOCK_ACCOUNT      |
+| INVENTORY_UPDATE    |
+| CREATE_USER         |
+| DELETE_USER         |
+| UPDATE_USER         |
+| CREATE_PATIENT      |
+| DELETE_PATIENT      |
+| UPDATE_PATIENT      |
+| CREATE_PRESCRIPTION |
+| CREATE_MEDICATION   |
+| DELETE_MEDICATION   |
+| UPDATE_MEDICATION   |
+| OTHER               |
+| ERROR               |
 
 #### InventoryUpdateType
 
 Defines the types of inventory updates.
 
-| Value                |
-|----------------------|
-| ADD                  |
-| DISCARD              |
-| FILLPRESC            |
-| SELLNONPRESC         |
+| Value        |
+| ------------ |
+| ADD          |
+| DISCARD      |
+| FILLPRESC    |
+| SELLNONPRESC |
 
 ### 8. **InventoryUpdate**
 
@@ -517,15 +554,15 @@ Represents updates made to the inventory, such as adding or discarding medicatio
 
 `quantity_changed_by` will be positive or negative depending on if medication was added or removed.
 
-| Column Name          | Data Type            |
-|----------------------|----------------------|
-| id                   | Integer (Primary Key)|
-| medication_id        | Integer (ForeignKey) |
-| user_activity_id     | Integer (ForeignKey) |
-| transaction_id       | Integer (ForeignKey, Nullable) |
-| quantity_changed_by  | Integer              |
-| timestamp            | DateTime (Default: current time) |
-| activity_type        | SQLAlchemyEnum(InventoryUpdateType) |
+| Column Name         | Data Type                           |
+| ------------------- | ----------------------------------- |
+| id                  | Integer (Primary Key)               |
+| medication_id       | Integer (ForeignKey)                |
+| user_activity_id    | Integer (ForeignKey)                |
+| transaction_id      | Integer (ForeignKey, Nullable)      |
+| quantity_changed_by | Integer                             |
+| timestamp           | DateTime (Default: current time)    |
+| activity_type       | SQLAlchemyEnum(InventoryUpdateType) |
 
 ---
 
@@ -533,13 +570,13 @@ Represents updates made to the inventory, such as adding or discarding medicatio
 
 Represents a transaction between a user and a patient (e.g., payment for medications or services).
 
-| Column Name          | Data Type            |
-|----------------------|----------------------|
-| id                   | Integer (Primary Key)|
-| user_id              | Integer (ForeignKey) |
-| patient_id           | Integer (ForeignKey) |
-| timestamp            | DateTime (Default: current time) |
-| payment_method       | String               |
+| Column Name    | Data Type                        |
+| -------------- | -------------------------------- |
+| id             | Integer (Primary Key)            |
+| user_id        | Integer (ForeignKey)             |
+| patient_id     | Integer (ForeignKey)             |
+| timestamp      | DateTime (Default: current time) |
+| payment_method | String                           |
 
 ## Screenshots
 

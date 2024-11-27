@@ -57,7 +57,7 @@ const ViewOfPatientPrescriptions = () => {
     // Fetch patient name
     const fetchPatientName = useCallback(async () => {
         try {
-            const response = await fetch(`http://localhost:8000/get/patient/${patientId}`, {
+            const response = await fetch(`http://localhost:8000/patient/${patientId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },

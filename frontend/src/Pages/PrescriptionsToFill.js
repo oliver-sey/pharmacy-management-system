@@ -49,8 +49,6 @@ const fetchPatients = async () => {
 			},
 		});
 		const data = await response.json()
-
-		console.log("patient data: " + JSON.stringify(data))
 		return data
 	} catch (error) {
 		console.error('Error fetching patient:', error);
@@ -68,8 +66,6 @@ const fetchMedications = async () => {
 			},
 		});
 		const data = await response.json()
-
-		console.log("medication data: " + JSON.stringify(data))
 		
 		return data
 	} catch (error) {
@@ -89,8 +85,6 @@ const fetchUsers = async () => {
 		  });
 		const data = await response.json()
 
-		console.log("users data: " + JSON.stringify(data))
-		
 		return data
 	} catch (error) {
 		console.error('Error fetching users:', error);
@@ -137,14 +131,12 @@ const loadRows = async () =>{
 
 	const filteredPrescriptions = updatedPrescriptions.filter(prescription => prescription.user_filled_id === null);
 
-	console.log(updatedPrescriptions)
 	setRows(filteredPrescriptions)
 }
 
 	
 const deletePrescription = async (id) => {
 	try {
-		console.log("row", id);
 		const response = await fetch(`http://localhost:8000/prescription/${id}`, {
 			method: 'DELETE',
 			headers: { 'Authorization': 'Bearer ' + token }
@@ -255,7 +247,6 @@ const deletePrescription = async (id) => {
 	 */
 	const addPrescription = async (data) => {
 		try {
-			console.log("row in addPrescription", data)
 			const response = await fetch(`http://localhost:8000/prescription`, {
 				method: 'POST',
 				headers: {

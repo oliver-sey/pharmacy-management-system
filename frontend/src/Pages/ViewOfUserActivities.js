@@ -59,8 +59,6 @@ const UserActivitiesTable = () => {
   };
 
   const applyFilters = () => {
-    console.log("Applying filters:", filters); // Log current filter values
-  
     const filtered = allActivities.filter(activity => {
       // Check each filter condition separately
       const matchUserId = filters.userId ? activity.user_id.toString() === filters.userId : true;
@@ -73,22 +71,12 @@ const UserActivitiesTable = () => {
   
       const matchStartDate = startDate ? activityDate >= startDate : true;
       const matchEndDate = endDate ? activityDate <= endDate : true;
-  
-      // Log each condition to see where it might fail
-      console.log({
-        activity: activity,
-        matchUserId,
-        matchActivity,
-        matchStartDate,
-        matchEndDate,
-      });
-  
+
       // Return true only if all conditions match
       return matchUserId && matchActivity && matchStartDate && matchEndDate;
     });
   
     setFilteredActivities(filtered);
-    console.log("Filtered Activities:", filtered); // Log filtered results
   };
   
 

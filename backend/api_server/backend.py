@@ -126,6 +126,10 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)],
     current_user = UserToReturn(id=user.id, email=user.email, user_type=user.user_type)
     if user is None:
         raise HTTPException(status_code=404, detail="get_current_user user not found")
+    elif user.is_locked_out:
+        raise HTTPException(status_code=423, detail="This account is locked out due to too many failed login attempts")
+    elif user.is_deleted:
+        raise HTTPException(status_code=403, detail="This account has been deleted and cannot be used to log in")
     
     return current_user
 
@@ -156,6 +160,17 @@ async def login_for_access_token(
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    elif user.is_locked_out:
+        raise HTTPException(
+            status_code=status.HTTP_423_LOCKED,
+            detail="This account is locked out due to too many failed login attempts",
+        )
+    elif user.is_deleted:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="This account has been deleted and cannot be used to log in",
+        )
+    
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": user.email}, expires_delta=access_token_expires

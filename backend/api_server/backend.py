@@ -62,6 +62,8 @@ def get_db():
     finally:
         db.close()
 
+# endregion
+# region Auth
 #for password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -218,6 +220,8 @@ async def reset_password(
     return {"message": "Password has been successfully reset."}
 
 
+# endregion
+# region Logging
 # # configure logging
 # logging.basicConfig(level=logging.INFO)
 # logger = logging.getLogger("pharmacy_logger")

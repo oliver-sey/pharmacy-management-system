@@ -1145,12 +1145,16 @@ def create_transaction(transaction: TransactionCreate, db: Session = Depends(get
     validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
 
     # create a new transaction
-    db_transaction = models.Transaction(**transaction.dict())
+    # add the transaction to the database
+    db.add(db_transaction)
+    db.commit()
+    db.refresh(db_transaction)
 
     # make a transaction_items entry for each of the items that got passed to this endpoint
+    # pass the transaction_id of the transaction we just created
     for transaction_item in transaction.transaction_items:
         create_transaction_item(
-            transaction_item=transaction_item, db=db, current_user=current_user
+            transaction_item=transaction_item, transaction_id=db_transaction.id, db=db, current_user=current_user
         )
 
     # Create a user activity
@@ -1158,10 +1162,6 @@ def create_transaction(transaction: TransactionCreate, db: Session = Depends(get
     user_activity = UserActivityCreate(activity_type=models.UserActivityType.OTHER)
     create_user_activity(user_activity=user_activity, db=db, current_user=current_user)
     
-
-    db.add(db_transaction)
-    db.commit()
-    db.refresh(db_transaction)
     return db_transaction
 
 # get a transaction
@@ -1195,11 +1195,17 @@ def get_transactions(db: Session = Depends(get_db), current_user: UserToReturn =
 # create a transaction item
 # @app.post("/transaction-item", response_model=TransactionItemResponse)
 # def create_transaction_item(transaction_item: TransactionItemCreate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
-def create_transaction_item(transaction_item: TransactionItemCreate, db: Session, current_user: UserToReturn):
+def create_transaction_item(transaction_item: TransactionItemCreate, transaction_id: int, db: Session, current_user: UserToReturn):
     # allow all user types 
 
     # create a new transaction item
-    db_transaction_item = models.TransactionItem(**transaction_item.dict())
+    db_transaction_item = models.TransactionItem(
+        # get the transaction_id from the parameter, from the transaction that we just created
+        transaction_id=transaction_id,
+        medication_id=transaction_item.medication_id,
+        quantity=transaction_item.quantity,
+    )
+
     db.add(db_transaction_item)
     db.commit()
     db.refresh(db_transaction_item)

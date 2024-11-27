@@ -265,7 +265,6 @@ class UserActivityResponse(BaseModel):
 # this requires the transaction_id, just need to make the transaction first, 
 # and then the associated transaction_items once you have the transaction_id
 class TransactionItemCreate(BaseModel):
-    transaction_id: int
     medication_id: int
     quantity: int
 

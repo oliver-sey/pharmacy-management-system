@@ -1138,7 +1138,7 @@ def get_all_user_activities(db: Session = Depends(get_db), current_user: UserToR
 # region Transaction CRUD
 
 # transaction crud for checkout, don't have update or delete since we are not deleting or updating transaction
-# createa a transaction
+# create a transaction
 @app.post("/transaction", response_model=TransactionResponse)
 def create_transaction(transaction: TransactionCreate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
     # make sure only pharmacy managers or pharmacists can call this endpoint
@@ -1146,6 +1146,19 @@ def create_transaction(transaction: TransactionCreate, db: Session = Depends(get
 
     # create a new transaction
     db_transaction = models.Transaction(**transaction.dict())
+
+    # make a transaction_items entry for each of the items that got passed to this endpoint
+    for transaction_item in transaction.transaction_items:
+        create_transaction_item(
+            transaction_item=transaction_item, db=db, current_user=current_user
+        )
+
+    # Create a user activity
+    # TODO: ***************fix the user_activity type
+    user_activity = UserActivityCreate(activity_type=models.UserActivityType.OTHER)
+    create_user_activity(user_activity=user_activity, db=db, current_user=current_user)
+    
+
     db.add(db_transaction)
     db.commit()
     db.refresh(db_transaction)
@@ -1180,8 +1193,9 @@ def get_transactions(db: Session = Depends(get_db), current_user: UserToReturn =
 # transaction items crud for checkout, don't have update or delete since we are not deleting or updating transaction items
 
 # create a transaction item
-@app.post("/transaction-item", response_model=TransactionItemResponse)
-def create_transaction_item(transaction_item: TransactionItemCreate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+# @app.post("/transaction-item", response_model=TransactionItemResponse)
+# def create_transaction_item(transaction_item: TransactionItemCreate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
+def create_transaction_item(transaction_item: TransactionItemCreate, db: Session, current_user: UserToReturn):
     # allow all user types 
 
     # create a new transaction item

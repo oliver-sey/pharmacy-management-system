@@ -262,7 +262,8 @@ class UserActivityResponse(BaseModel):
 # endregion
 # region Transaction Items
 
-
+# this requires the transaction_id, just need to make the transaction first, 
+# and then the associated transaction_items once you have the transaction_id
 class TransactionItemCreate(BaseModel):
     transaction_id: int
     medication_id: int
@@ -286,7 +287,7 @@ class TransactionCreate(BaseModel):
     # patient_id is required
     patient_id: int
     payment_method: str
-
+    transaction_items: list[TransactionItemCreate]
 
 class TransactionResponse(BaseModel):
     id: int
@@ -294,6 +295,8 @@ class TransactionResponse(BaseModel):
     patient_id: Optional[int] = None
     timestamp: datetime
     payment_method: str
+
+    transaction_items: list[TransactionItemResponse]
 
     class Config:
         from_attributes = True

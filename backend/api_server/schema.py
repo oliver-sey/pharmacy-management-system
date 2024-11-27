@@ -259,6 +259,9 @@ class UserActivityResponse(BaseModel):
     activity: UserActivityType # the activity type, an enum
     timestamp: datetime
 
+
+# endregion
+# region Transactions
 class TransactionCreate(BaseModel):
     user_id: int
     patient_id: Optional[int] = None
@@ -273,3 +276,21 @@ class TransactionResponse(BaseModel):
 
     class Config:
         from_attributes = True 
+
+# endregion
+# region Transaction Items
+
+class TransactionItemCreate(BaseModel):
+    transaction_id: int
+    medication_id: int
+    quantity: int
+
+
+class TransactionItemResponse(BaseModel):
+    id: int
+    transaction_id: int
+    medication_id: int
+    quantity: int
+
+    class Config:
+        from_attributes = True

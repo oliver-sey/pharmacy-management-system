@@ -291,7 +291,7 @@ class TransactionCreate(BaseModel):
 class TransactionResponse(BaseModel):
     id: int
     user_id: int
-    patient_id: Optional[int] = None
+    patient_id: int
     timestamp: datetime
     payment_method: str
 

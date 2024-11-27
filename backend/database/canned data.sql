@@ -229,6 +229,65 @@ INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES
 INSERT INTO transactions (user_id, patient_id, timestamp, payment_method) VALUES (14, 1, '2024-10-02 14:12:34', 'credit card');
 
 
+-- transaction_items table
+-- Transaction 1
+INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (1, 1, 300); -- Ibuprofen
+INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (1, 4, 20); -- Acetaminophen
+INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (1, 2, 10); -- Amoxicillin
+INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (2, 5, 40); -- Aspirin
+
+-- Transaction 2
+INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (2, 2, 10); -- Amoxicillin
+INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (2, 5, 50); -- Aspirin
+
+-- Transaction 3
+INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (3, 3, 15); -- Lipitor
+
+-- Transaction 4
+INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (4, 6, 5);  -- Warfarin
+INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (4, 1, 25); -- Ibuprofen
+INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (4, 7, 10); -- Metformin
+
+-- Transaction 5
+INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (5, 4, 40); -- Acetaminophen
+
+-- Transaction 6
+INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (6, 8, 100);  -- Melatonin
+INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (6, 9, 100); -- Dramamine
+INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (6, 10, 50); -- Ibuprofen
+
+-- Transaction 7
+INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (7, 11, 20); -- Amoxicillin
+INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (7, 12, 30); -- Lipitor
+
+-- Transaction 8
+INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (8, 11, 20); -- Amoxicillin
+INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (8, 12, 300); -- Lipitor
+INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (8, 13, 250); -- Acetaminophen
+INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (8, 14, 100); -- Aspirin
+
+-- Transaction 9
+INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (9, 15, 5);  -- Hydrochlorothiazide
+INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (9, 16, 10);  -- Simvastatin
+
+-- Transaction 10
+INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (10, 18, 20); -- Prednisone
+
+-- Transaction 11
+INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (11, 19, 10); -- Warfarin
+INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (11, 20, 30); -- Losartan
+INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (11, 10, 90); -- Ibuprofen
+
+-- Transaction 12
+INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (12, 21, 40); -- Levothyroxine
+INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (12, 8, 25); -- Melatonin
+
+-- Transaction 13
+INSERT INTO transaction_items (transaction_id, medication_id, quantity) VALUES (13, 11, 15); -- Amoxicillin
+
+
+
+
 -- inventory_updates table
 
 

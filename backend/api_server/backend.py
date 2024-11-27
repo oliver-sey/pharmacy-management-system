@@ -1146,13 +1146,16 @@ def create_transaction(transaction: TransactionCreate, db: Session = Depends(get
 
     # TODO: could possibly calculate total cost as a later feature
     # Calculate the total cost of items in the transaction
-    # total_cost = 0
-    # for item in transaction.transaction_items:
-    #     medication = db.query(models.Medication).filter(models.Medication.id == item.medication_id).first()
-    #     if not medication:
-    #         raise HTTPException(status_code=404, detail=f"Medication with ID {item.medication_id} not found")
-    #     total_cost += medication.dollars_per_unit * item.quantity
+    total_cost = 0
+    for item in transaction.transaction_items:
+        medication = db.query(models.Medication).filter(models.Medication.id == item.medication_id).first()
+        if not medication:
+            raise HTTPException(status_code=404, detail=f"Medication with ID {item.medication_id} not found")
+        total_cost += medication.dollars_per_unit * item.quantity
 
+
+    # add 8% tax to the total cost
+    total_cost *= 1.08
 
     # create a new transaction
     # but ignore the transaction_items field since we will create those separately
@@ -1160,7 +1163,7 @@ def create_transaction(transaction: TransactionCreate, db: Session = Depends(get
         # get the user_id from the current_user
         user_id=current_user.id,
         patient_id=transaction.patient_id,
-        # total_cost=total_cost,
+        total_cost=total_cost,
         timestamp=datetime.now(timezone.utc), # set the timestamp in UTC so timezones don't affect it
         payment_method=transaction.payment_method
     )

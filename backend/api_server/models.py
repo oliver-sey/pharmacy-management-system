@@ -183,8 +183,12 @@ class Transaction(Base):
     timestamp = Column(DateTime, default=func.now())
     payment_method = Column(SQLAlchemyEnum(PaymentMethodType))
 
+    total_price = Column(Float)
+
     patient = relationship("Patient", back_populates="transactions")
     user = relationship("User", back_populates="transactions")
+
+    # TODO: uncomment this?
     # inventory_update = relationship("InventoryUpdate", back_populates="transaction")  # This should link to the correct attribute
     transaction_items = relationship("TransactionItem", back_populates="transaction")
 

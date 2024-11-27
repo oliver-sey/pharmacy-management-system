@@ -294,6 +294,7 @@ class TransactionResponse(BaseModel):
     patient_id: int
     timestamp: datetime
     payment_method: str
+    total_price: float
 
     transaction_items: list[TransactionItemResponse]
 

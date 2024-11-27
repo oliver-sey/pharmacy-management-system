@@ -76,7 +76,7 @@ function Login({ updateUserRole }) {
 		updateMessageAndLockedOut(username);
 	};
 
-	const updateMessageAndLockedOut = (newEmail) => {
+	const updateMessageAndLockedOut = async (newEmail) => {
 		// reset the value of isLockedOut and showAttemptsMessage
 		setIsLockedOut(false);
 		setShowAttemptsMessage(false);
@@ -104,6 +104,20 @@ function Login({ updateUserRole }) {
 			alert(
 				"Your account has been locked. Please contact your pharmacy manager."
 			);
+
+			// get the user ID from the email
+			
+
+			// lock the user out now that we have their ID
+			await fetch(`http://localhost:8000/users/lock`, {
+				method: "PUT",
+				headers: {
+					"Content-Type": "application/json",
+					// no authorization on this one
+				},
+				body: JSON.stringify({ email: newEmail }),
+			});
+
 			setIsLockedOut(true);
 			setAttemptsMessage(
 				"Your account has been locked. Please contact your pharmacy manager."

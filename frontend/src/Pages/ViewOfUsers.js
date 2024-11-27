@@ -33,7 +33,7 @@ function ViewOfUsers() {
 	useEffect(() => {
 		CheckUserType(role, navigate);
 		fetchUsers();
-	}, []);
+	}, [fetchUsers]);
 
 	// the columns for the table
 	// headerName is what shows up on the website

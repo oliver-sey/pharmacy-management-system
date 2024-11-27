@@ -96,6 +96,7 @@ def verify_token(token: Annotated[str, Depends(oauth2_scheme)]):
         username: str = payload.get("sub")
         if username is None:
             raise HTTPException(status_code=403, detail="Token is invalid or expired")
+        print(payload)
         return payload
         
     except JWTError:
@@ -109,6 +110,7 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)],
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
+    # print(f"Received token: {token}")  # Print the token
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
@@ -116,6 +118,7 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)],
             raise credentials_exception
         token_data = TokenData(username=username)
     except InvalidTokenError:
+        print("Invalid token", token)
         raise HTTPException(status_code=400, detail="token is invalid")
     user = db.query(models.User).filter(models.User.email == token_data.username).first()
     current_user = UserToReturn(id=user.id, email=user.email, user_type=user.user_type)
@@ -214,6 +217,7 @@ async def reset_password(
 
     return {"message": "Password has been successfully reset."}
 
+
 # configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("pharmacy_logger")
@@ -230,17 +234,20 @@ def determine_activity_type(request: Request):
         elif request.method == "PUT":
             return models.UserActivityType.UPDATE_USER
         elif request.method == "DELETE":
-            return models.UserActivityType.DELETE_USER      
+            return models.UserActivityType.DELETE_USER
+    
     elif "patient" in request.url.path:
         if request.method == "POST":
             return models.UserActivityType.CREATE_PATIENT
         elif request.method == "PUT":
             return models.UserActivityType.UPDATE_PATIENT
         elif request.method == "DELETE":
-            return models.UserActivityType.DELETE_PATIENT  
+            return models.UserActivityType.DELETE_PATIENT
+
     elif "prescription" in request.url.path:
         if request.method == "POST":
-            return models.UserActivityType.CREATE_PRESCRIPTION  
+            return models.UserActivityType.CREATE_PRESCRIPTION
+
     elif "medication" in request.url.path:
         if request.method == "POST":
             return models.UserActivityType.CREATE_MEDICATION
@@ -250,7 +257,8 @@ def determine_activity_type(request: Request):
             return models.UserActivityType.DELETE_MEDICATION
     else:
         return models.UserActivityType.OTHER   
- # middleware for logging 
+    
+# middleware for logging 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
     '''
@@ -261,7 +269,6 @@ async def log_requests(request: Request, call_next):
     # as well as login and logout
     db: Session = SessionLocal()
     logger.info(f"Request Path: {request.url.path}")
-    logger.info(f"Request Method: {request.method}")
     if request.url.path in ("/token"):
         # check if a user is loggin in 
         logger.info(f"logging in: {request.url.path}")
@@ -283,27 +290,22 @@ async def log_requests(request: Request, call_next):
             db.refresh(db_user_activity)
         
         return response
-    # dont log whenever calling verify-token
     elif "/verify-token/" in request.url.path:
         # check if a user is verifying their token
         logger.info(f"verifying token: {request.url.path}")
         response = await call_next(request)
         return response
-    # dont run the logger on currentuser/me because the user does not have a token yet
     elif "currentuser/me" in request.url.path:
         #skip the log
         logger.info(f"current user: {request.url.path}")
         response = await call_next(request)
         return response
-    # dont log get requests
     elif request.method == "GET" or request.method == "OPTIONS":
         response = await call_next(request)
         return response
-    # log all other requests
     else:
-        logger.info(f"request: {request.headers}")
         logger.info(f"request.headers: {request.headers.keys()}") 
-        token = request.headers.get("authorization")
+        token = request.headers.get("Authorization")
         logger.info(f"token: {token}")
         if token:
             token = token.split(" ")[1]  # Remove 'Bearer' prefix
@@ -359,9 +361,8 @@ async def log_requests(request: Request, call_next):
             db.add(db_user_activity)
             db.commit()
             db.refresh(db_user_activity)
-            # Re-raise error after logging
             raise e
-
+            # Re-raise error after logging
 
 # endregion
 # region User CRUD
@@ -590,6 +591,7 @@ def put_patient(patient_id: int, patient: PatientUpdate, db: Session = Depends(g
 def delete_patient(pid: int, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
     # make a call to our future database to delete the patient with the given patient_id
     patient = db.query(models.Patient).filter(models.Patient.id == pid).first()
+    print(f"patient: {patient}")
     db.query(models.Prescription).filter(models.Prescription.patient_id == pid).update({models.Prescription.patient_id: None})
     
     if patient is None:
@@ -1031,19 +1033,29 @@ def get_inventory_updates(activity_type: Optional[models.InventoryUpdateType] = 
     # Execute the query to retrieve the inventory updates
     inventory_updates = query.all()
         # Convert to response format with medication names
-    inventory_update_responses = [
-            InventoryUpdateResponse(
-                id=update.id,
-                medication_id=update.medication_id,
-                user_activity_id=update.user_activity_id,
-                transaction_id=update.transaction_id,
-                quantity_changed_by=update.quantity_changed_by,
-                activity_type=update.activity_type,
-                timestamp=update.timestamp,
-                medication_name=update.medication.name if update.medication else None  # Medication name
+    inventory_update_responses = []
+    for update in inventory_updates:
+        try:
+            print(f"ID: {update.id}, Medication ID: {update.medication_id}, User Activity ID: {update.user_activity_id}, "
+                  f"Transaction ID: {update.transaction_id}, Quantity Changed By: {update.quantity_changed_by}, "
+                  f"Activity Type: {update.activity_type}, Timestamp: {update.timestamp}, "
+                  f"Medication Name: {update.medication.name if update.medication else None}, "
+                  f"Resulting Total Quantity: {update.resulting_total_quantity}")
+            inventory_update_responses.append(
+                InventoryUpdateResponse(
+                    id=update.id,
+                    medication_id=update.medication_id,
+                    user_activity_id=update.user_activity_id,
+                    transaction_id=update.transaction_id,
+                    quantity_changed_by=update.quantity_changed_by,
+                    activity_type=update.activity_type,
+                    timestamp=update.timestamp,
+                    medication_name=update.medication.name if update.medication else None,
+                    resulting_total_quantity=update.resulting_total_quantity
+                )
             )
-            for update in inventory_updates
-        ]
+        except AttributeError as e:
+            print(f"Error with update ID {update.id}: {e}")
         # return inventory_update_responses
     # return inventory_updates
     return inventory_update_responses

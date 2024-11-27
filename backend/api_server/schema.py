@@ -241,7 +241,7 @@ class InventoryUpdateResponse(BaseModel):
     activity_type: Union[InventoryUpdateType, str]
     medication_name: Optional[str] = None
     timestamp: Optional[datetime] = None
-    resulting_total_quantity: int = Field(..., example=100) 
+    resulting_total_quantity: int
    
 
 # **NOTE: we will not be allowing updating or deleting inventory_updates
@@ -256,7 +256,7 @@ class UserActivityCreate(BaseModel):
 class UserActivityResponse(BaseModel):
     id: int
     user_id: int
-    activity: UserActivityType # the activity type, an enum
+    activity_type: UserActivityType # the activity type, an enum
     timestamp: datetime
 
 class TransactionCreate(BaseModel):

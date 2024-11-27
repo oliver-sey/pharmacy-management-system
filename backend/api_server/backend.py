@@ -545,7 +545,7 @@ def change_user_lock_status(user_id: int, db: Session = Depends(get_db), current
     if is_locked == False:
         db_user_activity = models.UserActivity(
             user_id=user_id,
-            activity=models.UserActivityType.UNLOCK_ACCOUNT,
+            activity_type=models.UserActivityType.UNLOCK_ACCOUNT,
             timestamp=datetime.now(timezone.utc) # set the timestamp in UTC so timezones don't affect it  
         )
         db.add(db_user_activity)
@@ -703,10 +703,10 @@ def update_medication(
             transaction_id=None,  # Set this to the appropriate transaction ID if applicable
         )
 
-        # Pass the calculated resulting_total_quantity explicitly
-        create_inventory_update_with_quantity(
-            inventory_update_data, db_medication.quantity, db, current_user
-        )
+        # # Pass the calculated resulting_total_quantity explicitly
+        # create_inventory_update_with_quantity(
+        #     inventory_update_data, db_medication.quantity, db, current_user
+        # )
 
     return db_medication
 
@@ -957,45 +957,40 @@ def create_inventory_update(inventory_update: InventoryUpdateCreate, db: Session
     db.refresh(db_inventory_update)
     return db_inventory_update
 
-def create_inventory_update_with_quantity(
-    inventory_update: InventoryUpdateCreate,
-    resulting_total_quantity: int,
-    db: Session,
-    current_user: UserToReturn,
-):
-    try:
-        # Fetch the current medication
-        medication = db.query(models.Medication).filter(models.Medication.id == inventory_update.medication_id).first()
-        if not medication:
-            raise HTTPException(status_code=404, detail="Medication not found")
+# def create_inventory_update_with_quantity( inventory_update: InventoryUpdateCreate,resulting_total_quantity: int,db: Session,current_user: UserToReturn,):
+#     try:
+#         # Fetch the current medication
+#         medication = db.query(models.Medication).filter(models.Medication.id == inventory_update.medication_id).first()
+#         if not medication:
+#             raise HTTPException(status_code=404, detail="Medication not found")
 
-        # Create a user activity entry for this
-        user_activity_create = UserActivityCreate(activity_type=models.UserActivityType.INVENTORY_UPDATE)
-        new_user_activity = create_user_activity(user_activity_create, db, current_user)
+#         # Create a user activity entry for this
+#         user_activity_create = UserActivityCreate(activity_type=models.UserActivityType.INVENTORY_UPDATE)
+#         new_user_activity = create_user_activity(user_activity_create, db, current_user)
 
-        # Create the inventory update record with the provided resulting_total_quantity
-        db_inventory_update = models.InventoryUpdate(
-            medication_id=inventory_update.medication_id,
-            user_activity_id=new_user_activity.id,
-            transaction_id=inventory_update.transaction_id,
-            quantity_changed_by=inventory_update.quantity_changed_by,
-            resulting_total_quantity=resulting_total_quantity,  # Use the explicitly passed value
-            timestamp=datetime.now(timezone.utc),  # Set timestamp in UTC
-            activity_type=inventory_update.activity_type,
-        )
+#         # Create the inventory update record with the provided resulting_total_quantity
+#         db_inventory_update = models.InventoryUpdate(
+#             medication_id=inventory_update.medication_id,
+#             user_activity_id=new_user_activity.id,
+#             transaction_id=inventory_update.transaction_id,
+#             quantity_changed_by=inventory_update.quantity_changed_by,
+#             resulting_total_quantity=resulting_total_quantity,  # Use the explicitly passed value
+#             timestamp=datetime.now(timezone.utc),  # Set timestamp in UTC
+#             activity_type=inventory_update.activity_type,
+#         )
 
-        # Add the inventory_update to the database
-        db.add(db_inventory_update)
-        db.commit()
-        db.refresh(db_inventory_update)
+#         # Add the inventory_update to the database
+#         db.add(db_inventory_update)
+#         db.commit()
+#         db.refresh(db_inventory_update)
 
-        # Optionally print the update for debugging
-        print("Created Inventory Update:", db_inventory_update)
+#         # Optionally print the update for debugging
+#         print("Created Inventory Update:", db_inventory_update)
 
-        return db_inventory_update
+#         return db_inventory_update
 
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+#     except ValueError as e:
+#         raise HTTPException(status_code=400, detail=str(e))
 
 # get one inventory_update
 @app.get("/inventory-updates/{id}", response_model=InventoryUpdateResponse)

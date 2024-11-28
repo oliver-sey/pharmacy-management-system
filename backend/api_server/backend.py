@@ -836,7 +836,7 @@ def update_prescription(prescription_id: int, prescription: schema.PrescriptionU
 @app.delete("/prescription/{prescription_id}")
 def delete_prescription(prescription_id: int, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
 
-    validate_user_type(current_user, ["Pharmacy Manager"])
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
     '''
     deletes prescriptions
     not sure if this should be allowed tho... we should talk ab it
@@ -1115,7 +1115,7 @@ def get_all_user_activities(db: Session = Depends(get_db), current_user: UserToR
 @app.post("/transaction", response_model=TransactionResponse)
 def create_transaction(transaction: TransactionCreate, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
     # make sure only pharmacy managers or pharmacists can call this endpoint
-    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist", "Cashier"])
 
     # TODO: could possibly calculate total cost as a later feature
     # Calculate the total cost of items in the transaction
@@ -1130,13 +1130,15 @@ def create_transaction(transaction: TransactionCreate, db: Session = Depends(get
     # add 8% tax to the total cost
     total_cost *= 1.08
 
+    
+
     # create a new transaction
     # but ignore the transaction_items field since we will create those separately
     db_transaction = models.Transaction(
         # get the user_id from the current_user
         user_id=current_user.id,
         patient_id=transaction.patient_id,
-        total_cost=total_cost,
+        total_price=total_cost,
         timestamp=datetime.now(timezone.utc), # set the timestamp in UTC so timezones don't affect it
         payment_method=transaction.payment_method
     )

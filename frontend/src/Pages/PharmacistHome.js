@@ -25,6 +25,8 @@ function PharmacistHome() {
   const [isEditOpen, setIsEditOpen] = useState(false); // Tracks if the modal is open
   const [selectedRow, setSelectedRow] = useState(null); // Tracks the selected row for editing
   const openAddPrescriptionModal = useRef(null);
+  const token = localStorage.getItem("token")
+
 
   const [PrescriptionData, setPrescriptionData] = useState({
 		medication: "",
@@ -51,21 +53,31 @@ function PharmacistHome() {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token,
 				},
 				body: JSON.stringify(data),
 			});
 			if (!response.ok) {
-				throw new Error('Failed to add patient');
+				throw new Error('Failed to add prescription');
 			}
 			
 		} catch (error) {
-			console.error('Error adding patient:', error);
+			console.error('Error adding prescription:', error);
 		}
 	}
 
   // Handle saving Prescription data
   const handleSavePrescription = (formData) => {
-    addPrescription(PrescriptionData);
+    CheckUserType(role, navigate)
+    .then((curr_user_data) => addPrescription({
+      patient_id: formData.patient,
+      user_entered_id: curr_user_data.id, 
+      user_filled_id: null,
+      filled_timestamp: null,
+      medication_id: formData.medication,
+      doctor_name: formData.doctor_name,
+      quantity: formData.quantity
+    }))
     closeEditModal(); // Close modal after saving
   };
 

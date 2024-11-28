@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';import { Snackbar, Alert, Button}
 import EditDeleteTable from "../Components/EditDeleteTable";
 import AddEditPatientModal from "../Components/AddEditPatientModal";
 import DeleteModal from "../Components/DeleteModal";
+import CheckUserType from "../Functions/CheckUserType";
 
 function ViewOfPatients() {
 	const [rows, setRows] = useState([]);
@@ -11,6 +12,7 @@ function ViewOfPatients() {
 	const [openSnackbar, setOpenSnackbar] = useState(false);
 	const navigate = useNavigate();
 	const token = localStorage.getItem('token');
+	const roles = ["Pharmacy Manager", "Pharmacist"]
 
 	// Async function to fetch patients data
 	const fetchPatients = async () => {
@@ -30,6 +32,7 @@ function ViewOfPatients() {
 
 	// useEffect to fetch data when the component mounts
 	useEffect(() => {
+		CheckUserType(roles, navigate)
 		fetchPatients(); // Call the async function
 	  }, []); // Empty array means this effect runs once when the component mounts
 

@@ -46,6 +46,10 @@ function CashierHome() {
       console.log("Closing modal");
       setIsEditOpen(false);
     };
+
+    const handleViewCheckout = () => {
+      navigate('../checkout', {replace: true})
+    }
   
     const addPrescription = async (data) => {
       try {
@@ -105,7 +109,7 @@ function CashierHome() {
             <Item>
               Check Out
               <div/>
-              <IconButton sx={{maxWidth: 60}} aria-label="checkOut" color='primary' >
+              <IconButton sx={{maxWidth: 60}} aria-label="checkOut" color='primary' onClick={handleViewCheckout}>
                 <PointOfSaleOutlinedIcon />
               </IconButton>
             </Item>

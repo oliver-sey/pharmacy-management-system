@@ -169,12 +169,6 @@ class InventoryUpdate(Base):
     # transaction = relationship("Transaction", back_populates="inventory_update")]
 
 
-# an enum class so we can restrict the set of possible values in the payment_method column in transactions
-class PaymentMethodType(PyEnum):
-    CASH = "Cash"
-    CREDIT_CARD = "Credit Card"
-    DEBIT_CARD = "Debit Card"
-
 class Transaction(Base):
     __tablename__ = 'transactions'
 
@@ -182,7 +176,7 @@ class Transaction(Base):
     user_id = Column(Integer, ForeignKey('users.id'))
     patient_id = Column(Integer, ForeignKey('patients.id'))
     timestamp = Column(DateTime, default=func.now())
-    payment_method = Column(SQLAlchemyEnum(PaymentMethodType))
+    payment_method = Column(String)
 
     total_price = Column(Float)
 

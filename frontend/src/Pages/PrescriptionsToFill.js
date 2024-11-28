@@ -321,16 +321,6 @@ const deletePrescription = async (id) => {
 	return (
 		<div>
 		  <h2>Unfilled Prescriptions</h2>
-			<Button
-			  variant="contained"
-			  onClick={() => {
-				if (openAddPrescriptionModal.current) {
-				  openAddPrescriptionModal.current(); // Trigger modal to open for adding a prescription
-				}
-			  }}
-			>
-			  Add Prescription
-			</Button>
 
 			<BaseTable
 				columns={columns}

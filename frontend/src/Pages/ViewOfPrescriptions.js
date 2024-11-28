@@ -255,7 +255,7 @@ function ViewOfPrescriptions() {
           user_filled_id: null,
           filled_timestamp: null,
           medication_id: formData.medication,
-          doctor_name: formData.prescribing_doctor,
+          doctor_name: formData.doctor_name,
           quantity: formData.quantity
         }))
   

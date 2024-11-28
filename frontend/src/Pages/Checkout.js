@@ -40,6 +40,7 @@ function Checkout() {
 	const [filteredPrescriptions, setFilteredPrescriptions] = useState([]);
 	const [nonPrescriptionItems, setNonPrescriptionItems] = useState([]);
 	const [isEditOpen, setIsEditOpen] = useState(false)
+	const [payment, setPayment] = useState("")
 
 	// to open the snackbar component with a little alert to the user
 	// Snackbar handler state
@@ -433,12 +434,29 @@ function Checkout() {
 	};
 
 	const handleCompletePayment = (paymentMethod) => {
-		CheckUserType(roles, navigate)
-		.then((curr_user_data) => addTransaction({
-			user_id: curr_user_data.id,
+		const allItems = [...cart.nonPrescription, ...cart.prescription];
+		
+		if (paymentMethod === "credit") {
+			setPayment("CREDIT_CARD")
+		} else if (paymentMethod === "debit") {
+			setPayment("DEBIT_CARD")
+		} else {
+			setPayment("CASH")
+		}
+
+		const transactionItems = 
+		allItems.map((item) => {return {
+			medication_id: item.id,
+			quantity: item.quantityInCart
+		}})
+		
+		console.log(payment)
+		addTransaction({
+			
 			patient_id: selectedPatient.id, 
-			payment_method: paymentMethod
-		}))
+			payment_method: paymentMethod === "credit" ? "CREDIT_CARD" : paymentMethod === "debit" ? "DEBIT" : "CASH",
+			transaction_items: transactionItems
+		})
 		.then(() => {
             generateReceipt(); // Generate the receipt after the payment is completed
             showSnackbar("Payment completed! Receipt generated.", "success");

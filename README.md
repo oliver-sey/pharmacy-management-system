@@ -1,32 +1,6 @@
 # Pharmacy Management and Point-of-Sale Web App
 
-Developed in Fall 2024 by Skyler DeVaugh, Katelyn McLean, Oliver Seymour, Hsinwei Lin, CJ Reda, and Dalia Castro
-
-
-## Walkthrough
-
-When you first visit the pharmacy management system, you will be shown the homepage with information about location, hours and more.
-
-<img src="readme_pictures\homepage.png">
-
-You can click the login button to login to your account.
-
-<img src="readme_pictures/login.png">
-
-After you login, you will be shown the dashboard. The dashboard is different for every user type, this screenshot shows the dashboard for Pharmacy Managers.
-
-<img src="readme_pictures/PM_dashboard.png">
-
-You can naviagate to different places on the website using the navbar at the top or the buttons on the dashboard. Here are a few of the pages.
-
-- Prescriptions:
-  <img src="readme_pictures/prescriptions.png">
-- User Acrtivity:
-  <img src="readme_pictures/user_activity.png">
-- Notifications:
-  <img src="readme_pictures/notifications.png">
-
-Each page serves a unique purpose, most are simple CRUD operations for prescriptions, medication, patients, and users. Pages like user activity, report engine, and notifications allow pharmacy managers to monitor logs and get repors.
+Developed in Fall 2024 by Skyler DeVaughn, Katelyn McLean, Oliver Seymour, Hsinwei Lin, CJ Reda, and Dalia Castro
 
 ## Table of Contents
 
@@ -578,6 +552,61 @@ Represents a transaction between a user and a patient (e.g., payment for medicat
 | timestamp      | DateTime (Default: current time) |
 | payment_method | String                           |
 
-## Screenshots
 
-<!-- TODO: put screenshots of various pages here with captions -->
+## Walkthrough and Screenshots
+
+When you first visit the pharmacy management system, you will be shown the homepage with information about location, hours and more.
+
+<img src="readme_pictures\homepage.png">
+
+You can click the login button to login to your account.
+
+<img src="readme_pictures/login.png">
+
+If your pharmacy manager has made an account for you but you haven't set a password yet, you can click the link on the login page to go to the page to set your first password.
+
+<img src="readme_pictures/set_password1.png">
+
+
+With input validation!
+
+<img src="readme_pictures/set_password2.png">
+<img src="readme_pictures/set_password3.png">
+<img src="readme_pictures/set_password4.png">
+
+
+After you login, you will be shown the dashboard. The dashboard is different for every user type, this screenshot shows the dashboard for Pharmacy Managers.
+
+<img src="readme_pictures/PM_dashboard.png">
+
+You can navigate to different places on the website using the navbar at the top or the buttons on the dashboard. Here are a few of the pages.
+
+- Prescriptions:
+  <img src="readme_pictures/prescriptions.png">
+- Medications:
+With a description of the warning icons when you hover
+  <img src="readme_pictures/medications.png">
+- Patients/Customers:
+  <img src="readme_pictures/patients.png">
+
+  You can also delete prescriptions, and edit and delete patients,  medications, and users, complete with input validation to ensure data integrity.
+
+  <img src="readme_pictures/edit_patient_validation.png">
+
+- User Activity:
+  <img src="readme_pictures/user_activity.png">
+- Notifications:
+  <img src="readme_pictures/notifications.png">
+
+Each page serves a unique purpose, most are simple CRUD operations for prescriptions, medication, patients, and users. Pages like user activity, report engine, and notifications allow pharmacy managers to monitor logs and get reports.
+
+
+Since this system is also meant to be a point-of-sale, employees can checkout customers.
+
+  <img src="readme_pictures/checkout.png">
+
+Customers can pay with cash:
+  <img src="readme_pictures/payment_cash.png">
+
+Or they can pay with debit or credit card:
+  <img src="readme_pictures/payment_card.png">

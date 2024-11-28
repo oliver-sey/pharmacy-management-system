@@ -492,46 +492,87 @@ function ViewOfMedications() {
 	
 	
 	return (
-		<div>
+		<div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '20px' }}>
 			<h2>Medication Inventory Table</h2>
-
-			<div style={{ display: 'flex', alignItems: 'center' }}>
-
-    			<TextField
-                  type="datetime-local"
-                  value={timestamp1}
-                  onChange={(e) => setTimestamp1(e.target.value)}
-                  label="Inventory start date"
-                  InputLabelProps={{ shrink: true }}
-                  style={{ marginRight: '10px' }}
-                />
-                <TextField
-                  type="datetime-local"
-                  value={timestamp2}
-                  onChange={(e) => setTimestamp2(e.target.value)}
-                  label="Inventory end date"
-                  InputLabelProps={{ shrink: true }}
-                />
-    			<Button variant="contained" onClick={fetchInventory}>
-    				Generate Medication Inventory Report
-    			</Button>
-			</div>
-			<Button variant="contained" onClick={generateFinancialReport} style={{ marginLeft: '10px' }}>
-                Generate Financial Report
-            </Button>
-
-    {localStorage.getItem("role") === "Pharmacy Manager" &&
-			<Button
-				variant="contained"
-				onClick={() => {
-					if (openAddMedicationModal.current) {
-						openAddMedicationModal.current(); // Trigger modal to open for adding a medication
-					}
+	
+			<div
+				style={{
+					display: 'flex',
+					flexWrap: 'wrap',
+					gap: '15px',
+					justifyContent: 'center',
+					alignItems: 'center',
+					marginBottom: '20px',
+					width: '100%',
+					maxWidth: '800px',
 				}}
 			>
-				Add Medication
-			</Button>}
-
+				<TextField
+					type="datetime-local"
+					value={timestamp1}
+					onChange={(e) => setTimestamp1(e.target.value)}
+					label="Inventory start date"
+					InputLabelProps={{ shrink: true }}
+					style={{
+						flex: '1 1 auto',
+						maxWidth: '250px',
+						minWidth: '200px',
+					}}
+				/>
+				<TextField
+					type="datetime-local"
+					value={timestamp2}
+					onChange={(e) => setTimestamp2(e.target.value)}
+					label="Inventory end date"
+					InputLabelProps={{ shrink: true }}
+					style={{
+						flex: '1 1 auto',
+						maxWidth: '250px',
+						minWidth: '200px',
+					}}
+				/>
+				<Button
+					variant="contained"
+					onClick={fetchInventory}
+					style={{
+						flex: '0 1 auto',
+						maxWidth: '250px',
+						minWidth: '150px',
+						padding: '10px 15px',
+					}}
+				>
+					Generate Medication Inventory Report
+				</Button>
+				<Button
+					variant="contained"
+					onClick={generateFinancialReport}
+					style={{
+						flex: '0 1 auto',
+						maxWidth: '250px',
+						minWidth: '150px',
+						padding: '10px 15px',
+					}}
+				>
+					Generate Financial Report
+				</Button>
+				{localStorage.getItem('role') === 'Pharmacy Manager' && (
+					<Button
+						variant="contained"
+						onClick={() =>
+							openAddMedicationModal.current && openAddMedicationModal.current()
+						}
+						style={{
+							flex: '0 1 auto',
+							maxWidth: '250px',
+							minWidth: '150px',
+							padding: '10px 15px',
+						}}
+					>
+						Add Medication
+					</Button>
+				)}
+			</div>
+	
 			<EditDeleteTable
 				columns={columns}
 				rows={rows}
@@ -546,17 +587,14 @@ function ViewOfMedications() {
 				onEdit={addEditMedication}
 				onConfirmDelete={deleteMedication}
 				fetchMedications={fetchMedications} // Pass fetchMedications as a prop
-				/>
+			/>
+	
 			{/* Snackbar for error messages */}
-			<Snackbar 
-				open={openSnackbar} 
-				autoHideDuration={6000} 
-				onClose={handleCloseSnackbar}
-		 	>
+			<Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar}>
 				<Alert onClose={handleCloseSnackbar} severity="error">
 					{errorMessage}
 				</Alert>
-		  	</Snackbar>
+			</Snackbar>
 		</div>
 	);
 }

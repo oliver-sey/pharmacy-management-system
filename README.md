@@ -247,12 +247,15 @@ These endpoints manage user accounts and their details:
 
 **NOTE:** The endpoints below do not require authentication (a JWT) in the request. These are a very limited number of endpoints, and we intentionally only return very limited information.
 
-These two endpoints are used on the `/setpassword` page so that a user can set the first password on their account. We cannot pass a JWT (token) to these endpoints because the user does not have a password yet and cannot create a token.
+The first two endpoints are used on the `/setpassword` page so that a user can set the first password on their account. We cannot pass a JWT (token) to these endpoints because the user does not have a password yet and cannot create a token.
+
+The third endpoint is used on the login page (so the user does not have a JWT yet), and locks a user account if they make too many incorrect login attempts.
 
 We found these endpoints to be necessary to the proper function of our system and made sure to make the system as secure as possible.
 
 - **GET `/userslist/new/`**: Returns a list of emails and user ID's for accounts that have been newly created, but the user has not activated their account by setting a password yet. Allowed user: [Pharmacy Manager]
 - **PUT `/users/{user_id}/setpassword`**: Sets a new password for a user account, only works if the account has not had a password before (i.e. it is a new account). Passwords are normally changed with the PUT `/users/{user_id}` endpoint.
+- **PUT `/users/lock`**: Locks a user's account so they cannot login until a pharmacy manager unlocks their account. 
 
 ---
 
@@ -316,6 +319,18 @@ These endpoints track user activities, such as inventory updates and prescriptio
 
 These endpoints manage transactions in the pharmacy system:
 
+- **POST `/transaction`**: Creates a new transaction. Allowed user: [Pharmacy Manager, Pharmacist]
+- **GET `/transaction/{transaction_id}`**: Retrieves a specific transaction. Allowed user: [Pharmacy Manager, Pharmacist]
+- **GET `/transactions`**: Lists all transactions in the system. Allowed user: [Pharmacy Manager, Pharmacist]
+
+---
+
+### 9. **Transaction Items CRUD Endpoints**
+
+These endpoints manage transaction items. A transaction item is like one line-item on a receipt, it is a medication and the quantity of that medication.
+A transaction is associated with multiple transaction items:
+
+- There is no endpoint to create a transaction item, they are created when you create a transaction and pass the medications and quantities to that endpoint.
 - **POST `/transaction`**: Creates a new transaction. Allowed user: [Pharmacy Manager, Pharmacist]
 - **GET `/transaction/{transaction_id}`**: Retrieves a specific transaction. Allowed user: [Pharmacy Manager, Pharmacist]
 - **GET `/transactions`**: Lists all transactions in the system. Allowed user: [Pharmacy Manager, Pharmacist]

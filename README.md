@@ -38,29 +38,14 @@ Key users of this app include:
 ## Table of Contents
 <!-- 3. [Tech Stack](#tech-stack) -->
 1. [Overview](#overview)
-2. [Features](#features)
-3. [Setup Instructions](#setup-instructions)
-4. [Code Structure](#code-structure)
-5. [Architecture](#architecture)
-6. [Frontend](#frontend)
-7. [Backend](#backend)
-8. [API Documentation](#api-documentation)
-9. [Screenshots](#screenshots)
+2. [Setup Instructions](#setup-instructions)
+3. [Code Structure](#code-structure)
+4. [Architecture](#architecture)
+5. [Frontend](#frontend)
+6. [Backend](#backend)
+7. [API Documentation](#api-documentation)
+8. [Walkthrough and Screenshots](#walkthrough-and-screenshots)
 
-## Features
-
-### User-Facing Features
-
-<!-- TODO!!! -->
-- **Feature 1**: User authentication with role-based access control
-    We used JWT (JSON Web Token) to perform user authentication and role-based access control. Each user will be given a token at login. When user login and perform restricted actions that only allows some pharmacy staff to perform, the backend will check if that user's token has the privillege to do so. If not, will return errors.
-
-- **Feature 2**: Another feature (e.g., "Dynamic data visualization through interactive dashboards").
-
-
-### Admin Features
-
-- **Feature A**: Describe feature (e.g., "Ability to monitor and manage users").
 
 ## Setup Instructions
 
@@ -207,26 +192,6 @@ The backend is powered by FastAPI, a modern, high-performance web framework for 
 - **Data Validation**: Pydantic is used for data validation and serialization, ensuring that the data conforms to the expected schema.
 - **API Endpoints**: FastAPI is used to define RESTful API endpoints for various operations such as managing prescriptions, inventory, and user accounts.
 
-<!-- TODO -->
-
-Key Actions
-For Users:
-[Briefly describe key actions users can perform.]
-For Admins:
-[Briefly describe admin functionalities.]
-Screenshots
-
-Home Page
-![Home page](frontend/src/assets/homepage.png)
-Figure 5: Screenshot of the Home page.
-
-Login Page
-![Login page](frontend/src/assets/loginpage.png)
-Figure 6: Screenshot of the login page.
-
-Dashboard
-![Dashboard](frontend/src/assets/dashboard.png)
-Figure 7: User dashboard displaying data.
 
 ## API Documentation
 

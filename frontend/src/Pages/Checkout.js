@@ -23,6 +23,7 @@ import {
 	Snackbar,
 	Alert
 } from "@mui/material";
+import { jsPDF} from 'jspdf'; 
 
 
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
@@ -456,6 +457,15 @@ function Checkout() {
 			payment_method: paymentMethod === "credit" ? "CREDIT_CARD" : paymentMethod === "debit" ? "DEBIT" : "CASH",
 			transaction_items: transactionItems
 		})
+		.then(() => {
+            generateReceipt(); // Generate the receipt after the payment is completed
+            showSnackbar("Payment completed! Receipt generated.", "success");
+        })
+		.catch((error) => {
+            console.error("Error completing payment:", error);
+            showSnackbar("Failed to complete payment.", "error");
+        });
+
 	}
 
 	const addTransaction = async (data) => {
@@ -526,6 +536,67 @@ function Checkout() {
 	
 	const nonPrescriptionTotal = calculateTotal(cart.nonPrescription);
 	const prescriptionTotal = calculateTotal(cart.prescription);
+
+	
+	const generateReceipt = () => {
+		const doc = new jsPDF();
+
+		// Title
+		doc.setFontSize(18);
+		doc.text("Receipt", 10, 20);
+
+		// Patient Details
+		doc.setFontSize(12);
+		if (selectedPatient) {
+			doc.text(`Patient: ${selectedPatient.first_name} ${selectedPatient.last_name}`, 10, 30);
+			doc.text(`DOB: ${selectedPatient.date_of_birth}`, 10, 40);
+		}
+
+		// Cart Details
+		let yPosition = 50;
+		doc.text("Items Purchased:", 10, yPosition);
+		yPosition += 10;
+
+		// Non-Prescription Items
+		if (cart.nonPrescription.length > 0) {
+			cart.nonPrescription.forEach((item) => {
+				doc.text(
+					`${item.name} (${item.quantityInCart} x $${item.dollars_per_unit.toFixed(2)}) = $${(
+						item.dollars_per_unit * item.quantityInCart
+					).toFixed(2)}`,
+					10,
+					yPosition
+				);
+				yPosition += 10;
+			});
+		}
+
+		// Prescription Items
+		if (cart.prescription.length > 0) {
+			cart.prescription.forEach((item) => {
+				doc.text(
+					`${item.medication_name} (${item.quantityInCart} x $${item.dollars_per_unit.toFixed(2)}) = $${(
+						item.dollars_per_unit * item.quantityInCart
+					).toFixed(2)}`,
+					10,
+					yPosition
+				);
+				yPosition += 10;
+			});
+		}
+
+    // Summary
+    yPosition += 10;
+    doc.text(`Subtotal: $${subtotal.toFixed(2)}`, 10, yPosition);
+    yPosition += 10;
+    doc.text(`Tax (8%): $${tax.toFixed(2)}`, 10, yPosition);
+    yPosition += 10;
+    doc.text(`Grand Total: $${grandTotal.toFixed(2)}`, 10, yPosition);
+
+    // Save the PDF
+    doc.save("receipt.pdf");
+};
+
 
 
 	return (
@@ -744,11 +815,19 @@ function Checkout() {
 
 													<TableCell>
 														$
-
-														{(medication.dollars_per_unit.toFixed(
-															4
-														) * parseInt(medication.quantityInCart, 10)).toFixed(2)}
-
+														{(
+															medication.dollars_per_unit *
+															// either display the quantity in the cart currently, or the value in quantitiesInTable
+															(cart.nonPrescription.find(
+																(item) =>
+																	item.id ===
+																	medication.id
+															)?.quantityInCart ||
+																quantitiesInTable[
+																	medication
+																		.id
+																])
+														).toFixed(2)}
 													</TableCell>
 
 													<TableCell>

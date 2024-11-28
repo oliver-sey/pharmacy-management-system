@@ -1,32 +1,6 @@
 # Pharmacy Management and Point-of-Sale Web App
 
-Developed in Fall 2024 by Skyler DeVaugh, Katelyn McLean, Oliver Seymour, Hsinwei Lin, CJ Reda, and Dalia Castro
-
-
-## Walkthrough
-
-When you first visit the pharmacy management system, you will be shown the homepage with information about location, hours and more.
-
-<img src="readme_pictures\homepage.png">
-
-You can click the login button to login to your account.
-
-<img src="readme_pictures/login.png">
-
-After you login, you will be shown the dashboard. The dashboard is different for every user type, this screenshot shows the dashboard for Pharmacy Managers.
-
-<img src="readme_pictures/PM_dashboard.png">
-
-You can naviagate to different places on the website using the navbar at the top or the buttons on the dashboard. Here are a few of the pages.
-
-- Prescriptions:
-  <img src="readme_pictures/prescriptions.png">
-- User Acrtivity:
-  <img src="readme_pictures/user_activity.png">
-- Notifications:
-  <img src="readme_pictures/notifications.png">
-
-Each page serves a unique purpose, most are simple CRUD operations for prescriptions, medication, patients, and users. Pages like user activity, report engine, and notifications allow pharmacy managers to monitor logs and get repors.
+Developed in Fall 2024 by Skyler DeVaughn, Katelyn McLean, Oliver Seymour, Hsinwei Lin, CJ Reda, and Dalia Castro
 
 ## Table of Contents
 
@@ -39,7 +13,7 @@ Each page serves a unique purpose, most are simple CRUD operations for prescript
 6. [Frontend](#frontend)
 7. [Backend](#backend)
 8. [API Documentation](#api-documentation)
-9. [Screenshots](#screenshots)
+9. [Walkthrough and Screenshots](#walkthrough-and-screenshots)
 
 ## Overview
 
@@ -64,29 +38,14 @@ Key users of this app include:
 ## Table of Contents
 <!-- 3. [Tech Stack](#tech-stack) -->
 1. [Overview](#overview)
-2. [Features](#features)
-3. [Setup Instructions](#setup-instructions)
-4. [Code Structure](#code-structure)
-5. [Architecture](#architecture)
-6. [Frontend](#frontend)
-7. [Backend](#backend)
-8. [API Documentation](#api-documentation)
-9. [Screenshots](#screenshots)
+2. [Setup Instructions](#setup-instructions)
+3. [Code Structure](#code-structure)
+4. [Architecture](#architecture)
+5. [Frontend](#frontend)
+6. [Backend](#backend)
+7. [API Documentation](#api-documentation)
+8. [Walkthrough and Screenshots](#walkthrough-and-screenshots)
 
-## Features
-
-### User-Facing Features
-
-<!-- TODO!!! -->
-- **Feature 1**: User authentication with role-based access control
-    We used JWT (JSON Web Token) to perform user authentication and role-based access control. Each user will be given a token at login. When user login and perform restricted actions that only allows some pharmacy staff to perform, the backend will check if that user's token has the privillege to do so. If not, will return errors.
-
-- **Feature 2**: Another feature (e.g., "Dynamic data visualization through interactive dashboards").
-
-
-### Admin Features
-
-- **Feature A**: Describe feature (e.g., "Ability to monitor and manage users").
 
 ## Setup Instructions
 
@@ -233,26 +192,6 @@ The backend is powered by FastAPI, a modern, high-performance web framework for 
 - **Data Validation**: Pydantic is used for data validation and serialization, ensuring that the data conforms to the expected schema.
 - **API Endpoints**: FastAPI is used to define RESTful API endpoints for various operations such as managing prescriptions, inventory, and user accounts.
 
-<!-- TODO -->
-
-Key Actions
-For Users:
-[Briefly describe key actions users can perform.]
-For Admins:
-[Briefly describe admin functionalities.]
-Screenshots
-
-Home Page
-![Home page](frontend/src/assets/homepage.png)
-Figure 5: Screenshot of the Home page.
-
-Login Page
-![Login page](frontend/src/assets/loginpage.png)
-Figure 6: Screenshot of the login page.
-
-Dashboard
-![Dashboard](frontend/src/assets/dashboard.png)
-Figure 7: User dashboard displaying data.
 
 ## API Documentation
 
@@ -308,12 +247,15 @@ These endpoints manage user accounts and their details:
 
 **NOTE:** The endpoints below do not require authentication (a JWT) in the request. These are a very limited number of endpoints, and we intentionally only return very limited information.
 
-These two endpoints are used on the `/setpassword` page so that a user can set the first password on their account. We cannot pass a JWT (token) to these endpoints because the user does not have a password yet and cannot create a token.
+The first two endpoints are used on the `/setpassword` page so that a user can set the first password on their account. We cannot pass a JWT (token) to these endpoints because the user does not have a password yet and cannot create a token.
+
+The third endpoint is used on the login page (so the user does not have a JWT yet), and locks a user account if they make too many incorrect login attempts.
 
 We found these endpoints to be necessary to the proper function of our system and made sure to make the system as secure as possible.
 
 - **GET `/userslist/new/`**: Returns a list of emails and user ID's for accounts that have been newly created, but the user has not activated their account by setting a password yet. Allowed user: [Pharmacy Manager]
 - **PUT `/users/{user_id}/setpassword`**: Sets a new password for a user account, only works if the account has not had a password before (i.e. it is a new account). Passwords are normally changed with the PUT `/users/{user_id}` endpoint.
+- **PUT `/users/lock`**: Locks a user's account so they cannot login until a pharmacy manager unlocks their account. 
 
 ---
 
@@ -377,6 +319,18 @@ These endpoints track user activities, such as inventory updates and prescriptio
 
 These endpoints manage transactions in the pharmacy system:
 
+- **POST `/transaction`**: Creates a new transaction. Allowed user: [Pharmacy Manager, Pharmacist]
+- **GET `/transaction/{transaction_id}`**: Retrieves a specific transaction. Allowed user: [Pharmacy Manager, Pharmacist]
+- **GET `/transactions`**: Lists all transactions in the system. Allowed user: [Pharmacy Manager, Pharmacist]
+
+---
+
+### 9. **Transaction Items CRUD Endpoints**
+
+These endpoints manage transaction items. A transaction item is like one line-item on a receipt, it is a medication and the quantity of that medication.
+A transaction is associated with multiple transaction items:
+
+- There is no endpoint to create a transaction item, they are created when you create a transaction and pass the medications and quantities to that endpoint.
 - **POST `/transaction`**: Creates a new transaction. Allowed user: [Pharmacy Manager, Pharmacist]
 - **GET `/transaction/{transaction_id}`**: Retrieves a specific transaction. Allowed user: [Pharmacy Manager, Pharmacist]
 - **GET `/transactions`**: Lists all transactions in the system. Allowed user: [Pharmacy Manager, Pharmacist]
@@ -578,6 +532,62 @@ Represents a transaction between a user and a patient (e.g., payment for medicat
 | timestamp      | DateTime (Default: current time) |
 | payment_method | String                           |
 
-## Screenshots
 
-<!-- TODO: put screenshots of various pages here with captions -->
+## Walkthrough and Screenshots
+
+When you first visit the pharmacy management system, you will be shown the homepage with information about location, hours and more.
+
+<img src="readme_pictures\homepage.png">
+
+You can click the login button to login to your account.
+
+<img src="readme_pictures/login.png">
+
+If your pharmacy manager has made an account for you but you haven't set a password yet, you can click the link on the login page to go to the page to set your first password.
+
+<img src="readme_pictures/set_password1.png">
+
+
+With input validation!
+
+<img src="readme_pictures/set_password2.png">
+<img src="readme_pictures/set_password3.png">
+<img src="readme_pictures/set_password4.png">
+
+
+After you login, you will be shown the dashboard. The dashboard is different for every user type, this screenshot shows the dashboard for Pharmacy Managers.
+
+<img src="readme_pictures/PM_dashboard.png">
+
+You can navigate to different places on the website using the navbar at the top or the buttons on the dashboard. Here are a few of the pages.
+
+- Prescriptions:
+  <img src="readme_pictures/prescriptions.png">
+- Medications:
+With a description of the warning icons when you hover
+  <img src="readme_pictures/medications.png">
+- Patients/Customers:
+  <img src="readme_pictures/patients.png">
+
+  You can also delete prescriptions, and edit and delete patients,  medications, and users, complete with input validation to ensure data integrity.
+
+  <img src="readme_pictures/edit_patient_validation.png">
+
+- User Activity:
+  <img src="readme_pictures/user_activity.png">
+- Notifications:
+  <img src="readme_pictures/notifications.png">
+
+Each page serves a unique purpose, most are simple CRUD operations for prescriptions, medication, patients, and users. Pages like user activity, report engine, and notifications allow pharmacy managers to monitor logs and get reports.
+
+Since this system is also meant to be a point-of-sale, employees can checkout customers.
+
+  <img src="readme_pictures/checkout.png">
+
+Customers can pay with cash:
+
+  <img src="readme_pictures/payment_cash.png">
+
+Or they can pay with debit or credit card:
+
+  <img src="readme_pictures/payment_card.png">

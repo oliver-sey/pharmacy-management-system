@@ -726,11 +726,19 @@ function Checkout() {
 
 													<TableCell>
 														$
-
-														{(medication.dollars_per_unit.toFixed(
-															4
-														) * parseInt(medication.quantityInCart, 10)).toFixed(2)}
-
+														{(
+															medication.dollars_per_unit *
+															// either display the quantity in the cart currently, or the value in quantitiesInTable
+															(cart.nonPrescription.find(
+																(item) =>
+																	item.id ===
+																	medication.id
+															)?.quantityInCart ||
+																quantitiesInTable[
+																	medication
+																		.id
+																])
+														).toFixed(2)}
 													</TableCell>
 
 													<TableCell>

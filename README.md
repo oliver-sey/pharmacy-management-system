@@ -13,7 +13,7 @@ Developed in Fall 2024 by Skyler DeVaughn, Katelyn McLean, Oliver Seymour, Hsinw
 6. [Frontend](#frontend)
 7. [Backend](#backend)
 8. [API Documentation](#api-documentation)
-9. [Screenshots](#screenshots)
+9. [Walkthrough and Screenshots](#walkthrough-and-screenshots)
 
 ## Overview
 
@@ -580,13 +580,14 @@ With a description of the warning icons when you hover
 
 Each page serves a unique purpose, most are simple CRUD operations for prescriptions, medication, patients, and users. Pages like user activity, report engine, and notifications allow pharmacy managers to monitor logs and get reports.
 
-
 Since this system is also meant to be a point-of-sale, employees can checkout customers.
 
   <img src="readme_pictures/checkout.png">
 
 Customers can pay with cash:
+
   <img src="readme_pictures/payment_cash.png">
 
 Or they can pay with debit or credit card:
+
   <img src="readme_pictures/payment_card.png">

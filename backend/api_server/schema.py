@@ -1,8 +1,10 @@
 # build a schema using pydantic
 
-from typing import Optional
-from pydantic import BaseModel, EmailStr
+from typing import Optional, Union
+from pydantic import BaseModel, EmailStr, Field
 from datetime import date, datetime
+from .models import UserType, UserActivityType, InventoryUpdateType
+from enum import Enum as PyEnum
 
 class SimpleResponse(BaseModel):
     message: str
@@ -26,28 +28,42 @@ class UserToReturn(BaseModel):
     last_name: Optional[str] = None
     id: Optional[int] = None
     email: Optional[str] = None
-    user_type: Optional[str] = None
+    user_type: Optional[UserType] = None
+
 
 class UserResponse(BaseModel):
     id: int
     first_name: str
     last_name: str
-    user_type: str
+    user_type: UserType
     email: str
-    password: str
+    is_locked_out: bool
+
+# only for use by the route that lets you see users with no password yet,
+# and doesn't require a token to call
+# we don't want to give out a lot of details to people with no token
+
+class UserEmailResponse(BaseModel):
+    id: int
+    email: str    
 
 class UserLogin(BaseModel):
     email: str
     password: str
 
-
 class UserCreate(BaseModel):
     first_name: str
     last_name: str
-    user_type: str
+    user_type: UserType
     email: EmailStr
+    # optional password so a manager can create an user account for an employee
+    # and the employee will add a password later
+    password: Optional[str] = None
+    is_locked_out: bool = False
+
+# only for use by the route that lets you create a password for a user account that doesn't already have one
+class UserSetPassword(BaseModel):
     password: str
-    is_locked_out: bool = True
 
 class UserUpdate(BaseModel):
     first_name: Optional[str] = None
@@ -90,7 +106,7 @@ class PatientResponse(BaseModel):
     id: int
     first_name: str
     last_name: str
-    date_of_birth: str
+    date_of_birth: date
     address: str
     phone_number: str
     email: EmailStr
@@ -98,10 +114,11 @@ class PatientResponse(BaseModel):
     insurance_group_number: str
     insurance_member_id: str
 
+    
     class Config:
         orm_mode = True
 
-    # this handles converting the date_of_birth from a datetime object to a string
+    
     @staticmethod
     def from_orm(patient):
         # Ensure date_of_birth is converted to a string
@@ -170,7 +187,8 @@ class PrescriptionResponse(BaseModel):
 
 class PrescriptionCreate(BaseModel):
     patient_id: int
-    user_entered_id: int
+    # user_id comes from the token
+    # user_entered_id: int
     # TODO: i don't think you should be allowed to create an already filled prescription right away
     # it makes more sense to make them call the fill prescription route after creating the prescription
     # user_filled_id: Optional[int] = None
@@ -183,9 +201,15 @@ class PrescriptionCreate(BaseModel):
     class Config:
         orm_mode = True
 
+# **NOTE: prescriptions are only able to be edited until they are filled
+# since we rely on the prescription to store important information and it doesn't
+# make sense to edit info after the patients already has the medication
 class PrescriptionUpdate(BaseModel):
     patient_id: Optional[int] = None
-    user_entered_id: Optional[int] = None
+    # Not allowing user to change who entered the prescription, this comes from the token anyways
+    # to see who modified a prescription, look at user_activities
+    # user_entered_id: Optional[int] = None
+
     # I think you should have to call the fill prescription route to edit these
     # so we can have control over checking if we're able to fill the prescription
     # user_filled_id: Optional[int] = None
@@ -197,8 +221,55 @@ class PrescriptionUpdate(BaseModel):
     quantity: Optional[int] = None
 
 
-class PrescriptionFillRequest(BaseModel):
-    user_filled_id: int
-    # token: str
+# endregion
+# region Inventory Updates
+class InventoryUpdateCreate(BaseModel):
+    medication_id: int
+    # get user_id from token
+    # create an entry in user_activities, and then we will put that ID here
+    # optional since some updates will not be associated with a transaction (e.g. add or discard)
+    transaction_id: Optional[int] = None
+    quantity_changed_by: int
+    activity_type: InventoryUpdateType
+
+class InventoryUpdateResponse(BaseModel):
+    id: int
+    medication_id: int
+    user_activity_id: int
+    transaction_id: Optional[int] = None
+    quantity_changed_by: int
+    activity_type: Union[InventoryUpdateType, str]
+    medication_name: Optional[str] = None
+    timestamp: Optional[datetime] = None
+    resulting_total_quantity: int = Field(..., example=100) 
+   
+
+# **NOTE: we will not be allowing updating or deleting inventory_updates
+
+
+# endregion
+# region User Activities
+class UserActivityCreate(BaseModel):
+    activity: UserActivityType # the activity type, an enum which can be "Login", "Logout", "Unlock Account", "Inventory Update"
+    # TODO: let the database set the timestamp to the current time?
+
+class UserActivityResponse(BaseModel):
+    id: int
+    user_id: int
+    activity: UserActivityType # the activity type, an enum
+    timestamp: datetime
+
+class TransactionCreate(BaseModel):
+    user_id: int
+    patient_id: Optional[int] = None
+    payment_method: str
+
+class TransactionResponse(BaseModel):
+    id: int
+    user_id: int
+    patient_id: Optional[int] = None
+    timestamp: datetime
+    payment_method: str
+
     class Config:
-        orm_mode = True
+        from_attributes = True 

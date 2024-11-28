@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "../Styles/Login.css"; // import the specific stylesheet for this page;
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import "../Styles/Login.css";
 
 function Login({ updateUserRole }) {
@@ -167,11 +167,15 @@ function Login({ updateUserRole }) {
 
           //redirects user to homepage for their role
           //more can be added as needed
-          if (userData.user_type === 'pharmacy_manager') {
+          if (userData.user_type === 'Pharmacy Manager') {
             navigate('../managerhome', {replace: true})
-          } else if (userData.user_type === 'pharmacist') {
+          } else if (userData.user_type === 'Pharmacist') {
             navigate('../pharmacisthome', {replace: true})
-          } else {
+          } else if (userData.user_type === 'Cashier'){
+			navigate('../cashierhome', {replace: true})
+		  } else if (userData.user_type === 'Pharmacy Technician'){
+			navigate('../pharmtechhome', {replace: true})
+		  }else {
             navigate('../protected', {replace: true})
           }
       }
@@ -236,6 +240,10 @@ function Login({ updateUserRole }) {
 
 				<p className="password-help">
 					Forgot your password? Please contact your pharmacy manager.
+				</p>
+
+				<p className="password-help">
+					First time logging in? Set your password <Link to="/setpassword">here</Link>!
 				</p>
 
 				{/* add the error-text class when the user is locked out */}

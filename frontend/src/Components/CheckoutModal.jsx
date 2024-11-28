@@ -4,7 +4,7 @@
 //NOTES: will have to collect the patient, user, and medication ID on the backend
 //also will have to set the filled ID and time of fill as null if adding prescription
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import {
 	Dialog,
 	DialogActions,
@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import "../Styles/SearchBar.css"
 
-const AddEditPrescriptionModal = ({ open, onClose, row, onSave }) => {
+const CheckoutModal = ({ open, onClose, row, onSave }) => {
 	// Initialize form data
 	const [formData, setFormData] = useState({
 		medication: "",
@@ -258,4 +258,4 @@ const AddEditPrescriptionModal = ({ open, onClose, row, onSave }) => {
 	);
 };
 
-export default AddEditPrescriptionModal;
+export default CheckoutModal;

@@ -50,3 +50,4 @@ coverage/
 __pycache__/
 *.pyc
 *.pyo
+backend/database/canned data.sql

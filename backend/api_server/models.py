@@ -1,12 +1,24 @@
-from sqlalchemy import Column, DateTime, Date, ForeignKey, Integer, String, Float, Boolean
+from sqlalchemy import Column, DateTime, Date, ForeignKey, Integer, String, Float, Boolean, Enum as SQLAlchemyEnum
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from .database import Base
+from sqlalchemy import Enum as SQLAlchemyEnum
 
 from sqlalchemy import Column, Integer, String, Boolean, ARRAY
 from sqlalchemy.orm import relationship
 from .database import Base
+from enum import Enum
+
+class UserType(str, Enum):
+    PHARMACY_MANAGER = "Pharmacy Manager"
+    PHARMACY_TECHNICIAN = "Pharmacy Technician"
+    CASHIER = "Cashier"
+    PHARMACIST = "Pharmacist"
+
+
+# renaming to clarify difference betweenPython's Enum and SQLAlchemy's Enum
+from enum import Enum as PyEnum
 
 class User(Base):
     __tablename__ = 'users'
@@ -14,7 +26,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     first_name = Column(String, index=True)
     last_name = Column(String, index=True)
-    user_type = Column(String, index=True)
+    user_type = Column(SQLAlchemyEnum(UserType), index=True)
     email = Column(String, unique=True, index=True)
     password = Column(String)
     is_locked_out = Column(Boolean, default=True)
@@ -27,7 +39,6 @@ class User(Base):
     user_activities = relationship("UserActivity", back_populates="user", cascade="all, delete-orphan")
     # A user can have many transactions
     transactions = relationship("Transaction", back_populates="user", cascade="all, delete-orphan")
-
 
 class Patient(Base):
     __tablename__ = 'patients'
@@ -84,16 +95,51 @@ class Medication(Base):
     prescriptions = relationship("Prescription", back_populates="medication")
     inventory_updates = relationship("InventoryUpdate", back_populates="medication")
 
+
+# an enum class so we can restrict the set of possible values in the type column in user_activities
+class UserActivityType(PyEnum):
+    LOGIN = "Login"
+    LOGOUT = "Logout"
+    UNLOCK_ACCOUNT = "Unlock Account"
+    # including all the possible types that we are storing in inventory_updates
+    #  (Add medication, Discard medication, Fill prescription, Sell non-prescription item)
+    INVENTORY_UPDATE = "Inventory Update"
+    CREATE_USER = "Create User"
+    DELETE_USER = "Delete User"
+    UPDATE_USER = "Update User"
+    CREATE_PATIENT = "Create Patient"
+    DELETE_PATIENT = "Delete Patient"
+    UPDATE_PATIENT = "Update Patient"
+    CREATE_PRESCRIPTION = "Create Prescription"
+    CREATE_MEDICATION = "Create Medication"
+    DELETE_MEDICATION = "Delete Medication"
+    UPDATE_MEDICATION = "Update Medication"
+    OTHER = "Other"
+    ERROR = "Error"
+
+
 class UserActivity(Base):
     __tablename__ = 'user_activities'
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey('users.id'))
-    activity = Column(String)
+    # restrict the set of possible values in the type column
+    activity = Column(SQLAlchemyEnum(UserActivityType))
     timestamp = Column(DateTime, default=func.now())
 
     user = relationship("User", back_populates="user_activities")
     inventory_updates = relationship("InventoryUpdate", back_populates="user_activity", uselist=False)
+
+
+
+# an enum class so we can restrict the set of possible values in the type column in inventory_updates
+class InventoryUpdateType(PyEnum):
+    ADD = "Add medication"
+    DISCARD = "Discard medication"
+    FILLPRESC = "Fill prescription"
+    SELLNONPRESC = "Sell non-prescription item"
+    RESTOCK = "Restock medication" 
+
 
 class InventoryUpdate(Base):
     __tablename__ = 'inventory_updates'
@@ -101,19 +147,22 @@ class InventoryUpdate(Base):
     id = Column(Integer, primary_key=True, index=True)
     medication_id = Column(Integer, ForeignKey('medications.id'))
     user_activity_id = Column(Integer, ForeignKey('user_activities.id'))
-    transaction_id = Column(Integer, ForeignKey('transactions.id')) # don't think we need this - Hsinwei
+    # optional since they're not always associated with a transaction, e.g. on 'add' or 'discard'
+    transaction_id = Column(Integer, ForeignKey('transactions.id'), nullable=True) # don't think we need this - Hsinwei
     # user_id = Column(Integer, ForeignKey('users.id')) # don't think we need this
     # don't need dosage, that's stored in medication
     # dosage = Column(String)
     # quantity changed by
     # TODO: are we doing this so it could be positive or negative?
     quantity_changed_by = Column(Integer)
+    resulting_total_quantity = Column(Integer)
     timestamp = Column(DateTime, default=func.now())
     # what action type it was, e.g. 'add', 'discard', 'fillpresc', or 'sellnonpresc'
-    type = Column(String)
+    activity_type = Column(SQLAlchemyEnum(InventoryUpdateType))
     medication = relationship("Medication", back_populates="inventory_updates")
     user_activity = relationship("UserActivity", back_populates="inventory_updates")  # Correct the relationship
-    # transaction = relationship("Transaction", back_populates="inventory_update")
+    # transaction = relationship("Transaction", back_populates="inventory_update")]
+    
 
 class Transaction(Base):
     __tablename__ = 'transactions'

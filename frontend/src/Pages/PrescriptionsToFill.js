@@ -5,7 +5,7 @@ import { IconButton, Tooltip } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CheckUserType from "../Functions/CheckUserType";
-
+import LocalPharmacyOutlinedIcon from '@mui/icons-material/LocalPharmacyOutlined';
 import BaseTable from "../Components/BaseTable";
 
 
@@ -18,14 +18,18 @@ function PrescriptionsToFill() {
 	const [errorMessage, setErrorMessage] = useState(null);
 	const [openSnackbar, setOpenSnackbar] = useState(false);
 	const navigate = useNavigate();
-	const role = ["pharmacist"]
+	const role = ["Pharmacist"]
 	const token = localStorage.getItem('token');
 	const [updated, setUpdated] = useState(false);
 	
 	// Async function to fetch presciptions data
 const fetchPrescriptions = async () => {
 	try {
-	  const response = await fetch('http://localhost:8000/prescriptions');
+	  const response = await fetch('http://localhost:8000/prescriptions', {
+		headers: {
+			'Authorization': 'Bearer ' + token,
+		},
+	  });
 	  const data = await response.json(); // Convert response to JSON
 
 	  return data
@@ -39,7 +43,11 @@ const fetchPrescriptions = async () => {
 
 const fetchPatients = async () => {
 	try {
-		const response = await fetch('http://localhost:8000/patients')
+		const response = await fetch('http://localhost:8000/patients', {
+			headers: {
+				'Authorization': 'Bearer ' + token,
+			},
+		});
 		const data = await response.json()
 
 		console.log("patient data: " + JSON.stringify(data))
@@ -54,7 +62,11 @@ const fetchPatients = async () => {
 
 const fetchMedications = async () => {
 	try {
-		const response = await fetch('http://localhost:8000/medicationlist')
+		const response = await fetch('http://localhost:8000/medicationlist', {
+			headers: {
+				'Authorization': 'Bearer ' + token,
+			},
+		});
 		const data = await response.json()
 
 		console.log("medication data: " + JSON.stringify(data))
@@ -70,7 +82,11 @@ const fetchMedications = async () => {
 
 const fetchUsers = async () => {
 	try {
-		const response = await fetch('http://localhost:8000/userslist')
+		const response = await fetch('http://localhost:8000/userslist', {
+			headers: {
+				'Authorization': 'Bearer ' + token,
+			},
+		  });
 		const data = await response.json()
 
 		console.log("users data: " + JSON.stringify(data))
@@ -131,6 +147,7 @@ const deletePrescription = async (id) => {
 		console.log("row", id);
 		const response = await fetch(`http://localhost:8000/prescription/${id}`, {
 			method: 'DELETE',
+			headers: { 'Authorization': 'Bearer ' + token }
 		});
 		if (!response.ok) {
 			throw new Error('Failed to delete prescription');
@@ -145,22 +162,53 @@ const deletePrescription = async (id) => {
 
 	const FillPrescription = async (row) => {
 		try {
-			
-			const response = await fetch(`http://localhost:8000/prescription/${row.id}/fill`, {
-				method: 'PUT',
-				headers: {'Authorization': 'Bearer ' + token}
-			});
-			if (!response.ok) {
-				throw new Error('Failed to fill prescription');
-			}
-			loadRows()
-		} catch (error) {
-			console.error('Error filling prescription:', error);
-			setErrorMessage('Failed to fill prescription' + error);
+		  // Fetch the medication details first
+		  const medicationResponse = await fetch(`http://localhost:8000/medication/${row.id}`, {
+			headers: { 'Authorization': 'Bearer ' + token },
+		  });
+	  
+		  if (!medicationResponse.ok) {
+			throw new Error('Failed to fetch medication data');
+		  }
+	  
+		  const medicationData = await medicationResponse.json();
+	  
+		  // Get the current date and expiration date
+		  const currentDate = new Date();
+		  const expirationDate = new Date(medicationData.expiration_date);
+	  
+		  console.log("Current Date: " + currentDate.toISOString());
+		  console.log("Expiration Date: " + expirationDate.toISOString());
+	  
+		  // Check if the medication is expired
+		  if (currentDate > expirationDate) {
+			// Medication is expired, show error message
+			setErrorMessage('Cannot fill prescription: Medication is expired');
 			setOpenSnackbar(true);
+			return; // Exit the function early, don't proceed with filling the prescription
+		  }
+	  
+		  // If medication is not expired, proceed with filling the prescription
+		  const fillResponse = await fetch(`http://localhost:8000/prescription/${row.id}/fill`, {
+			method: 'PUT',
+			headers: { 'Authorization': 'Bearer ' + token },
+		  });
+	  
+		  if (!fillResponse.ok) {
+			throw new Error('Failed to fill prescription');
+		  }
+	  
+		  // Reload the data after a successful fill
+		  loadRows();
+		} catch (error) {
+		  console.error('Error filling prescription:', error);
+		  setErrorMessage('Failed to fill prescription: ' + error.message);
+		  setOpenSnackbar(true);
 		}
-	}
-
+	  };
+	  
+	  
+	  
 	const HandleDelete = async (row) => {
 		//TO DO: confirmation message
 		deletePrescription(row.id)
@@ -195,7 +243,7 @@ const deletePrescription = async (id) => {
 	// only pharmacists or pharmacy managers can delete
 	const canDelete = () => {
 		const role = localStorage.getItem('role');
-		return role === 'pharmacist' || role === 'pharmacymanager';
+		return role === 'Pharmacist' || role === 'Pharmacy Manager';
 	};
 
 
@@ -212,6 +260,7 @@ const deletePrescription = async (id) => {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
+					'Authorization': 'Bearer ' + token,
 				},
 				body: JSON.stringify(data),
 			});
@@ -250,7 +299,7 @@ const deletePrescription = async (id) => {
 						onClick={() => FillPrescription(row)}
 						style={{ width: "auto" }}
 					>
-						<EditIcon color="primary" />
+						<LocalPharmacyOutlinedIcon color="primary" />
 					</IconButton>
 				</Tooltip>
 			)}

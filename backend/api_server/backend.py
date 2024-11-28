@@ -838,7 +838,7 @@ def update_prescription(prescription_id: int, prescription: schema.PrescriptionU
 @app.delete("/prescription/{prescription_id}")
 def delete_prescription(prescription_id: int, db: Session = Depends(get_db), current_user: UserToReturn = Depends(get_current_user)):
 
-    validate_user_type(current_user, ["Pharmacy Manager"])
+    validate_user_type(current_user, ["Pharmacy Manager", "Pharmacist"])
     '''
     deletes prescriptions
     not sure if this should be allowed tho... we should talk ab it

@@ -2,6 +2,19 @@
 
 Developed in Fall 2024 by Skyler DeVaugh, Katelyn McLean, Oliver Seymour, Hsinwei Lin, CJ Reda, and Dalia Castro
 
+## Table of Contents
+
+<!-- 3. [Tech Stack](#tech-stack) -->
+1. [Overview](#overview)
+2. [Features](#features)
+3. [Setup Instructions](#setup-instructions)
+4. [Code Structure](#code-structure)
+5. [Architecture](#architecture)
+6. [Frontend](#frontend)
+7. [Backend](#backend)
+8. [API Documentation](#api-documentation)
+9. [Screenshots](#screenshots)
+
 ## Overview
 
 This is a complete Web App for managing a modern pharmacy, including managing prescriptions, inventory, employee accounts, and more, and selling items to customers with a point-of-sale.
@@ -21,26 +34,17 @@ Key users of this app include:
 - Pharmacy technicians: Can view medication inventory and checkout customers
 - Cashiers: can checkout customers
 
-## Table of Contents
-
-<!-- 3. [Tech Stack](#tech-stack) -->
-1. [Overview](#overview)
-2. [Features](#features)
-3. [Setup Instructions](#setup-instructions)
-4. [Code Structure](#code-structure)
-5. [Architecture](#architecture)
-6. [Frontend](#frontend)
-7. [Backend](#backend)
-8. [API Documentation](#api-documentation)
-9. [Screenshots](#screenshots)
 
 ## Features
 
 ### User-Facing Features
 
 <!-- TODO!!! -->
-- **Feature 1**: Describe feature (e.g., "User authentication with role-based access control").
+- **Feature 1**: User authentication with role-based access control
+    We used JWT (JSON Web Token) to perform user authentication and role-based access control. Each user will be given a token at login. When user login and perform restricted actions that only allows some pharmacy staff to perform, the backend will check if that user's token has the privillege to do so. If not, will return errors.
+
 - **Feature 2**: Another feature (e.g., "Dynamic data visualization through interactive dashboards").
+
 
 ### Admin Features
 
@@ -128,7 +132,6 @@ The project is organized into the following directories:
 This structure ensures a clear separation of concerns, making the project easy to navigate and maintain.
 
 ## Architecture
-<!-- TODO -->
 
 This project includes a **FastAPI** backend with **SQLAlchemy** models and schema design, a **PostgreSQL** database, a **React** frontend, and the use of **Docker** containers for easy deployment.
 
@@ -201,13 +204,18 @@ For Users:
 For Admins:
 [Briefly describe admin functionalities.]
 Screenshots
-Login Page
 
-Figure 5: Screenshot of the login page.
+Home Page
+![Home page](frontend/src/assets/homepage.png)
+Figure 5: Screenshot of the Home page.
+
+Login Page
+![Login page](frontend/src/assets/loginpage.png)
+Figure 6: Screenshot of the login page.
 
 Dashboard
-
-Figure 6: User dashboard displaying data.
+![Dashboard](frontend/src/assets/dashboard.png)
+Figure 7: User dashboard displaying data.
 
 ## API Documentation
 
@@ -254,12 +262,12 @@ This endpoint allows a user to verify whether their JWT token is valid. It decod
 
 These endpoints manage user accounts and their details:
 
-- **POST `/users/`**: Creates a new user.
-- **GET `/users/{user_id}`**: Retrieves details of a specific user.
-- **DELETE `/users/{user_id}`**: Deletes a user if no prescriptions are associated.
-- **PUT `/users/{user_id}`**: Updates the details of an existing user.
-- **GET `/userslist/`**: Lists all users in the system.
-- **PUT `/users/unlock/{user_id}`**: Unlocks a user account after it has been locked due to too many incorrect login attempts.
+- **POST `/users/`**: Creates a new user. Allowed user: [Pharmacy Manager]
+- **GET `/users/{user_id}`**: Retrieves details of a specific user. Allowed user: [Pharmacy Manager, Pharmacist]
+- **DELETE `/users/{user_id}`**: Deletes a user if no prescriptions are associated. Allowed user: [Pharmacy Manager]
+- **PUT `/users/{user_id}`**: Updates the details of an existing user. Allowed user: [Pharmacy Manager]
+- **GET `/userslist/`**: Lists all users in the system. Allowed user: [Pharmacy Manager, Pharmacist]
+- **PUT `/users/unlock/{user_id}`**: Unlocks a user account after it has been locked due to too many incorrect login attempts. Allowed user: [Pharmacy Manager]
 
 **NOTE:** The endpoints below do not require authentication (a JWT) in the request. These are a very limited number of endpoints, and we intentionally only return very limited information.
 
@@ -267,7 +275,7 @@ These two endpoints are used on the `/setpassword` page so that a user can set t
 
 We found these endpoints to be necessary to the proper function of our system and made sure to make the system as secure as possible.
 
-- **GET `/userslist/new/`**: Returns a list of emails and user ID's for accounts that have been newly created, but the user has not activated their account by setting a password yet.
+- **GET `/userslist/new/`**: Returns a list of emails and user ID's for accounts that have been newly created, but the user has not activated their account by setting a password yet. Allowed user: [Pharmacy Manager]
 - **PUT `/users/{user_id}/setpassword`**: Sets a new password for a user account, only works if the account has not had a password before (i.e. it is a new account). Passwords are normally changed with the PUT `/users/{user_id}` endpoint.
 
 ---
@@ -276,11 +284,11 @@ We found these endpoints to be necessary to the proper function of our system an
 
 These endpoints handle patient records:
 
-- **POST `/patient`**: Creates a new patient.
-- **GET `/patient/{patient_id}`**: Retrieves details of a specific patient.
-- **GET `/patients`**: Lists all patients in the system.
-- **PUT `/patient/{patient_id}`**: Updates a patient’s information.
-- **DELETE `/patient/{patient_id}`**: Deletes a patient and updates any associated prescriptions.
+- **POST `/patient`**: Creates a new patient. Allowed user: all
+- **GET `/patient/{patient_id}`**: Retrieves details of a specific patient. Allowed user: all
+- **GET `/patients`**: Lists all patients in the system. Allowed user: all
+- **PUT `/patient/{patient_id}`**: Updates a patient’s information. Allowed user: all
+- **DELETE `/patient/{patient_id}`**: Deletes a patient and updates any associated prescriptions. Allowed user: [Pharmacy Manager]
 
 ---
 
@@ -288,11 +296,11 @@ These endpoints handle patient records:
 
 These endpoints are used to manage medications in the system:
 
-- **POST `/medication/`**: Adds a new medication to the database.
-- **GET `/medication/{medication_id}`**: Retrieves details of a specific medication.
-- **PUT `/medication/{medication_id}`**: Updates details of an existing medication.
-- **DELETE `/medication/{medication_id}`**: Deletes a specific medication from the system.
-- **GET `/medicationlist/`**: Lists all medications in the system.
+- **POST `/medication/`**: Adds a new medication to the database. Allowed user: [Pharmacy Manager]
+- **GET `/medication/{medication_id}`**: Retrieves details of a specific medication. Allowed user: [Pharmacy Manager, Pharmacist, pharmacy technician]
+- **PUT `/medication/{medication_id}`**: Updates details of an existing medication. Allowed user: [Pharmacy Manager]
+- **DELETE `/medication/{medication_id}`**: Deletes a specific medication from the system. Allowed user: [Pharmacy Manager]
+- **GET `/medicationlist/`**: Lists all medications in the system. Allowed user: [Pharmacy Manager, Pharmacist, pharmacy technician]
 
 ---
 
@@ -300,12 +308,12 @@ These endpoints are used to manage medications in the system:
 
 These endpoints handle prescription management, including creation, updating, deletion, and filling:
 
-- **GET `/prescriptions`**: Retrieves all prescriptions, optionally filtered by patient ID.
-- **GET `/prescription/{prescription_id}`**: Retrieves a specific prescription.
-- **POST `/prescription`**: Creates a new prescription.
-- **PUT `/prescription/{prescription_id}`**: Updates an existing prescription (unless it has been filled).
-- **DELETE `/prescription/{prescription_id}`**: Deletes a prescription.
-- **PUT `/prescription/{prescription_id}/fill`**: Marks a prescription as filled and updates inventory accordingly.
+- **GET `/prescriptions`**: Retrieves all prescriptions, optionally filtered by patient ID. Allowed user: all
+- **GET `/prescription/{prescription_id}`**: Retrieves a specific prescription. Allowed user: all
+- **POST `/prescription`**: Creates a new prescription. Allowed user: all
+- **PUT `/prescription/{prescription_id}`**: Updates an existing prescription (unless it has been filled). Allowed user: all
+- **DELETE `/prescription/{prescription_id}`**: Deletes a prescription. Allowed user: [ Pharmacy Manager ]
+- **PUT `/prescription/{prescription_id}/fill`**: Marks a prescription as filled and updates inventory accordingly. Allowed user: [ Pharmacist ]
 
 ---
 
@@ -314,8 +322,8 @@ These endpoints handle prescription management, including creation, updating, de
 These endpoints manage changes to medication inventory, such as adding, filling, or selling medications:
 
 - **POST `/inventory-updates`**: Creates an inventory update (used internally).
-- **GET `/inventory-updates/{id}`**: Retrieves a specific inventory update.
-- **GET `/inventory-updates`**: Lists all inventory updates, optionally filtered by activity type (e.g., "add", "fillpresc", "sellnonpresc").
+- **GET `/inventory-updates/{id}`**: Retrieves a specific inventory update. Allowed user: [Pharmacy Manager, Pharmacist]
+- **GET `/inventory-updates`**: Lists all inventory updates, optionally filtered by activity type (e.g., "add", "fillpresc", "sellnonpresc"). Allowed user: [Pharmacy Manager, Pharmacist]
 
 ---
 
@@ -323,8 +331,8 @@ These endpoints manage changes to medication inventory, such as adding, filling,
 
 These endpoints track user activities, such as inventory updates and prescription fillings:
 
-- **POST `/user-activities`**: Creates a new user activity (used internally).
-- **GET `/user-activities`**: Lists all user activities recorded in the system.
+- **POST `/user-activities`**: Creates a new user activity (used internally). 
+- **GET `/user-activities`**: Lists all user activities recorded in the system. Allowed user: [Pharmacy Manager, Pharmacist]
 
 ---
 
@@ -332,9 +340,9 @@ These endpoints track user activities, such as inventory updates and prescriptio
 
 These endpoints manage transactions in the pharmacy system:
 
-- **POST `/transaction`**: Creates a new transaction.
-- **GET `/transaction/{transaction_id}`**: Retrieves a specific transaction.
-- **GET `/transactions`**: Lists all transactions in the system.
+- **POST `/transaction`**: Creates a new transaction. Allowed user: [Pharmacy Manager, Pharmacist]
+- **GET `/transaction/{transaction_id}`**: Retrieves a specific transaction. Allowed user: [Pharmacy Manager, Pharmacist]
+- **GET `/transactions`**: Lists all transactions in the system. Allowed user: [Pharmacy Manager, Pharmacist]
 
 ---
 

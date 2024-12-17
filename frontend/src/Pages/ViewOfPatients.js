@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';import { Snackbar, Alert, Button}
 import EditDeleteTable from "../Components/EditDeleteTable";
 import AddEditPatientModal from "../Components/AddEditPatientModal";
 import DeleteModal from "../Components/DeleteModal";
+import CheckUserType from "../Functions/CheckUserType";
 
 function ViewOfPatients() {
 	const [rows, setRows] = useState([]);
@@ -11,6 +12,7 @@ function ViewOfPatients() {
 	const [openSnackbar, setOpenSnackbar] = useState(false);
 	const navigate = useNavigate();
 	const token = localStorage.getItem('token');
+	const roles = ["Pharmacy Manager", "Pharmacist"]
 
 	// Async function to fetch patients data
 	const fetchPatients = async () => {
@@ -30,6 +32,7 @@ function ViewOfPatients() {
 
 	// useEffect to fetch data when the component mounts
 	useEffect(() => {
+		CheckUserType(roles, navigate)
 		fetchPatients(); // Call the async function
 	  }, []); // Empty array means this effect runs once when the component mounts
 
@@ -80,7 +83,6 @@ function ViewOfPatients() {
 
 	const deletePatient = async (id) => {
 		try {
-			console.log("row", id);
 			const response = await fetch(`http://localhost:8000/patient/${id}`, {
 				method: 'DELETE',
 				headers: {'Authorization': 'Bearer ' + token}
@@ -103,15 +105,12 @@ function ViewOfPatients() {
 	 */
 	// this is 'onSave()'
 	const addEditPatient = async (data, id) => {
-		console.log("adding patient: ", data, id);
 		try {
 			if (id) {
 				const result = await editPatient(data, id);
-				console.log("editPatient result:", result);
 				return result;
 			} else {
 				const result = await addPatient(data);
-				console.log("addPatient result:", result);
 				return result;
 			}
 		} catch (error) {
@@ -126,7 +125,6 @@ function ViewOfPatients() {
 	 */
 	const editPatient = async (data, id) => {
 		try {
-			console.log("row in editPatient", id, data)
 			const response = await fetch(`http://localhost:8000/patient/${id}`, {
 				method: 'PUT',
 				headers: {
@@ -137,7 +135,6 @@ function ViewOfPatients() {
 			});
 			if (!response.ok) {
 				const responseData = await response.json(); // Wait for the JSON to be parsed
-				console.log("Error detail from response:", responseData.detail[0].msg);
 				throw new Error(responseData.detail[0].msg);
 			}
 			fetchPatients();
@@ -155,7 +152,6 @@ function ViewOfPatients() {
 	 */
 	const addPatient = async (data) => {
 		try {
-			console.log("row in addPatient", data)
 			const response = await fetch(`http://localhost:8000/patient`, {
 				method: 'POST',
 				headers: {

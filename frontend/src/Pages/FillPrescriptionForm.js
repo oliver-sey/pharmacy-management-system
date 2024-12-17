@@ -16,7 +16,6 @@ function FillPrescriptionForm() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(formData);
     setFormData({
       medication: '',
       dosage: '',

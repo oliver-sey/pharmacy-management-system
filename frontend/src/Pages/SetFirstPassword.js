@@ -59,7 +59,6 @@ function SetFirstPassword() {
 	// Function to fetch all user emails
 	const fetchUserEmails = async () => {
 		try {
-			console.log("fetching users with no password yet");
 			// no token needed on this specific endpoint
 			const response = await fetch(
 				"http://localhost:8000/userslist/new/",
@@ -222,7 +221,6 @@ function SetFirstPassword() {
 			setLoading(false);
 
 			if (response.ok) {
-				console.log("Successfully set password!");
 				showSnackbar(
 					"Successfully set password! Redirecting you to the login page in a moment", "success"
 				);
@@ -330,10 +328,6 @@ function SetFirstPassword() {
 						// set that the user has interacted with one of the password fields, and now we can display the errors
 						onBlur={() => {
 							setEitherPasswordTouched(true);
-							// console.log(
-							// 	"eitherPasswordTouched: " +
-							// 		eitherPasswordTouched
-							// );
 						}}
 						className={
 							passwordsErrors.length > 0 ? "error-input" : ""

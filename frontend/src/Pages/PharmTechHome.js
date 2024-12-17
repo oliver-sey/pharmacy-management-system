@@ -38,20 +38,17 @@ function PharmTechHome() {
 
    // Function to open the Add/Edit modal
   const openAddPrescriptionHandler = () => {
-    console.log("Add Prescription button clicked");
     setSelectedRow(null); // Clear any selected row (for new Prescription)
     setIsEditOpen(true); // Open modal
   };
 
   // Close the modal
   const closeEditModal = () => {
-    console.log("Closing modal");
     setIsEditOpen(false);
   };
 
   const addPrescription = async (data) => {
 		try {
-			console.log("row in addPrescription", data)
 			const response = await fetch(`http://localhost:8000/prescription`, {
 				method: 'POST',
 				headers: {
@@ -71,8 +68,6 @@ function PharmTechHome() {
 
   // Handle saving Prescription data
   const handleSavePrescription = (formData) => {
-
-    console.log("Prescription saved:", PrescriptionData);
     addPrescription(PrescriptionData);
     closeEditModal(); // Close modal after saving
   };

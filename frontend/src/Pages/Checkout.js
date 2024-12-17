@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from 'react-router-dom';
 import VerifyToken from '../Functions/VerifyToken';
 import '../Styles/Checkout.css';
-
+import CheckUserType from "../Functions/CheckUserType";
 import {
 	TextField,
 	Table,
@@ -23,12 +23,14 @@ import {
 	Snackbar,
 	Alert
 } from "@mui/material";
+import { jsPDF} from 'jspdf'; 
 
 
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import RemoveShoppingCartIcon from "@mui/icons-material/RemoveShoppingCart";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
+import CheckoutModal from "../Components/CheckoutModal";
 
 
 function Checkout() {
@@ -37,7 +39,8 @@ function Checkout() {
 	const [selectedPatient, setSelectedPatient] = useState(null);
 	const [filteredPrescriptions, setFilteredPrescriptions] = useState([]);
 	const [nonPrescriptionItems, setNonPrescriptionItems] = useState([]);
-
+	const [isEditOpen, setIsEditOpen] = useState(false)
+	const [payment, setPayment] = useState("")
 
 	// to open the snackbar component with a little alert to the user
 	// Snackbar handler state
@@ -63,6 +66,7 @@ function Checkout() {
 
 	const navigate = useNavigate();
 	const token = localStorage.getItem("token");
+	const roles = ["Pharmacist", "Pharmacy Manager", "Cashier"]
 
 
     useEffect(() => {
@@ -319,9 +323,6 @@ function Checkout() {
 				[type]: [...prevCart[type], { ...item, quantityInCart: item.quantity}],
 				
 			}));
-		
-
-	
 	};
 
 	// TODO: can we combine handleAddToCart and handleAddNonPrescToCart into one function?
@@ -427,6 +428,65 @@ function Checkout() {
 		}
 	};
 	
+	const closeEditModal = () => {
+		
+		setIsEditOpen(false);
+	};
+
+	const handleCompletePayment = (paymentMethod) => {
+		const allItems = [...cart.nonPrescription, ...cart.prescription];
+		
+		if (paymentMethod === "credit") {
+			setPayment("CREDIT_CARD")
+		} else if (paymentMethod === "debit") {
+			setPayment("DEBIT_CARD")
+		} else {
+			setPayment("CASH")
+		}
+
+		const transactionItems = 
+		allItems.map((item) => {return {
+			medication_id: item.id,
+			quantity: item.quantityInCart
+		}})
+		
+		console.log(payment)
+		addTransaction({
+			
+			patient_id: selectedPatient.id, 
+			payment_method: paymentMethod === "credit" ? "CREDIT_CARD" : paymentMethod === "debit" ? "DEBIT" : "CASH",
+			transaction_items: transactionItems
+		})
+		.then(() => {
+            generateReceipt(); // Generate the receipt after the payment is completed
+            showSnackbar("Payment completed! Receipt generated.", "success");
+        })
+		.catch((error) => {
+            console.error("Error completing payment:", error);
+            showSnackbar("Failed to complete payment.", "error");
+        });
+
+	}
+
+	const addTransaction = async (data) => {
+		try {
+		  
+		  const response = await fetch(`http://localhost:8000/transaction`, {
+			method: 'POST',
+			headers: {
+			  'Content-Type': 'application/json',
+			  'Authorization': 'Bearer ' + token,
+			},
+			body: JSON.stringify(data),
+		  });
+		  if (!response.ok) {
+			throw new Error('Failed to add transaction');
+		  }
+		  
+		} catch (error) {
+		  console.error('Error adding transaction:', error);
+		}
+	  }
 
 	const handlePatientSelect = async (patientID) => {
 		// Clear the prescription items in the cart if the selected patient changes (from a value other than the default, to a new value)
@@ -465,6 +525,78 @@ function Checkout() {
 	const handleCloseSnackbar = () => {
 		setSnackbar((prev) => ({ ...prev, open: false }));
 	};
+
+
+	const calculateTotal = (items) => 
+		items.reduce(
+			(total, item) => total + item.dollars_per_unit * item.quantityInCart,
+			0
+		);
+	
+	
+	const nonPrescriptionTotal = calculateTotal(cart.nonPrescription);
+	const prescriptionTotal = calculateTotal(cart.prescription);
+
+	
+	const generateReceipt = () => {
+		const doc = new jsPDF();
+
+		// Title
+		doc.setFontSize(18);
+		doc.text("Receipt", 10, 20);
+
+		// Patient Details
+		doc.setFontSize(12);
+		if (selectedPatient) {
+			doc.text(`Patient: ${selectedPatient.first_name} ${selectedPatient.last_name}`, 10, 30);
+			doc.text(`DOB: ${selectedPatient.date_of_birth}`, 10, 40);
+		}
+
+		// Cart Details
+		let yPosition = 50;
+		doc.text("Items Purchased:", 10, yPosition);
+		yPosition += 10;
+
+		// Non-Prescription Items
+		if (cart.nonPrescription.length > 0) {
+			cart.nonPrescription.forEach((item) => {
+				doc.text(
+					`${item.name} (${item.quantityInCart} x $${item.dollars_per_unit.toFixed(2)}) = $${(
+						item.dollars_per_unit * item.quantityInCart
+					).toFixed(2)}`,
+					10,
+					yPosition
+				);
+				yPosition += 10;
+			});
+		}
+
+		// Prescription Items
+		if (cart.prescription.length > 0) {
+			cart.prescription.forEach((item) => {
+				doc.text(
+					`${item.medication_name} (${item.quantityInCart} x $${item.dollars_per_unit.toFixed(2)}) = $${(
+						item.dollars_per_unit * item.quantityInCart
+					).toFixed(2)}`,
+					10,
+					yPosition
+				);
+				yPosition += 10;
+			});
+		}
+
+    // Summary
+    yPosition += 10;
+    doc.text(`Subtotal: $${subtotal.toFixed(2)}`, 10, yPosition);
+    yPosition += 10;
+    doc.text(`Tax (8%): $${tax.toFixed(2)}`, 10, yPosition);
+    yPosition += 10;
+    doc.text(`Grand Total: $${grandTotal.toFixed(2)}`, 10, yPosition);
+
+    // Save the PDF
+    doc.save("receipt.pdf");
+};
+
 
 
 	return (
@@ -685,6 +817,7 @@ function Checkout() {
 														$
 														{(
 															medication.dollars_per_unit *
+															// either display the quantity in the cart currently, or the value in quantitiesInTable
 															(cart.nonPrescription.find(
 																(item) =>
 																	item.id ===
@@ -693,8 +826,7 @@ function Checkout() {
 																quantitiesInTable[
 																	medication
 																		.id
-																] ||
-																0)
+																])
 														).toFixed(2)}
 													</TableCell>
 
@@ -980,6 +1112,16 @@ function Checkout() {
 								<p className="cart-total">
 									Grand Total: ${grandTotal.toFixed(2)}
 								</p>
+								<Button
+									variant="outlined"
+									className="pay-button"
+									onClick={() =>
+										setIsEditOpen(true)
+									}
+									style={{minWidth: 110}}
+								>
+									Pay
+								</Button>
 							</>
 						)}
 					</Paper>
@@ -999,7 +1141,16 @@ function Checkout() {
 					{snackbar.message}
 				</Alert>
 			</Snackbar>
+
+			<CheckoutModal
+			open={isEditOpen}
+			onClose={closeEditModal}
+			patient={selectedPatient}
+			total={grandTotal.toFixed(2)}
+			onSave={handleCompletePayment}
+			/>
 		</div>
+		
 	);
 }
 

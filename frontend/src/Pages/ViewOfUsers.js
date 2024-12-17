@@ -16,35 +16,6 @@ function ViewOfUsers() {
 	const role = ["Pharmacy Manager", "Pharmacist"]
 	const navigate = useNavigate()
 
-	// const fetchUsers = async () => {
-	// 	console.log("In fetchUsers");
-	// 	try {
-	// 		const response = await fetch(
-	// 			"http://localhost:8000/userslist/",
-	// 			{
-	// 				method: "GET",
-	// 				// TODO: do we need this??
-	// 				headers: {
-	// 					"Content-Type": "application/json",
-	// 				},
-	// 			}
-	// 		);
-
-	// 		if (!response.ok) {
-	// 			throw new Error("Failed to fetch users");
-
-	// 			// TODO: add a snackbar for an alert?
-	// 		}
-
-	// 		const data = await response.json();
-	// 		console.log(data);
-	// 		// update the state with the fetched users
-	// 		setUsers(data);
-	// 	} catch (error) {
-	// 		console.error("Error fetching users:", error);
-	// 	}
-	// };
-
 	const fetchUsers = async () => {
 		try {
 		  const response = await fetch('http://localhost:8000/userslist', {
@@ -53,7 +24,6 @@ function ViewOfUsers() {
 			},
 		  });
 		  const data = await response.json(); // Convert response to JSON
-		  console.log(data);
 		  setUsers(data); // Update rows state with fetched data
 		} catch (error) {
 		  console.error('Error fetching users:', error);
@@ -63,7 +33,7 @@ function ViewOfUsers() {
 	useEffect(() => {
 		CheckUserType(role, navigate);
 		fetchUsers();
-	}, []);
+	}, [fetchUsers]);
 
 	// the columns for the table
 	// headerName is what shows up on the website
@@ -114,7 +84,6 @@ function ViewOfUsers() {
 
 	const deleteUser = async (id) => {
 		try {
-			console.log("row", id);
 			const response = await fetch(`http://localhost:8000/users/${id}`, {
 				method: 'DELETE',
 				headers: {
@@ -140,8 +109,6 @@ function ViewOfUsers() {
 
 	const editUser = async (data, id) => {
 		try {
-			
-			console.log("row in editUser", id, data)
 			const response = await fetch(`http://localhost:8000/users/${id}`, {
 				method: 'PUT',
 				headers: {
@@ -161,7 +128,6 @@ function ViewOfUsers() {
 
 	const addUser = async (data) => {
 		try {
-			console.log("row in addUser", data)
 			const response = await fetch(`http://localhost:8000/users`, {
 				method: 'POST',
 				headers: {

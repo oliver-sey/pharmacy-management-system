@@ -103,13 +103,6 @@ function ViewOfMedications() {
 
 				// expiration date is today or earlier
 				if (differenceDays <= 0) {
-					// console.log(
-					// 	"Difference between expiration",
-					// 	expirationDate,
-					// 	"and today is",
-					// 	differenceDays,
-					// 	"**is expired"
-					// );
 					icons.push(
 						// empty hourglass icon, says "Expired" when you hover
 						<IconButton sx={{maxWidth: 43}}>
@@ -121,13 +114,6 @@ function ViewOfMedications() {
 				}
 				// expiration date is within the next 30 days
 				else if (differenceDays <= 30) {
-					// console.log(
-					// 	"Difference between expiration (in UTC)",
-					// 	expirationDate,
-					// 	"and today is",
-					// 	differenceDays,
-					// 	"not expired, **but need a warning"
-					// );
 					icons.push(
 						// TODO: fix style?
 						// <div style={[{"display": "flex"}, { "align-items": "center" }]}>
@@ -145,19 +131,12 @@ function ViewOfMedications() {
 				}
 				// expiration date is over 30 days into the future
 				else {
-					// console.log(
-					// 	"Difference between expiration (in UTC)",
-					// 	expirationDate,
-					// 	"and today is",
-					// 	differenceDays,
-					// 	"not expired, and don't need a warning"
-					// );
+					
 				}
 
 				// check inventory
 				// less than 120 should give a warning
 				if (params.row.quantity < 120) {
-					// console.log("Less than 120 units/doses, giving a warning");
 					icons.push(
 						<IconButton sx={{maxWidth: 43}}>
 							<Tooltip
@@ -184,21 +163,18 @@ function ViewOfMedications() {
 	// only pharmacy manager can edit
 	const canEdit = () => {
 		const role = localStorage.getItem('role');
-		// console.log("canEdit:", (role === 'Pharmacy Manager'));
 		return role === 'Pharmacy Manager';
 	};
 	  
 	// only pharmacy managers can delete
 	const canDelete = () => {
 		const role = localStorage.getItem('role');
-		// console.log("canDelete:", (role === 'Pharmacy Manager'));
 		return role === 'Pharmacy Manager';
 	};
 
 
 	const deleteMedication = async (id) => {
 		try {
-			console.log("row", id);
 			const response = await fetch(`http://localhost:8000/medication/${id}`, {
 				method: 'DELETE',
 				headers: {
@@ -226,7 +202,6 @@ function ViewOfMedications() {
 
 	const editMedication = async (data, id) => {
 		try {
-			console.log("row in editMedication", id, data)
 			const response = await fetch(`http://localhost:8000/medication/${id}`, {
 				method: 'PUT',
 				headers: {
@@ -237,7 +212,6 @@ function ViewOfMedications() {
 			});
 			if (!response.ok) {
 				const responseData = await response.json(); // Wait for the JSON to be parsed
-				console.log("Error detail from response:", responseData.detail[0].msg);
 				throw new Error(responseData.detail[0].msg);
 			}
 			fetchMedications();
@@ -249,7 +223,6 @@ function ViewOfMedications() {
 
 	const addMedication = async (data) => {
 		try {
-			console.log("row in addMedication", data)
 			const response = await fetch(`http://localhost:8000/medication/`, {
 				method: 'POST',
 				headers: {
@@ -395,79 +368,211 @@ function ViewOfMedications() {
 		doc.save('inventory_update_report.pdf');
 	  };
 	
-	  const generateFinancialReport = () => {
-        const doc = new jsPDF();
-
-        // Set title for the PDF
-        doc.setFontSize(20);
-        doc.text('Financial Report', 10, 20);
-
-        // Set table headers for financial data
-        doc.setFontSize(12);
-        let yPosition = 30;
-        doc.text('Medication Name', 10, yPosition);
-        doc.text('Dollars per Unit', 60, yPosition);
-        doc.text('Quantity', 100, yPosition);
-        doc.text('Total Value', 140, yPosition);
-
-        yPosition += 10; // Space after header row
-
-        // Loop through rows and add each medication financial detail
-        rows.forEach((medication) => {
-            const totalValue = (medication.dollars_per_unit * medication.quantity).toFixed(2); // Calculate total value
-            doc.text(medication.name, 10, yPosition);
-            doc.text(medication.dollars_per_unit.toFixed(2), 60, yPosition);
-            doc.text(medication.quantity.toString(), 100, yPosition);
-            doc.text(totalValue, 140, yPosition);
-            yPosition += 10; // Move to the next row
-        });
-
-        // Save the generated PDF
-        doc.save('financial_report.pdf');
-    }
-
-
+	  const generateFinancialReport = async () => {
+		try {
+			// Fetch all transactions
+			const transactionsResponse = await fetch('http://localhost:8000/transactions', {
+				headers: { Authorization: 'Bearer ' + token },
+			});
+			if (!transactionsResponse.ok) throw new Error('Failed to fetch transactions');
+			const transactions = await transactionsResponse.json();
+	
+			// Fetch all transaction items
+			const transactionItemsResponse = await fetch('http://localhost:8000/transaction-items', {
+				headers: { Authorization: 'Bearer ' + token },
+			});
+			if (!transactionItemsResponse.ok) throw new Error('Failed to fetch transaction items');
+			const transactionItems = await transactionItemsResponse.json();
+	
+			// Initialize jsPDF
+			const doc = new jsPDF();
+			const pageHeight = doc.internal.pageSize.height; // Get page height
+			let yPosition = 20; // Start position for the first page
+	
+			// Helper to add a new page if needed
+			const addNewPageIfNeeded = () => {
+				if (yPosition + 10 > pageHeight - 15) { // 15 is the bottom margin
+					doc.addPage();
+					yPosition = 20; // Reset yPosition for the new page
+				}
+			};
+	
+			// Title
+			doc.setFontSize(20);
+			doc.text('Financial Report', 10, yPosition);
+			yPosition += 10;
+	
+			// Total Revenue
+			const totalRevenue = transactions.reduce((sum, transaction) => sum + transaction.total_price, 0);
+			doc.setFontSize(12);
+			doc.text(`Total Revenue: $${totalRevenue.toFixed(2)}`, 10, yPosition);
+			yPosition += 10;
+	
+			// Average Transaction Value
+			const averageTransactionValue = totalRevenue / transactions.length;
+			doc.text(`Average Transaction Value: $${averageTransactionValue.toFixed(2)}`, 10, yPosition);
+			yPosition += 10;
+	
+			// Transaction Count
+			doc.text(`Total Transactions: ${transactions.length}`, 10, yPosition);
+			yPosition += 10;
+	
+			// Payment Method Breakdown
+			const paymentMethods = transactions.reduce((totals, transaction) => {
+				const method = transaction.payment_method;
+				totals[method] = (totals[method] || 0) + 1; 
+				return totals;
+			}, {});
+			const mostPopularPaymentMethod = Object.entries(paymentMethods).sort((a, b) => b[1] - a[1])[0][0];
+			doc.text('Payment Method Breakdown:', 10, yPosition);
+			yPosition += 10;
+	
+			Object.entries(paymentMethods).forEach(([method, count]) => {
+				addNewPageIfNeeded();
+				doc.text(`  - ${method}: ${count} transactions`, 10, yPosition);
+				yPosition += 10;
+			});
+			doc.text(`Most Popular Payment Method: ${mostPopularPaymentMethod}`, 10, yPosition);
+			yPosition += 20;
+	
+			// Top Selling Medications
+			const medicationSales = transactionItems.reduce((totals, item) => {
+				totals[item.medication_id] = (totals[item.medication_id] || 0) + item.quantity;
+				return totals;
+			}, {});
+			const topSellingMedications = Object.entries(medicationSales)
+				.sort((a, b) => b[1] - a[1])
+				.slice(0, 5); // Top 5 medications
+			doc.text('Top Selling Medications (by Quantity):', 10, yPosition);
+			yPosition += 10;
+	
+			topSellingMedications.forEach(([medicationId, quantity]) => {
+				addNewPageIfNeeded();
+				doc.text(`  - Medication ID: ${medicationId}, Quantity Sold: ${quantity}`, 10, yPosition);
+				yPosition += 10;
+			});
+	
+			// Transaction Details
+			doc.setFontSize(14);
+			doc.text('Transaction Details:', 10, yPosition);
+			yPosition += 10;
+			doc.setFontSize(12);
+	
+			transactions.forEach((transaction) => {
+				addNewPageIfNeeded();
+				doc.text(`Transaction ID: ${transaction.id}`, 10, yPosition);
+				doc.text(`  Patient ID: ${transaction.patient_id}`, 70, yPosition);
+				doc.text(`  Total Price (incl. tax): $${transaction.total_price.toFixed(2)}`, 140, yPosition);
+				yPosition += 10;
+	
+				// Transaction Items
+				const items = transactionItems.filter((item) => item.transaction_id === transaction.id);
+				items.forEach((item) => {
+					addNewPageIfNeeded();
+					const subtotalWithTax = item.subtotal_price * 1.08; // Assuming 8% tax
+					doc.text(
+						`    - Medication ID: ${item.medication_id}, Quantity: ${item.quantity}, Subtotal (w/tax): $${subtotalWithTax.toFixed(2)}`,
+						20,
+						yPosition
+					);
+					yPosition += 10;
+				});
+				yPosition += 10; // Space between transactions
+			});
+	
+			// Save the generated PDF
+			doc.save('financial_report_with_statistics.pdf');
+		} catch (error) {
+			console.error('Error generating financial report:', error);
+			setErrorMessage('Failed to generate financial report: ' + error.message);
+			setOpenSnackbar(true);
+		}
+	};
+	
+	
+	
 	return (
-		<div>
+		<div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '20px' }}>
 			<h2>Medication Inventory Table</h2>
-
-			<div style={{ display: 'flex', alignItems: 'center' }}>
-
-    			<TextField
-                  type="datetime-local"
-                  value={timestamp1}
-                  onChange={(e) => setTimestamp1(e.target.value)}
-                  label="Inventory start date"
-                  InputLabelProps={{ shrink: true }}
-                  style={{ marginRight: '10px' }}
-                />
-                <TextField
-                  type="datetime-local"
-                  value={timestamp2}
-                  onChange={(e) => setTimestamp2(e.target.value)}
-                  label="Inventory end date"
-                  InputLabelProps={{ shrink: true }}
-                />
-    			<Button variant="contained" onClick={fetchInventory}>
-    				Generate Medication Inventory Report
-    			</Button>
-			</div>
-			<Button variant="contained" onClick={generateFinancialReport} style={{ marginLeft: '10px' }}>
-                Generate Financial Report
-            </Button>
-
-    {localStorage.getItem("role") === "Pharmacy Manager" &&
-			<Button
-				variant="contained"
-				onClick={() => {
-					if (openAddMedicationModal.current) {
-						openAddMedicationModal.current(); // Trigger modal to open for adding a medication
-					}
+	
+			<div
+				style={{
+					display: 'flex',
+					flexWrap: 'wrap',
+					gap: '15px',
+					justifyContent: 'center',
+					alignItems: 'center',
+					marginBottom: '20px',
+					width: '100%',
+					maxWidth: '800px',
 				}}
 			>
-				Add Medication
-			</Button>}
-
+				<TextField
+					type="datetime-local"
+					value={timestamp1}
+					onChange={(e) => setTimestamp1(e.target.value)}
+					label="Inventory start date"
+					InputLabelProps={{ shrink: true }}
+					style={{
+						flex: '1 1 auto',
+						maxWidth: '250px',
+						minWidth: '200px',
+					}}
+				/>
+				<TextField
+					type="datetime-local"
+					value={timestamp2}
+					onChange={(e) => setTimestamp2(e.target.value)}
+					label="Inventory end date"
+					InputLabelProps={{ shrink: true }}
+					style={{
+						flex: '1 1 auto',
+						maxWidth: '250px',
+						minWidth: '200px',
+					}}
+				/>
+				<Button
+					variant="contained"
+					onClick={fetchInventory}
+					style={{
+						flex: '0 1 auto',
+						maxWidth: '250px',
+						minWidth: '150px',
+						padding: '10px 15px',
+					}}
+				>
+					Generate Medication Inventory Report
+				</Button>
+				<Button
+					variant="contained"
+					onClick={generateFinancialReport}
+					style={{
+						flex: '0 1 auto',
+						maxWidth: '250px',
+						minWidth: '150px',
+						padding: '10px 15px',
+					}}
+				>
+					Generate Financial Report
+				</Button>
+				{localStorage.getItem('role') === 'Pharmacy Manager' && (
+					<Button
+						variant="contained"
+						onClick={() =>
+							openAddMedicationModal.current && openAddMedicationModal.current()
+						}
+						style={{
+							flex: '0 1 auto',
+							maxWidth: '250px',
+							minWidth: '150px',
+							padding: '10px 15px',
+						}}
+					>
+						Add Medication
+					</Button>
+				)}
+			</div>
+	
 			<EditDeleteTable
 				columns={columns}
 				rows={rows}
@@ -482,17 +587,14 @@ function ViewOfMedications() {
 				onEdit={addEditMedication}
 				onConfirmDelete={deleteMedication}
 				fetchMedications={fetchMedications} // Pass fetchMedications as a prop
-				/>
+			/>
+	
 			{/* Snackbar for error messages */}
-			<Snackbar 
-				open={openSnackbar} 
-				autoHideDuration={6000} 
-				onClose={handleCloseSnackbar}
-		 	>
+			<Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar}>
 				<Alert onClose={handleCloseSnackbar} severity="error">
 					{errorMessage}
 				</Alert>
-		  	</Snackbar>
+			</Snackbar>
 		</div>
 	);
 }
